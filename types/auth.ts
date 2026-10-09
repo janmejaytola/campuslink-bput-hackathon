@@ -23,6 +23,7 @@ export interface UserRecord {
   cgpa?: number;
   phone?: string;
   avatarUrl?: string;
+  onboardingCompleted?: boolean;
 }
 
 // UserProfile alias matching UserRecord

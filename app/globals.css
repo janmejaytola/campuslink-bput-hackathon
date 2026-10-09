@@ -2,25 +2,25 @@
 
 @layer base {
   :root {
-    --brand-primary: #0B0F19;
-    --brand-secondary: #0F172A;
-    --brand-accent: #0D9488;
-    --brand-accent-light: #14B8A6;
-    --brand-accent-dark: #0F766E;
-    --surface-bg: #F8FAFD;
-    --surface-card: #FFFFFF;
-    --text-primary: #0F172A;
-    --text-muted: #64748B;
-    --border-subtle: #E2E8F0;
+    --brand-bg: #020817;
+    --brand-surface-1: #06162D;
+    --brand-surface-2: #0A203B;
+    --brand-neon-cyan: #16CFFF;
+    --brand-turquoise: #00E5D4;
+    --brand-teal: #00BFA6;
+    --text-primary: #F4FAFF;
+    --text-muted: #9CB4CC;
+    --border-subtle: #152744;
   }
 
   body {
-    background-color: #F8FAFD;
-    color: #0F172A;
+    background-color: #020817;
+    color: #F4FAFF;
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
   }
 
   /* Custom subtle sleek scrollbar */
@@ -29,14 +29,14 @@
     height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: transparent;
+    background: #020817;
   }
   ::-webkit-scrollbar-thumb {
-    background: #CBD5E1;
+    background: #152744;
     border-radius: 9999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #94A3B8;
+    background: #16CFFF;
   }
 }
 
@@ -45,16 +45,88 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Subtle dot mesh background for dark hero sections */
-.bg-mesh-dark {
-  background-color: #0B0F19;
-  background-image: radial-gradient(rgba(20, 184, 166, 0.12) 1px, transparent 1px);
-  background-size: 24px 24px;
+/* Glass-like layered card styling */
+.glass-panel {
+  background: rgba(6, 22, 45, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(22, 207, 255, 0.18);
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.55), 0 0 24px 0 rgba(22, 207, 255, 0.05);
 }
 
-.bg-mesh-light {
-  background-image: radial-gradient(rgba(148, 163, 184, 0.2) 1px, transparent 1px);
-  background-size: 24px 24px;
+.glass-panel-hover {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-panel-hover:hover {
+  border-color: rgba(22, 207, 255, 0.5);
+  box-shadow: 0 16px 48px 0 rgba(0, 0, 0, 0.65), 0 0 32px 0 rgba(22, 207, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Glow effects */
+.glow-cyan {
+  box-shadow: 0 0 25px rgba(22, 207, 255, 0.35);
+}
+
+.glow-turquoise {
+  box-shadow: 0 0 25px rgba(0, 229, 212, 0.35);
+}
+
+.glow-text-cyan {
+  text-shadow: 0 0 12px rgba(22, 207, 255, 0.65);
+}
+
+.glow-text-turquoise {
+  text-shadow: 0 0 12px rgba(0, 229, 212, 0.65);
+}
+
+/* Cyan to turquoise luminous gradients */
+.gradient-btn-primary {
+  background: linear-gradient(135deg, #16CFFF 0%, #00E5D4 50%, #00BFA6 100%);
+  color: #020817;
+  font-weight: 800;
+  box-shadow: 0 4px 20px rgba(22, 207, 255, 0.35);
+  transition: all 0.3s ease;
+}
+
+.gradient-btn-primary:hover {
+  box-shadow: 0 6px 28px rgba(0, 229, 212, 0.55);
+  transform: translateY(-1px);
+}
+
+/* Subtle dot mesh background for dark hero sections */
+.bg-mesh-dark {
+  background-color: #020817;
+  background-image: radial-gradient(rgba(22, 207, 255, 0.12) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* 3D perspective wrapper */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+/* Subtle cyan light sweep animation */
+@keyframes lightSweep {
+  0% {
+    transform: translateX(-150%);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(250%);
+    opacity: 0;
+  }
+}
+
+.animate-light-sweep {
+  animation: lightSweep 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 /* Accessible reduced-motion discipline */

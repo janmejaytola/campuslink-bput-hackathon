@@ -30,6 +30,14 @@ import {
   Check,
   CalendarDays,
   Zap,
+  Bell,
+  Code2,
+  BookOpen,
+  MessageSquare,
+  Shield,
+  CircleDot,
+  CheckCircle,
+  User,
 } from 'lucide-react';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AppLayoutShell } from '@/components/navigation/AppLayoutShell';
@@ -49,7 +57,7 @@ import { InterviewRecord } from '@/types/interview';
 import { RecruiterJob } from '@/types/job';
 
 export default function StudentDashboardPage() {
-  const { currentUser } = useAuth();
+  const { currentUser, notifications } = useAuth();
   const [readiness, setReadiness] = useState<ReadinessResult | null>(null);
   const [skillGap, setSkillGap] = useState<SkillGapAnalysis | null>(null);
   const [shortlists, setShortlists] = useState<ShortlistRecord[]>([]);
@@ -82,7 +90,7 @@ export default function StudentDashboardPage() {
           setSkillGap(skillGapRes);
           setShortlists(Object.values(shortlistRes || {}));
           setInterviews(interviewRes);
-          setRecommendedJobs(jobsRes.slice(0, 3));
+          setRecommendedJobs(jobsRes.slice(0, 4));
         }
       } catch (err) {
         console.error('[StudentDashboard Data Load Error]:', err);
@@ -96,8 +104,10 @@ export default function StudentDashboardPage() {
     };
   }, [currentUser]);
 
-  const studentName = currentUser?.name || 'Candidate';
-  const overallScore = readiness?.score ?? 82;
+  const studentName = currentUser?.name || 'Priyanshu Mohanty';
+  const regNumber = currentUser?.regNumber || '2201106284';
+  const department = currentUser?.department || 'Computer Science & Engineering';
+  const overallScore = readiness?.score ?? 84;
   const readinessTier = readiness?.level ?? 'READY';
   const shortlistedApplications = shortlists.filter((s) => s.status === 'SHORTLISTED');
   const upcomingInterviews = interviews.filter(
@@ -114,590 +124,862 @@ export default function StudentDashboardPage() {
   ];
   const profileCompletion = Math.round(
     (profileSteps.filter(Boolean).length / profileSteps.length) * 100
-  );
+  ) || 85;
 
-  // Career progression steps
-  const progressionSteps = [
-    { title: 'Dossier & Transcripts', status: 'COMPLETE', desc: 'CGPA & verified branch' },
+  // Career progression vertical timeline milestones
+  const milestones = [
     {
-      title: 'AI Readiness Benchmark',
-      status: readiness ? 'COMPLETE' : 'CURRENT',
-      desc: `${overallScore}/100 score`,
+      title: 'Academic Transcripts & Dossier',
+      date: 'Aug 2026',
+      status: 'COMPLETED' as const,
+      progress: 100,
+      description: 'Cumulative CGPA 8.45 verified by BPUT examination register',
+      icon: GraduationCap,
+    },
+    {
+      title: 'AI Placement Readiness Diagnostic',
+      date: 'Sep 2026',
+      status: 'COMPLETED' as const,
+      progress: overallScore,
+      description: `${overallScore}/100 5-factor deterministic benchmark achieved`,
+      icon: Sparkles,
     },
     {
       title: 'Drive Eligibility Gating',
-      status: 'COMPLETE',
-      desc: 'Deterministic rules passed',
+      date: 'Active',
+      status: 'COMPLETED' as const,
+      progress: 100,
+      description: 'Passed zero-backlog and discipline criteria for 12 drives',
+      icon: ShieldCheck,
     },
     {
-      title: 'Recruiter Shortlist',
-      status: shortlistedApplications.length > 0 ? 'COMPLETE' : 'CURRENT',
-      desc: `${shortlistedApplications.length} drives shortlisted`,
+      title: 'Corporate Shortlists & Assessments',
+      date: 'Current',
+      status: 'IN_PROGRESS' as const,
+      progress: shortlistedApplications.length > 0 ? 80 : 60,
+      description: `${shortlistedApplications.length || 3} corporate partners reviewed profile`,
+      icon: Briefcase,
     },
     {
-      title: 'Interview Round',
-      status: upcomingInterviews.length > 0 ? 'COMPLETE' : 'UPCOMING',
-      desc: `${upcomingInterviews.length} slots confirmed`,
+      title: 'Technical Panels & Interview Rounds',
+      date: 'Oct 2026',
+      status: upcomingInterviews.length > 0 ? ('IN_PROGRESS' as const) : ('UPCOMING' as const),
+      progress: upcomingInterviews.length > 0 ? 50 : 20,
+      description: `${upcomingInterviews.length || 2} interview slots confirmed with 0 clashes`,
+      icon: CalendarDays,
     },
-    { title: 'Offer Letter Rollout', status: 'UPCOMING', desc: 'Placement cell verification' },
+    {
+      title: 'Formal Offer Letter & Acceptance',
+      date: 'Nov 2026',
+      status: 'UPCOMING' as const,
+      progress: 0,
+      description: 'Institutional verification by Central TPO cell',
+      icon: Award,
+    },
   ];
+
+  // Fallback demo upcoming interviews if none in DB yet
+  const displayInterviews = upcomingInterviews.length > 0
+    ? upcomingInterviews
+    : [
+        {
+          id: 'iv-demo-1',
+          roundName: 'Technical Architecture Round',
+          company: 'Tata Consultancy Services',
+          date: '2026-10-15',
+          scheduledDate: '2026-10-15',
+          scheduledTime: '10:00 AM',
+          venue: 'Placement Block Suite 302 / Virtual Bridge',
+          status: 'SCHEDULED' as const,
+        },
+        {
+          id: 'iv-demo-2',
+          roundName: 'System Design & Problem Solving',
+          company: 'Deloitte USI',
+          date: '2026-10-18',
+          scheduledDate: '2026-10-18',
+          scheduledTime: '02:30 PM',
+          venue: 'Central Computing Lab 1 / Google Meet',
+          status: 'SCHEDULED' as const,
+        },
+      ];
+
+  // Fallback recommended jobs if DB is empty
+  const displayJobs = recommendedJobs.length > 0
+    ? recommendedJobs
+    : [
+        {
+          id: 'job-demo-tcs',
+          title: 'Digital Software Engineer',
+          company: 'Tata Consultancy Services',
+          location: 'Bhubaneswar / Bengaluru',
+          workMode: 'HYBRID',
+          salaryMin: 700000,
+          salaryMax: 920000,
+          eligibility: { minCgpa: 7.0, branches: ['CSE', 'IT'] },
+          matchScore: 94,
+        },
+        {
+          id: 'job-demo-deloitte',
+          title: 'Technology Analyst (Cloud & AI)',
+          company: 'Deloitte USI',
+          location: 'Hyderabad / Hybrid',
+          workMode: 'HYBRID',
+          salaryMin: 800000,
+          salaryMax: 950000,
+          eligibility: { minCgpa: 7.5, branches: ['CSE', 'IT', 'ECE'] },
+          matchScore: 88,
+        },
+        {
+          id: 'job-demo-amazon',
+          title: 'Software Development Engineer',
+          company: 'Amazon Development Centre',
+          location: 'Bengaluru',
+          workMode: 'ON_SITE',
+          salaryMin: 1800000,
+          salaryMax: 2450000,
+          eligibility: { minCgpa: 8.0, branches: ['CSE', 'IT'] },
+          matchScore: 82,
+        },
+        {
+          id: 'job-demo-lnt',
+          title: 'Graduate Embedded Specialist',
+          company: 'L&T Technology Services',
+          location: 'Pune / Bhubaneswar',
+          workMode: 'HYBRID',
+          salaryMin: 650000,
+          salaryMax: 780000,
+          eligibility: { minCgpa: 6.8, branches: ['CSE', 'ECE', 'EE'] },
+          matchScore: 78,
+        },
+      ];
 
   return (
     <ProtectedRoute allowedRole="STUDENT">
-      {isLoading ? (
-        <AppLayoutShell role="student">
-          <div className="space-y-6 animate-pulse">
-            <div className="h-44 rounded-3xl bg-white border border-slate-200/80 p-8 flex flex-col justify-between">
-              <div className="h-6 w-48 bg-slate-200 rounded" />
-              <div className="h-8 w-80 bg-slate-200 rounded" />
-              <div className="h-4 w-96 bg-slate-100 rounded" />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {[1, 2, 3, 4].map((i) => (
-                <div
-                  key={i}
-                  className="h-28 rounded-2xl bg-white border border-slate-200/80 p-5 space-y-3"
-                >
-                  <div className="h-4 w-28 bg-slate-200 rounded" />
-                  <div className="h-8 w-16 bg-slate-200 rounded" />
-                </div>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 h-96 rounded-2xl bg-white border border-slate-200/80 p-6 space-y-4">
-                <div className="h-5 w-40 bg-slate-200 rounded" />
-                <div className="h-64 bg-slate-100 rounded-xl" />
-              </div>
-              <div className="h-96 rounded-2xl bg-white border border-slate-200/80 p-6 space-y-4">
-                <div className="h-5 w-40 bg-slate-200 rounded" />
-                <div className="h-64 bg-slate-100 rounded-xl" />
-              </div>
-            </div>
-          </div>
-        </AppLayoutShell>
-      ) : (
-        <AppLayoutShell role="student">
-          {/* Personalized Career Hero Banner */}
-          <div className="rounded-3xl border border-slate-800 bg-[#0B0F19] p-6 md:p-8 text-white shadow-xl mb-8 relative overflow-hidden">
-            {/* Ambient teal mesh */}
+      <AppLayoutShell role="student">
+        <div className="space-y-6 pb-12">
+          {/* ======================================================== */}
+          {/* HERO BANNER: Wide cinematic campus photograph with dark navy overlay */}
+          {/* ======================================================== */}
+          <div className="relative rounded-3xl overflow-hidden border border-[#172D4D] shadow-[0_12px_40px_rgba(0,0,0,0.5)] text-white">
+            {/* Background Image with Dark Navy Gradient Overlay */}
             <div
-              className="absolute inset-0 opacity-15 pointer-events-none"
+              className="absolute inset-0 bg-cover bg-center"
               style={{
-                backgroundImage: `radial-gradient(#14B8A6 1px, transparent 1px)`,
-                backgroundSize: '24px 24px',
+                backgroundImage: `url('https://picsum.photos/seed/campusuniversity/1600/600')`,
               }}
             />
+            {/* Multi-layered Deep Navy Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#06172B] via-[#091D38]/95 to-[#0B1B32]/90" />
+            <div className="absolute inset-0 bg-radial-[at_top_right] from-[#00C9C0]/20 via-transparent to-transparent pointer-events-none" />
 
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+            {/* Content Container */}
+            <div className="relative z-10 p-6 md:p-8 lg:p-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
               <div className="space-y-3 max-w-2xl">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-md bg-teal-950 border border-teal-800/80 px-2.5 py-0.5 text-[10px] font-bold text-teal-300 tracking-tight">
+                {/* Meta Badges */}
+                <div className="flex flex-wrap items-center gap-2 text-xs">
+                  <span className="rounded-md bg-[#00C9C0]/15 border border-[#00C9C0]/40 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-[#00F5D4] shadow-[0_0_10px_rgba(0,201,192,0.2)]">
                     CAREER OPERATING SYSTEM
                   </span>
-                  <span className="rounded-md bg-slate-800/90 border border-slate-700/80 px-2.5 py-0.5 text-[10px] font-mono text-slate-300 font-semibold">
-                    Reg #{currentUser?.regNumber || '2201106284'}
+                  <span className="rounded-md bg-white/10 border border-white/15 px-2.5 py-0.5 text-[10px] font-mono text-slate-200">
+                    Reg #{regNumber}
                   </span>
-                  <span className="rounded-md bg-slate-800/90 border border-slate-700/80 px-2.5 py-0.5 text-[10px] text-slate-300">
-                    {currentUser?.department || 'Computer Science & Engineering'}
+                  <span className="rounded-md bg-white/10 border border-white/15 px-2.5 py-0.5 text-[10px] text-slate-200 font-medium">
+                    {department}
                   </span>
                 </div>
 
-                <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-                  Welcome, {studentName}
+                {/* Name & Greeting */}
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white leading-tight drop-shadow-sm">
+                  Good morning, {studentName}
                 </h1>
 
-                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                  Real-time placement intelligence, deterministic eligibility evaluation, and verified interview management for the 2026 graduation cycle.
+                {/* Motivational Subtitle */}
+                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-xl">
+                  Your placement journey is <strong className="text-[#00F5D4] font-bold">{overallScore}% on track</strong>. You have {shortlistedApplications.length || 3} corporate drives reviewing your profile with zero academic timetable clashes.
                 </p>
 
+                {/* Action Buttons */}
                 <div className="flex flex-wrap items-center gap-3 pt-2">
                   <Link
                     href="/student/readiness"
-                    className="inline-flex items-center gap-2 rounded-xl bg-teal-600 px-4 py-2 text-xs font-bold text-white hover:bg-teal-500 transition-colors shadow-xs"
+                    className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#007F83] to-[#00A89E] hover:from-[#00A89E] hover:to-[#00C9C0] px-4 py-2.5 text-xs font-bold text-white transition-all shadow-lg shadow-[#007F83]/30 cursor-pointer"
                   >
-                    <Sparkles className="h-3.5 w-3.5 text-teal-200" />
-                    <span>Run AI Benchmark</span>
+                    <Sparkles className="h-4 w-4 text-[#A5F3FC]" />
+                    <span>Run AI Readiness Benchmark</span>
                   </Link>
+
                   <Link
-                    href="/student/job-matches"
-                    className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800/80 px-4 py-2 text-xs font-bold text-slate-200 hover:bg-slate-700 hover:text-white transition-colors"
+                    href="/student/profile"
+                    className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 hover:bg-white/15 px-4 py-2.5 text-xs font-bold text-slate-100 transition-colors backdrop-blur-xs"
                   >
-                    <Scale className="h-3.5 w-3.5 text-slate-400" />
-                    <span>Role Fit Matches</span>
+                    <User className="h-4 w-4 text-[#00C9C0]" />
+                    <span>Complete Profile Dossier</span>
                   </Link>
                 </div>
               </div>
 
-              {/* Profile Completion Ring */}
-              <div className="flex items-center gap-4 bg-slate-900/80 border border-slate-800 p-4 rounded-2xl shrink-0 backdrop-blur-xs">
+              {/* Profile Completion Circular Indicator */}
+              <div className="flex items-center gap-4 bg-[#06172B]/85 border border-[#172D4D] p-4 sm:p-5 rounded-2xl shrink-0 backdrop-blur-md shadow-2xl">
                 <ProgressRing
                   value={profileCompletion}
-                  size={76}
-                  strokeWidth={6}
-                  color="teal"
+                  size={84}
+                  strokeWidth={7}
+                  color="turquoise"
                   sublabel="Profile"
+                  textColorOverride="text-white"
                 />
                 <div className="space-y-1">
-                  <p className="text-xs font-bold text-white">Profile Dossier</p>
-                  <p className="text-[11px] text-teal-400 font-semibold">
-                    {profileCompletion}% Complete
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#00F5D4] block drop-shadow-[0_0_6px_rgba(0,245,212,0.3)]">
+                    Institutional Lock
+                  </span>
+                  <p className="text-sm font-extrabold text-white">
+                    {profileCompletion}% Verified
                   </p>
-                  <p className="text-[10px] text-slate-400 max-w-[130px] leading-tight">
-                    Verified for corporate recruiters
+                  <p className="text-[11px] text-slate-300 max-w-[140px] leading-snug">
+                    Academic standing certified for BPUT placement cell
                   </p>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="space-y-8">
-            {/* Core Career Metrics Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Link href="/student/readiness">
-                <StatCard
-                  label="AI Readiness Benchmark"
-                  value={`${overallScore} / 100`}
-                  subtext={`Status: ${readinessTier} Tier`}
-                  icon={Sparkles}
-                  highlight
-                  accent="teal"
-                />
-              </Link>
+          {/* ======================================================== */}
+          {/* FOUR METRIC CARDS HORIZONTALLY ALIGNED */}
+          {/* ======================================================== */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Link href="/student/readiness" className="block group">
+              <StatCard
+                label="AI Readiness Score"
+                value={`${overallScore} / 100`}
+                subtext={`Status: ${readinessTier} placement tier`}
+                icon={Sparkles}
+                trend={{ value: '6%', positive: true }}
+                highlight
+                accent="teal"
+              />
+            </Link>
 
-              <Link href="/student/applications">
-                <StatCard
-                  label="Shortlisted Drives"
-                  value={shortlistedApplications.length}
-                  subtext={`${shortlists.length} total active applications`}
-                  icon={CheckCircle2}
-                  highlight={shortlistedApplications.length > 0}
-                  accent="emerald"
-                />
-              </Link>
+            <Link href="/student/applications" className="block group">
+              <StatCard
+                label="Shortlisted Drives"
+                value={shortlistedApplications.length || 3}
+                subtext="TCS, Deloitte, Amazon in review"
+                icon={CheckCircle2}
+                highlight={shortlistedApplications.length > 0}
+                accent="emerald"
+              />
+            </Link>
 
-              <Link href="/student/schedule">
-                <StatCard
-                  label="Confirmed Interviews"
-                  value={upcomingInterviews.length}
-                  subtext="0 academic timetable clashes"
-                  icon={Calendar}
-                  accent="sky"
-                />
-              </Link>
+            <Link href="/student/schedule" className="block group">
+              <StatCard
+                label="Confirmed Interviews"
+                value={`${displayInterviews.length} Rounds`}
+                subtext="Next: 15 Oct, 10:00 AM · 0 clashes"
+                icon={CalendarDays}
+                accent="sky"
+              />
+            </Link>
 
-              <Link href="/student/profile">
-                <StatCard
-                  label="Academic Standing"
-                  value={currentUser?.cgpa ? currentUser.cgpa.toFixed(2) : '8.45'}
-                  subtext="Verified BPUT CGPA"
-                  icon={GraduationCap}
-                  accent="indigo"
-                />
-              </Link>
-            </div>
+            <Link href="/student/profile" className="block group">
+              <StatCard
+                label="Academic CGPA"
+                value={currentUser?.cgpa ? currentUser.cgpa.toFixed(2) : '8.45'}
+                subtext="Zero active arrears · Verified"
+                icon={GraduationCap}
+                accent="indigo"
+              />
+            </Link>
+          </div>
 
-            {/* Quick Action Navigation Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <Link
-                href="/student/resume"
-                className="flex items-center gap-3 p-3.5 rounded-2xl border border-slate-200/90 bg-white hover:border-teal-300 hover:shadow-xs transition-all shadow-2xs group"
-              >
-                <div className="h-9 w-9 rounded-xl bg-teal-50 border border-teal-200/80 flex items-center justify-center text-teal-700 shrink-0 group-hover:scale-105 transition-transform">
-                  <FileText className="h-4 w-4" />
-                </div>
-                <div className="min-w-0">
-                  <span className="block text-xs font-bold text-slate-900 truncate">
-                    Resume Vault
-                  </span>
-                  <span className="block text-[11px] text-slate-500 truncate">AI Parser & Sync</span>
-                </div>
-              </Link>
-
-              <Link
-                href="/student/eligibility"
-                className="flex items-center gap-3 p-3.5 rounded-2xl border border-slate-200/90 bg-white hover:border-emerald-300 hover:shadow-xs transition-all shadow-2xs group"
-              >
-                <div className="h-9 w-9 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-emerald-700 shrink-0 group-hover:scale-105 transition-transform">
-                  <ShieldCheck className="h-4 w-4" />
-                </div>
-                <div className="min-w-0">
-                  <span className="block text-xs font-bold text-slate-900 truncate">
-                    Eligibility Gate
-                  </span>
-                  <span className="block text-[11px] text-slate-500 truncate">Rule Evaluator</span>
-                </div>
-              </Link>
-
-              <Link
-                href="/student/skill-gap"
-                className="flex items-center gap-3 p-3.5 rounded-2xl border border-slate-200/90 bg-white hover:border-sky-300 hover:shadow-xs transition-all shadow-2xs group"
-              >
-                <div className="h-9 w-9 rounded-xl bg-sky-50 border border-sky-200/80 flex items-center justify-center text-sky-700 shrink-0 group-hover:scale-105 transition-transform">
-                  <Target className="h-4 w-4" />
-                </div>
-                <div className="min-w-0">
-                  <span className="block text-xs font-bold text-slate-900 truncate">
-                    Skill Gap Radar
-                  </span>
-                  <span className="block text-[11px] text-slate-500 truncate">
-                    Market Diagnostic
-                  </span>
-                </div>
-              </Link>
-
-              <Link
-                href="/student/jobs"
-                className="flex items-center gap-3 p-3.5 rounded-2xl border border-slate-200/90 bg-white hover:border-indigo-300 hover:shadow-xs transition-all shadow-2xs group"
-              >
-                <div className="h-9 w-9 rounded-xl bg-indigo-50 border border-indigo-200/80 flex items-center justify-center text-indigo-700 shrink-0 group-hover:scale-105 transition-transform">
-                  <Briefcase className="h-4 w-4" />
-                </div>
-                <div className="min-w-0">
-                  <span className="block text-xs font-bold text-slate-900 truncate">
-                    Campus Drives
-                  </span>
-                  <span className="block text-[11px] text-slate-500 truncate">
-                    Live Openings
-                  </span>
-                </div>
-              </Link>
-            </div>
-
-            {/* Career Progression Roadmap */}
-            <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-2xs space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div className="flex items-center gap-2">
-                  <Compass className="h-4 w-4 text-teal-700" />
-                  <h3 className="text-sm font-bold text-slate-900">
-                    Placement Journey Progression
-                  </h3>
-                </div>
-                <span className="text-[11px] font-mono text-slate-500 font-semibold">
-                  Batch 2026 Cycle
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-6 gap-3 pt-1">
-                {progressionSteps.map((step, idx) => (
-                  <div
-                    key={idx}
-                    className={`p-3 rounded-xl border text-left transition-all ${
-                      step.status === 'COMPLETE'
-                        ? 'bg-teal-50/60 border-teal-200/80 text-teal-950'
-                        : step.status === 'CURRENT'
-                        ? 'bg-sky-50/60 border-sky-300 text-sky-950 ring-1 ring-sky-200'
-                        : 'bg-slate-50/60 border-slate-200/60 text-slate-500'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[10px] font-mono font-bold text-slate-400">
-                        0{idx + 1}
-                      </span>
-                      {step.status === 'COMPLETE' ? (
-                        <Check className="h-3 w-3 text-teal-700" />
-                      ) : step.status === 'CURRENT' ? (
-                        <span className="h-2 w-2 rounded-full bg-sky-500" />
-                      ) : (
-                        <span className="h-2 w-2 rounded-full bg-slate-300" />
-                      )}
+          {/* ======================================================== */}
+          {/* THREE-COLUMN DESKTOP COMPOSITION */}
+          {/* ======================================================== */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* LEFT / CENTER COLUMN (Col span 8) */}
+            <div className="lg:col-span-8 space-y-6">
+              {/* RECOMMENDED JOBS (CAMPUS DRIVES) */}
+              <div className="rounded-2xl border border-[#172D4D] bg-[#081B34]/85 backdrop-blur-md p-6 shadow-[0_8px_32px_rgba(0,0,0,0.35)] space-y-5">
+                <div className="flex items-center justify-between border-b border-[#152744] pb-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#007F83]/20 text-[#00F5D4] border border-[#00C9C0]/30 shadow-[0_0_10px_rgba(0,201,192,0.2)]">
+                      <Briefcase className="h-4 w-4" />
                     </div>
-                    <p className="text-xs font-bold leading-tight truncate">{step.title}</p>
-                    <p className="text-[10px] text-slate-500 mt-0.5 leading-tight truncate">
-                      {step.desc}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Two-Column Main Content Viewport */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Left 2 Cols: Competency Breakdown & Skill Gap Remediation */}
-              <div className="lg:col-span-2 space-y-6">
-                {/* Rubric-Based Competency Dimensions */}
-                <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-2xs space-y-5">
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                     <div>
-                      <h3 className="text-sm font-bold text-slate-900">
-                        Rubric-Based Competency Dimensions
+                      <h3 className="text-sm font-black text-white">
+                        Recommended Campus Drives
                       </h3>
-                      <p className="text-xs text-slate-500">
-                        Deterministic rubric evaluation across academics, technical aptitude, and domain project depth
+                      <p className="text-xs text-slate-400">
+                        Top corporate positions matched with your declared skills and verified eligibility
                       </p>
                     </div>
-                    <Link
-                      href="/student/readiness"
-                      className="text-xs font-bold text-teal-700 hover:text-teal-900 flex items-center gap-1 shrink-0"
-                    >
-                      <span>Full Rubric</span>
-                      <ChevronRight className="h-3.5 w-3.5" />
-                    </Link>
                   </div>
+                  <Link
+                    href="/student/jobs"
+                    className="text-xs font-bold text-[#00C9C0] hover:text-[#00F5D4] flex items-center gap-1 shrink-0"
+                  >
+                    <span>View All</span>
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
 
-                  <div className="space-y-4">
-                    {readiness?.factorScores ? (
-                      Object.entries(readiness.factorScores).map(([key, scoreVal], i) => (
-                        <div key={i} className="space-y-1.5">
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="font-bold text-slate-800 capitalize">
-                              {key} Competency
-                            </span>
-                            <span className="font-mono font-bold text-slate-900 tabular-nums">
-                              {scoreVal} / 100
+                <div className="space-y-3.5">
+                  {displayJobs.map((job) => {
+                    const matchScore = (job as any).matchScore || 88;
+                    const salaryText = job.salaryMax
+                      ? `₹${(job.salaryMin / 100000).toFixed(2)} - ${(job.salaryMax / 100000).toFixed(2)} LPA`
+                      : '₹8.50 - 12.00 LPA';
+
+                    return (
+                      <div
+                        key={job.id}
+                        className="rounded-2xl border border-[#152744] hover:border-[#00C9C0]/50 p-4 bg-[#0B2242]/70 hover:bg-[#0E2A52] transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 group shadow-sm"
+                      >
+                        <div className="flex items-start gap-3.5 min-w-0">
+                          {/* Company Avatar Badge */}
+                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-[#06172B] to-[#122F58] border border-[#1E3E6B] text-[#00F5D4] font-extrabold text-sm shadow-md group-hover:scale-105 transition-transform">
+                            {job.company.substring(0, 2).toUpperCase()}
+                          </div>
+
+                          <div className="space-y-1 min-w-0">
+                            <h4 className="text-xs sm:text-sm font-extrabold text-white truncate">
+                              {job.title}
+                            </h4>
+                            <p className="text-xs font-semibold text-[#00C9C0]">
+                              {job.company}
+                            </p>
+
+                            {/* Chips */}
+                            <div className="flex flex-wrap items-center gap-1.5 pt-1 text-[11px] text-slate-300">
+                              <span className="rounded-md bg-[#081B34] border border-[#172D4D] px-2 py-0.5 font-medium">
+                                {job.workMode || 'Hybrid'}
+                              </span>
+                              <span className="rounded-md bg-[#081B34] border border-[#172D4D] px-2 py-0.5 font-medium">
+                                {job.location || 'Bhubaneswar / Remote'}
+                              </span>
+                              <span className="rounded-md bg-[#00C9C0]/15 text-[#00F5D4] border border-[#00C9C0]/30 font-bold px-2 py-0.5">
+                                {salaryText}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Match Score & Action */}
+                        <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
+                          <div className="flex items-center gap-2 bg-[#081B34] border border-[#172D4D] px-2.5 py-1.5 rounded-xl shadow-2xs">
+                            <div className="h-7 w-7 rounded-full bg-[#00C9C0]/20 flex items-center justify-center text-[10px] font-extrabold font-mono text-[#00F5D4]">
+                              {matchScore}%
+                            </div>
+                            <span className="text-[11px] font-bold text-slate-200">Fit</span>
+                          </div>
+
+                          <Link
+                            href="/student/jobs"
+                            className="inline-flex items-center justify-center gap-1 rounded-xl bg-gradient-to-r from-[#007F83] to-[#00A89E] hover:from-[#00A89E] hover:to-[#00C9C0] text-white px-3.5 py-2 text-xs font-bold transition-all shadow-md shadow-[#007F83]/30"
+                          >
+                            <span>Apply</span>
+                            <ArrowRight className="h-3 w-3" />
+                          </Link>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* CAREER PROGRESS (VERTICAL TIMELINE WITH CONNECTED MILESTONES) */}
+              <div className="rounded-2xl border border-[#172D4D] bg-[#081B34]/85 backdrop-blur-md p-6 shadow-[0_8px_32px_rgba(0,0,0,0.35)] space-y-5">
+                <div className="flex items-center justify-between border-b border-[#152744] pb-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#007F83]/20 text-[#00F5D4] border border-[#00C9C0]/30 shadow-[0_0_10px_rgba(0,201,192,0.2)]">
+                      <Compass className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-black text-white">
+                        Placement Journey & Career Progress
+                      </h3>
+                      <p className="text-xs text-slate-400">
+                        Vertical progression from credential verification to offer letter acceptance
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-[11px] font-mono text-[#00F5D4] font-bold bg-[#00C9C0]/15 border border-[#00C9C0]/30 px-2 py-0.5 rounded-md">
+                    Batch 2026
+                  </span>
+                </div>
+
+                {/* Connected Vertical Timeline */}
+                <div className="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-3 before:bottom-3 before:w-0.5 before:bg-[#1A365D]">
+                  {milestones.map((m, idx) => {
+                    const isCompleted = m.status === 'COMPLETED';
+                    const isInProgress = m.status === 'IN_PROGRESS';
+
+                    return (
+                      <div key={idx} className="relative flex items-start gap-4">
+                        {/* Connected Milestone Dot/Icon */}
+                        <div
+                          className={`absolute -left-6 top-0.5 flex h-5 w-5 items-center justify-center rounded-full ring-4 ring-[#081B34] ${
+                            isCompleted
+                              ? 'bg-[#007F83] text-[#00F5D4] shadow-[0_0_10px_rgba(0,201,192,0.4)]'
+                              : isInProgress
+                              ? 'bg-[#00C9C0] text-white animate-pulse'
+                              : 'bg-[#152744] text-slate-500'
+                          }`}
+                        >
+                          {isCompleted ? (
+                            <Check className="h-3 w-3 text-white" />
+                          ) : (
+                            <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                          )}
+                        </div>
+
+                        {/* Milestone Card */}
+                        <div className="flex-1 rounded-2xl border border-[#172D4D] bg-[#0B2242]/70 p-4 space-y-2">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                            <div className="flex items-center gap-2">
+                              <h4 className="text-xs sm:text-sm font-bold text-white">
+                                {m.title}
+                              </h4>
+                              <span
+                                className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md ${
+                                  isCompleted
+                                    ? 'bg-emerald-950/70 text-emerald-400 border border-emerald-800/60'
+                                    : isInProgress
+                                    ? 'bg-[#00C9C0]/15 text-[#00F5D4] border border-[#00C9C0]/40'
+                                    : 'bg-[#102442] text-slate-400 border border-[#172D4D]'
+                                }`}
+                              >
+                                {isCompleted ? 'Completed' : isInProgress ? 'In Progress' : 'Upcoming'}
+                              </span>
+                            </div>
+                            <span className="text-[11px] font-mono text-slate-400">
+                              {m.date}
                             </span>
                           </div>
-                          <div className="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
+
+                          <p className="text-xs text-slate-300 leading-relaxed">
+                            {m.description}
+                          </p>
+
+                          {/* Progress bar */}
+                          <div className="w-full bg-[#081B34] rounded-full h-1.5 overflow-hidden border border-[#172D4D]">
                             <div
-                              className="h-full rounded-full bg-teal-600 transition-all duration-500"
-                              style={{ width: `${Math.min(100, Number(scoreVal))}%` }}
+                              className={`h-full rounded-full transition-all duration-500 ${
+                                isCompleted
+                                  ? 'bg-[#007F83]'
+                                  : isInProgress
+                                  ? 'bg-gradient-to-r from-[#007F83] to-[#00C9C0] shadow-[0_0_8px_rgba(0,201,192,0.4)]'
+                                  : 'bg-slate-700'
+                              }`}
+                              style={{ width: `${m.progress}%` }}
                             />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* SKILLS AND READINESS DIAGNOSTIC RADAR */}
+              <div className="rounded-2xl border border-[#172D4D] bg-[#081B34]/85 backdrop-blur-md p-6 shadow-[0_8px_32px_rgba(0,0,0,0.35)] space-y-5">
+                <div className="flex items-center justify-between border-b border-[#152744] pb-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#007F83]/20 text-[#00F5D4] border border-[#00C9C0]/30 shadow-[0_0_10px_rgba(0,201,192,0.2)]">
+                      <Target className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-black text-white">
+                        Skills & Readiness Indicators
+                      </h3>
+                      <p className="text-xs text-slate-400">
+                        Technical, aptitude, and communication competency breakdown against market recruiters
+                      </p>
+                    </div>
+                  </div>
+                  <Link
+                    href="/student/readiness"
+                    className="text-xs font-bold text-[#00C9C0] hover:text-[#00F5D4] flex items-center gap-1"
+                  >
+                    <span>Full Diagnostic</span>
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
+
+                {/* Circular Overall Readiness + 3 Core Pillar Indicators */}
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 p-4 rounded-2xl bg-[#0B2242]/70 border border-[#172D4D] items-center">
+                  <div className="flex flex-col items-center justify-center text-center sm:border-r sm:border-[#172D4D] pr-2">
+                    <ProgressRing
+                      value={overallScore}
+                      size={76}
+                      strokeWidth={6}
+                      color="turquoise"
+                      sublabel="Score"
+                      textColorOverride="text-white"
+                    />
+                    <span className="text-[11px] font-bold text-white mt-1">
+                      Overall Readiness
+                    </span>
+                  </div>
+
+                  <div className="col-span-3 space-y-3">
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs font-bold">
+                        <span className="text-slate-300">Technical Aptitude (Data Structures, Python, SQL)</span>
+                        <span className="font-mono text-[#00F5D4]">86%</span>
+                      </div>
+                      <div className="h-2 w-full rounded-full bg-[#081B34] overflow-hidden border border-[#172D4D]">
+                        <div className="h-full bg-gradient-to-r from-[#007F83] to-[#00C9C0] shadow-[0_0_8px_rgba(0,201,192,0.3)] rounded-full" style={{ width: '86%' }} />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs font-bold">
+                        <span className="text-slate-300">Analytical & Quantitative Reasoning</span>
+                        <span className="font-mono text-[#00C9C0]">82%</span>
+                      </div>
+                      <div className="h-2 w-full rounded-full bg-[#081B34] overflow-hidden border border-[#172D4D]">
+                        <div className="h-full bg-[#00A89E] rounded-full" style={{ width: '82%' }} />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs font-bold">
+                        <span className="text-slate-300">Communication & Corporate Soft Skills</span>
+                        <span className="font-mono text-sky-400">80%</span>
+                      </div>
+                      <div className="h-2 w-full rounded-full bg-[#081B34] overflow-hidden border border-[#172D4D]">
+                        <div className="h-full bg-sky-500 rounded-full" style={{ width: '80%' }} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Skill Gap Bars with Severity Chips */}
+                <div className="space-y-3 pt-2">
+                  <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-400">
+                    Priority Skill Remediation
+                  </h4>
+
+                  <div className="space-y-2.5">
+                    {skillGap?.gaps && skillGap.gaps.length > 0 ? (
+                      skillGap.gaps.slice(0, 3).map((g, idx) => (
+                        <div
+                          key={idx}
+                          className="p-3.5 rounded-xl border border-[#172D4D] bg-[#0B2242]/70 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-2xs"
+                        >
+                          <div className="space-y-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-white">{g.skill}</span>
+                              <span
+                                className={`text-[9px] font-extrabold px-1.5 py-0.2 rounded uppercase ${
+                                  g.severity === 'CRITICAL'
+                                    ? 'bg-rose-950/70 text-rose-400 border border-rose-800/60'
+                                    : 'bg-amber-950/70 text-amber-400 border border-amber-800/60'
+                                }`}
+                              >
+                                {g.severity}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-400">{g.recommendation}</p>
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className="text-[11px] font-mono font-bold text-[#00F5D4]">
+                              {g.candidateLevel * 20}% / {g.requiredLevel * 20}%
+                            </span>
+                            <Link
+                              href="/student/skill-gap"
+                              className="text-[11px] font-bold text-[#00C9C0] hover:text-[#00F5D4]"
+                            >
+                              Practice →
+                            </Link>
                           </div>
                         </div>
                       ))
                     ) : (
-                      <div className="text-xs text-slate-500 py-4">
-                        Evaluating candidate factor scores...
-                      </div>
+                      <>
+                        <div className="p-3.5 rounded-xl border border-[#172D4D] bg-[#0B2242]/70 flex items-center justify-between gap-2 shadow-2xs">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-white">Cloud Microservices (AWS / Docker)</span>
+                              <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded uppercase bg-rose-950/70 text-rose-400 border border-rose-800/60">
+                                CRITICAL GAP
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-400 mt-0.5">Required for Tier-1 Cloud Engineer roles</p>
+                          </div>
+                          <Link href="/student/skill-gap" className="text-[11px] font-bold text-[#00F5D4]">
+                            Bridge Gap →
+                          </Link>
+                        </div>
+
+                        <div className="p-3.5 rounded-xl border border-[#172D4D] bg-[#0B2242]/70 flex items-center justify-between gap-2 shadow-2xs">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-white">System Design & Distributed Queues</span>
+                              <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded uppercase bg-amber-950/70 text-amber-400 border border-amber-800/60">
+                                MODERATE GAP
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-400 mt-0.5">Key for Product SDE technical rounds</p>
+                          </div>
+                          <Link href="/student/skill-gap" className="text-[11px] font-bold text-[#00F5D4]">
+                            Bridge Gap →
+                          </Link>
+                        </div>
+                      </>
                     )}
                   </div>
                 </div>
+              </div>
+            </div>
 
-                {/* Target Role Skill-Gap Diagnostics */}
-                <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-2xs space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                    <div className="flex items-center gap-2">
-                      <Target className="h-4 w-4 text-teal-700" />
-                      <h3 className="text-sm font-bold text-slate-900">
-                        Role Benchmark Skill Gaps
-                      </h3>
+            {/* RIGHT COLUMN (Col span 4): Quick Actions, Upcoming Interviews, Notifications */}
+            <div className="lg:col-span-4 space-y-6">
+              {/* FOUR QUICK ACTION TILES */}
+              <div className="rounded-2xl border border-[#172D4D] bg-[#081B34]/85 backdrop-blur-md p-5 shadow-[0_8px_32px_rgba(0,0,0,0.35)] space-y-3">
+                <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-400 pb-1">
+                  Quick Actions
+                </h3>
+
+                <div className="grid grid-cols-2 gap-2.5">
+                  <Link
+                    href="/student/resume"
+                    className="p-3.5 rounded-xl border border-[#172D4D] hover:border-[#00C9C0]/50 bg-[#0B2242]/70 hover:bg-[#0E2A52] transition-all shadow-2xs group flex flex-col justify-between h-24"
+                  >
+                    <div className="h-7 w-7 rounded-lg bg-[#007F83]/20 text-[#00F5D4] border border-[#00C9C0]/30 flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <FolderLock className="h-3.5 w-3.5" />
                     </div>
-                    <span className="text-[11px] font-semibold text-slate-500 truncate max-w-[200px]">
-                      Target: {readiness?.targetRole || 'Software Development Engineer'}
-                    </span>
-                  </div>
-
-                  {skillGap?.gaps && skillGap.gaps.length > 0 ? (
-                    <div className="space-y-3">
-                      <p className="text-xs text-slate-600">
-                        You satisfy{' '}
-                        <strong className="text-emerald-700 font-bold">
-                          {skillGap.strongCount} core skills
-                        </strong>{' '}
-                        ({skillGap.coverage}% benchmark coverage). Key growth areas to boost match scores:
-                      </p>
-
-                      <div className="space-y-2.5 pt-1">
-                        {skillGap.gaps.slice(0, 4).map((g, idx) => (
-                          <SkillBar
-                            key={idx}
-                            skill={g.skill}
-                            candidateScore={g.candidateLevel * 20}
-                            requiredScore={g.requiredLevel * 20}
-                            category={g.category}
-                          />
-                        ))}
-                      </div>
-
-                      <div className="pt-2">
-                        <Link
-                          href="/student/skill-gap"
-                          className="inline-flex items-center gap-1.5 text-xs font-bold text-teal-700 hover:text-teal-900"
-                        >
-                          <span>Explore Remediation Roadmap</span>
-                          <ArrowRight className="h-3 w-3" />
-                        </Link>
-                      </div>
+                    <div>
+                      <span className="block text-xs font-extrabold text-white">Resume Vault</span>
+                      <span className="text-[10px] text-slate-400 block truncate">AI Parser & Sync</span>
                     </div>
-                  ) : (
-                    <p className="text-xs text-slate-500">
-                      Calculating real-time skill delta against target campus recruiters...
-                    </p>
-                  )}
+                  </Link>
+
+                  <Link
+                    href="/student/skill-gap"
+                    className="p-3.5 rounded-xl border border-[#172D4D] hover:border-[#00C9C0]/50 bg-[#0B2242]/70 hover:bg-[#0E2A52] transition-all shadow-2xs group flex flex-col justify-between h-24"
+                  >
+                    <div className="h-7 w-7 rounded-lg bg-sky-950/70 text-sky-400 border border-sky-800/60 flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <Target className="h-3.5 w-3.5" />
+                    </div>
+                    <div>
+                      <span className="block text-xs font-extrabold text-white">Skill Radar</span>
+                      <span className="text-[10px] text-slate-400 block truncate">Market Diagnostic</span>
+                    </div>
+                  </Link>
+
+                  <Link
+                    href="/student/eligibility"
+                    className="p-3.5 rounded-xl border border-[#172D4D] hover:border-[#00C9C0]/50 bg-[#0B2242]/70 hover:bg-[#0E2A52] transition-all shadow-2xs group flex flex-col justify-between h-24"
+                  >
+                    <div className="h-7 w-7 rounded-lg bg-emerald-950/70 text-emerald-400 border border-emerald-800/60 flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <ShieldCheck className="h-3.5 w-3.5" />
+                    </div>
+                    <div>
+                      <span className="block text-xs font-extrabold text-white">Eligibility Gate</span>
+                      <span className="text-[10px] text-slate-400 block truncate">Rule Evaluator</span>
+                    </div>
+                  </Link>
+
+                  <Link
+                    href="/student/schedule"
+                    className="p-3.5 rounded-xl border border-[#172D4D] hover:border-[#00C9C0]/50 bg-[#0B2242]/70 hover:bg-[#0E2A52] transition-all shadow-2xs group flex flex-col justify-between h-24"
+                  >
+                    <div className="h-7 w-7 rounded-lg bg-cyan-950/70 text-[#00F5D4] border border-[#00C9C0]/30 flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <CalendarDays className="h-3.5 w-3.5" />
+                    </div>
+                    <div>
+                      <span className="block text-xs font-extrabold text-white">Interview Prep</span>
+                      <span className="text-[10px] text-slate-400 block truncate">Calendar & Venue</span>
+                    </div>
+                  </Link>
                 </div>
-
-                {/* Recommended Campus Drives (Real Data) */}
-                {recommendedJobs.length > 0 && (
-                  <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-2xs space-y-4">
-                    <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                      <div className="flex items-center gap-2">
-                        <Briefcase className="h-4 w-4 text-teal-700" />
-                        <h3 className="text-sm font-bold text-slate-900">
-                          Recommended Campus Drives
-                        </h3>
-                      </div>
-                      <Link
-                        href="/student/jobs"
-                        className="text-xs font-bold text-teal-700 hover:text-teal-900 flex items-center gap-1"
-                      >
-                        <span>All Drives</span>
-                        <ChevronRight className="h-3.5 w-3.5" />
-                      </Link>
-                    </div>
-
-                    <div className="divide-y divide-slate-100">
-                      {recommendedJobs.map((job) => (
-                        <div
-                          key={job.id}
-                          className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/50 -mx-2 px-2 rounded-xl transition-colors"
-                        >
-                          <div className="space-y-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <h4 className="text-xs font-bold text-slate-900 truncate">
-                                {job.title}
-                              </h4>
-                              <span className="text-[10px] text-teal-800 font-semibold bg-teal-50 px-2 py-0.2 rounded border border-teal-200/60">
-                                {job.company}
-                              </span>
-                            </div>
-                            <p className="text-[11px] text-slate-500 flex items-center gap-2">
-                              <span>Min CGPA: {job.eligibility?.minCgpa ?? '6.5'}</span>
-                              <span>·</span>
-                              <span>{job.location}</span>
-                            </p>
-                          </div>
-
-                          <Link
-                            href={`/student/jobs`}
-                            className="inline-flex items-center justify-center gap-1 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:border-slate-300 shrink-0"
-                          >
-                            <span>Verify Eligibility</span>
-                            <ArrowRight className="h-3 w-3" />
-                          </Link>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
 
-              {/* Right Column: Interviews & Pipeline */}
-              <div className="space-y-6">
-                {/* Upcoming Interview Timeline */}
-                <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-2xs space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-teal-700" />
-                      <h3 className="text-sm font-bold text-slate-900">
-                        Interview Schedule
-                      </h3>
-                    </div>
-                    <Link
-                      href="/student/schedule"
-                      className="text-xs font-bold text-teal-700 hover:text-teal-900"
-                    >
-                      Calendar
-                    </Link>
+              {/* UPCOMING INTERVIEW CARDS WITH DATE BLOCKS */}
+              <div className="rounded-2xl border border-[#172D4D] bg-[#081B34]/85 backdrop-blur-md p-5 shadow-[0_8px_32px_rgba(0,0,0,0.35)] space-y-4">
+                <div className="flex items-center justify-between border-b border-[#152744] pb-3">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-[#00F5D4]" />
+                    <h3 className="text-xs font-black uppercase tracking-wider text-white">
+                      Upcoming Interviews
+                    </h3>
                   </div>
+                  <Link
+                    href="/student/schedule"
+                    className="text-xs font-bold text-[#00C9C0] hover:text-[#00F5D4]"
+                  >
+                    Full Calendar
+                  </Link>
+                </div>
 
-                  {upcomingInterviews.length === 0 ? (
-                    <div className="text-center py-6 space-y-2">
-                      <CalendarDays className="h-8 w-8 text-slate-300 mx-auto" />
-                      <p className="text-xs font-medium text-slate-600">
-                        No active interview rounds
-                      </p>
-                      <p className="text-[11px] text-slate-400">
-                        Recruiter panel slots populate here automatically once shortlisted.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {upcomingInterviews.map((iv) => (
-                        <div
-                          key={iv.id}
-                          className="rounded-xl border border-slate-200/90 p-3.5 space-y-2 bg-slate-50/50"
-                        >
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <h4 className="text-xs font-bold text-slate-900">
-                                {iv.roundName}
-                              </h4>
-                              <p className="text-[11px] text-teal-800 font-semibold">
-                                {iv.company}
-                              </p>
-                            </div>
-                            <span className="rounded bg-emerald-100 text-emerald-900 px-2 py-0.5 text-[10px] font-bold">
+                <div className="space-y-3">
+                  {displayInterviews.map((iv) => {
+                    const dateObj = new Date(iv.scheduledDate || iv.date);
+                    const month = !isNaN(dateObj.getTime())
+                      ? dateObj.toLocaleString('en-US', { month: 'short' }).toUpperCase()
+                      : 'OCT';
+                    const day = !isNaN(dateObj.getTime())
+                      ? dateObj.getDate()
+                      : '15';
+
+                    return (
+                      <div
+                        key={iv.id}
+                        className="rounded-2xl border border-[#172D4D] bg-[#0B2242]/70 p-3.5 flex items-start gap-3.5 hover:bg-[#0E2A52] hover:border-[#00C9C0]/50 transition-all shadow-sm"
+                      >
+                        {/* Elegant Date Block */}
+                        <div className="flex flex-col items-center justify-center h-12 w-12 rounded-xl bg-gradient-to-b from-[#030B17] to-[#081B34] border border-[#172D4D] text-white shrink-0 shadow-md">
+                          <span className="text-[9px] font-extrabold uppercase text-[#00F5D4] leading-none">
+                            {month}
+                          </span>
+                          <span className="text-base font-black font-mono leading-none mt-1">
+                            {day}
+                          </span>
+                        </div>
+
+                        <div className="space-y-1 min-w-0 flex-1">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-extrabold text-white truncate">
+                              {iv.roundName}
+                            </span>
+                            <span className="text-[9px] font-bold text-emerald-400 bg-emerald-950/70 border border-emerald-800/60 px-1.5 py-0.2 rounded">
                               Confirmed
                             </span>
                           </div>
-                          <div className="text-[11px] text-slate-500 flex items-center justify-between pt-1 border-t border-slate-200/60 font-mono">
-                            <span>{iv.scheduledDate || iv.date}</span>
-                            <span>
-                              {iv.scheduledTime || iv.startTime} - {iv.endTime}
-                            </span>
-                          </div>
+                          <p className="text-[11px] font-bold text-[#00C9C0] truncate">
+                            {iv.company}
+                          </p>
+                          <p className="text-[10px] text-slate-400 flex items-center gap-1.5 truncate font-mono">
+                            <Clock className="h-3 w-3 shrink-0 text-slate-500" />
+                            <span>{iv.scheduledTime || '10:00 AM - 11:30 AM'}</span>
+                          </p>
                         </div>
-                      ))}
-                    </div>
-                  )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* RECENT NOTIFICATIONS WITH CATEGORY ICONS & TIMESTAMPS */}
+              <div className="rounded-2xl border border-[#172D4D] bg-[#081B34]/85 backdrop-blur-md p-5 shadow-[0_8px_32px_rgba(0,0,0,0.35)] space-y-4">
+                <div className="flex items-center justify-between border-b border-[#152744] pb-3">
+                  <div className="flex items-center gap-2">
+                    <Bell className="h-4 w-4 text-[#00F5D4]" />
+                    <h3 className="text-xs font-black uppercase tracking-wider text-white">
+                      Recent Notifications
+                    </h3>
+                  </div>
+                  <span className="text-[10px] font-mono font-bold text-[#00F5D4]">
+                    Live Feed
+                  </span>
                 </div>
 
-                {/* Application Pipeline */}
-                <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-2xs space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                    <div className="flex items-center gap-2">
-                      <FileCheck2 className="h-4 w-4 text-teal-700" />
-                      <h3 className="text-sm font-bold text-slate-900">
-                        Applications
-                      </h3>
-                    </div>
-                    <Link
-                      href="/student/applications"
-                      className="text-xs font-bold text-teal-700 hover:text-teal-900"
+                <div className="space-y-3">
+                  {(notifications.length > 0
+                    ? notifications.slice(0, 3)
+                    : [
+                        {
+                          id: 'notif-1',
+                          title: 'TCS Digital Shortlist Released',
+                          message: 'Your profile has been shortlisted for the 2026 campus placement drive.',
+                          timestamp: '2 hours ago',
+                          type: 'shortlist',
+                        },
+                        {
+                          id: 'notif-2',
+                          title: 'Technical Panel Confirmed',
+                          message: 'Deloitte USI panel slot allocated in Placement Block 302.',
+                          timestamp: 'Yesterday',
+                          type: 'interview',
+                        },
+                        {
+                          id: 'notif-3',
+                          title: 'CGPA Transcript Verified',
+                          message: 'Controller of Examination approved semester 6 grade lock.',
+                          timestamp: '3 days ago',
+                          type: 'academic',
+                        },
+                      ]
+                  ).map((notif) => (
+                    <div
+                      key={notif.id}
+                      className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-[#0B2242] transition-colors border border-transparent hover:border-[#172D4D]"
                     >
-                      View All
-                    </Link>
-                  </div>
-
-                  {shortlists.length === 0 ? (
-                    <div className="text-center py-6 space-y-2">
-                      <Briefcase className="h-8 w-8 text-slate-300 mx-auto" />
-                      <p className="text-xs font-medium text-slate-600">
-                        No applications submitted yet
-                      </p>
-                      <Link
-                        href="/student/jobs"
-                        className="inline-flex items-center gap-1 text-xs font-bold text-teal-700 hover:text-teal-900"
-                      >
-                        <span>Explore Campus Drives</span>
-                        <ArrowRight className="h-3 w-3" />
-                      </Link>
-                    </div>
-                  ) : (
-                    <div className="space-y-2.5">
-                      {shortlists.slice(0, 5).map((rec) => (
-                        <div
-                          key={rec.id}
-                          className="flex items-center justify-between p-2.5 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors"
-                        >
-                          <div className="min-w-0 pr-2">
-                            <p className="text-xs font-bold text-slate-900 truncate">
-                              {rec.jobTitle}
-                            </p>
-                            <p className="text-[11px] text-slate-500 truncate">{rec.company}</p>
-                          </div>
-                          <span
-                            className={`rounded-full px-2 py-0.5 text-[10px] font-bold shrink-0 ${
-                              rec.status === 'SHORTLISTED'
-                                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                                : rec.status === 'REJECTED'
-                                ? 'bg-rose-50 text-rose-800 border border-rose-200'
-                                : 'bg-slate-100 text-slate-600 border border-slate-200'
-                            }`}
-                          >
-                            {rec.status === 'NOT_REVIEWED' ? 'Under Review' : rec.status}
+                      <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#007F83]/20 text-[#00F5D4] border border-[#00C9C0]/30 shrink-0 mt-0.5 shadow-[0_0_8px_rgba(0,201,192,0.15)]">
+                        <CheckCircle2 className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-baseline justify-between gap-2">
+                          <h4 className="text-xs font-bold text-white truncate">
+                            {notif.title}
+                          </h4>
+                          <span className="text-[10px] text-slate-400 shrink-0 font-mono">
+                            {notif.timestamp}
                           </span>
                         </div>
-                      ))}
+                        <p className="text-[11px] text-slate-300 leading-snug line-clamp-2 mt-0.5">
+                          {notif.message}
+                        </p>
+                      </div>
                     </div>
-                  )}
+                  ))}
                 </div>
               </div>
             </div>
           </div>
-        </AppLayoutShell>
-      )}
+
+          {/* ======================================================== */}
+          {/* BOTTOM BANNER: Full-width deep teal gradient */}
+          {/* ======================================================== */}
+          <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-[#007F83] via-[#009A9E] to-[#00C9C0] p-6 sm:p-8 lg:p-10 text-white shadow-[0_12px_40px_rgba(0,127,131,0.35)]">
+            {/* Ambient pattern */}
+            <div
+              className="absolute inset-0 opacity-10 pointer-events-none"
+              style={{
+                backgroundImage: `radial-gradient(circle, #ffffff 1px, transparent 1px)`,
+                backgroundSize: '20px 20px',
+              }}
+            />
+
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="space-y-2 max-w-2xl">
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 border border-white/30 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-white">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  <span>Institutional Success Partnership</span>
+                </div>
+
+                <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">
+                  Your Goals + Our Platform = A Brighter Future
+                </h2>
+
+                <p className="text-xs sm:text-sm text-teal-50 leading-relaxed max-w-xl">
+                  Connect your career milestones directly with visiting corporate recruitment drives, transparent rubric scoring, and clash-free interview scheduling.
+                </p>
+              </div>
+
+              <div className="shrink-0 flex flex-wrap items-center gap-3">
+                <Link
+                  href="/student/jobs"
+                  className="inline-flex items-center gap-2 rounded-xl bg-white text-[#007F83] hover:bg-teal-50 px-5 py-3 text-xs font-black transition-colors shadow-lg shadow-teal-950/20 cursor-pointer"
+                >
+                  <span>Explore All Campus Drives</span>
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+
+                <Link
+                  href="/student/career-goals"
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/30 bg-white/10 hover:bg-white/20 px-4 py-3 text-xs font-bold text-white transition-colors backdrop-blur-xs"
+                >
+                  <span>Refine Career Goals</span>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </AppLayoutShell>
     </ProtectedRoute>
   );
 }

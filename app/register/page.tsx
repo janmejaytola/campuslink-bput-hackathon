@@ -20,9 +20,11 @@ import {
   Sparkles,
   Shield,
   Check,
+  Zap,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { StrictRole, ROLE_LABELS, ROLE_DASHBOARD_ROUTES } from '@/types/auth';
+import { StrictRole, ROLE_LABELS, ROLE_DASHBOARD_ROUTES, UserRecord } from '@/types/auth';
+import { AuthTransitionScreen } from '@/components/auth/AuthTransitionScreen';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -40,6 +42,7 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [transitioningUser, setTransitioningUser] = useState<UserRecord | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,7 +54,7 @@ export default function RegisterPage() {
       return;
     }
     if (!email || !email.includes('@')) {
-      setErrorMessage('Please enter a valid institutional or business email address.');
+      setErrorMessage('Please enter a valid institutional or corporate email address.');
       return;
     }
     if (!password || password.length < 6) {
@@ -59,7 +62,7 @@ export default function RegisterPage() {
       return;
     }
     if (password !== confirmPassword) {
-      setErrorMessage('Passwords do not match. Please verify your password entry.');
+      setErrorMessage('Passwords do not match. Please re-enter.');
       return;
     }
 
@@ -67,46 +70,69 @@ export default function RegisterPage() {
 
     try {
       const user = await register({
-        name: fullName,
-        email,
+        name: fullName.trim(),
+        email: email.trim(),
         password,
         role,
-        regNumber: role === 'STUDENT' ? regOrId : undefined,
-        department: role === 'PLACEMENT_OFFICER' ? institutionOrCompany : undefined,
-        company: role === 'RECRUITER' ? institutionOrCompany : undefined,
-        institution: role === 'STUDENT' ? institutionOrCompany : undefined,
+        regNumber: role === 'STUDENT' ? regOrId.trim() : undefined,
+        institution: role !== 'RECRUITER' ? (institutionOrCompany.trim() || 'Biju Patnaik University of Technology (BPUT)') : undefined,
+        company: role === 'RECRUITER' ? (institutionOrCompany.trim() || 'Hiring Enterprise') : undefined,
+        department: role === 'PLACEMENT_OFFICER' ? (institutionOrCompany.trim() || 'Central Placement Cell') : undefined,
       });
 
-      setSuccessMessage(`Account registered successfully as ${ROLE_LABELS[user.role]}! Initializing workspace...`);
-      const targetDashboard = ROLE_DASHBOARD_ROUTES[user.role];
+      setSuccessMessage(
+        `Workspace successfully provisioned for ${user.displayName || fullName}! Directing to console...`
+      );
 
-      setTimeout(() => {
-        router.replace(targetDashboard);
-      }, 600);
+      // Trigger premium post-registration transition
+      setTransitioningUser(user);
     } catch (err: unknown) {
       setIsLoading(false);
       if (err instanceof Error) {
         setErrorMessage(err.message);
       } else {
-        setErrorMessage('Registration failed. Please verify your details and try again.');
+        setErrorMessage('Failed to register account. Please check your credentials.');
       }
     }
   };
 
+  if (transitioningUser) {
+    return (
+      <AuthTransitionScreen
+        user={transitioningUser}
+        destination="/onboarding"
+      />
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-[#0A0F1D] flex flex-col lg:flex-row text-slate-100 selection:bg-teal-500/30">
-      {/* Left Column: Onboarding Narrative */}
-      <div className="hidden lg:flex lg:w-5/12 flex-col justify-between p-12 lg:p-16 relative bg-gradient-to-br from-[#0A0F1D] via-[#0F172A] to-[#0A2540] border-r border-slate-800/80">
+    <div className="min-h-screen bg-[#040D1A] flex flex-col lg:flex-row text-slate-100 selection:bg-[#00C9C0]/25 selection:text-white relative overflow-hidden">
+      {/* Background ambient lighting */}
+      <div className="fixed top-0 left-1/4 w-[32rem] h-[32rem] bg-[#00C9C0]/10 rounded-full blur-3xl pointer-events-none -z-10" />
+      <div className="fixed bottom-0 right-1/4 w-[36rem] h-[36rem] bg-[#007F83]/10 rounded-full blur-3xl pointer-events-none -z-10" />
+
+      {/* Left Column: Authority & Institutional Overview */}
+      <div className="hidden lg:flex lg:w-1/2 flex-col justify-between p-12 lg:p-16 relative bg-gradient-to-br from-[#06172B] via-[#091D38] to-[#0B1B32] border-r border-[#152744]">
+        {/* Subtle dot mesh */}
+        <div
+          className="absolute inset-0 opacity-15 pointer-events-none"
+          style={{
+            backgroundImage: `radial-gradient(rgba(0, 201, 192, 0.25) 1px, transparent 1px)`,
+            backgroundSize: '24px 24px',
+          }}
+        />
+
+        {/* Top Brand Mark */}
         <div className="relative z-10">
-          <Link href="/" className="inline-flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-600 text-white font-black tracking-wider shadow-md shadow-teal-950">
+          <Link href="/" className="inline-flex items-center gap-3 group">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-[#007F83] to-[#00C9C0] text-white font-black tracking-wider shadow-lg shadow-[#00C9C0]/25 transition-transform group-hover:scale-105">
               CL
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xl font-bold tracking-tight text-white">CAMPUSLINK</span>
-                <span className="text-[10px] font-mono uppercase tracking-wider text-teal-400 bg-teal-950/80 border border-teal-800/60 px-2 py-0.5 rounded">
-                  ENROLL
+                <span className="text-xl font-black tracking-tight text-white">CAMPUSLINK</span>
+                <span className="text-[10px] font-mono text-[#00F5D4] bg-[#007F83]/30 border border-[#00C9C0]/50 px-2 py-0.5 rounded shadow-[0_0_8px_rgba(0,201,192,0.2)]">
+                  ONBOARDING
                 </span>
               </div>
               <p className="text-xs text-slate-400">Institutional Placement Operating System</p>
@@ -114,20 +140,21 @@ export default function RegisterPage() {
           </Link>
         </div>
 
-        <div className="relative z-10 my-auto max-w-sm space-y-6">
-          <div className="inline-flex items-center gap-2 rounded-full border border-teal-500/20 bg-teal-950/50 px-3 py-1 text-xs font-medium text-teal-300">
-            <Sparkles className="h-3.5 w-3.5 text-teal-400" />
+        {/* Center Narrative */}
+        <div className="relative z-10 my-auto max-w-lg space-y-6">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#00C9C0]/30 bg-[#007F83]/20 px-3.5 py-1 text-xs font-semibold text-[#00F5D4] shadow-[0_0_12px_rgba(0,201,192,0.15)]">
+            <Sparkles className="h-3.5 w-3.5 text-[#00F5D4]" />
             <span>Structured Campus Placement Onboarding</span>
           </div>
 
-          <h1 className="text-3xl font-black tracking-tight text-white leading-tight">
+          <h1 className="text-3xl lg:text-4xl font-black tracking-tight text-white leading-tight drop-shadow-md">
             Register your role in the 2026 placement cycle.
           </h1>
 
           <div className="space-y-4 pt-2 text-xs text-slate-300">
-            <div className="flex items-start gap-3">
-              <div className="rounded-full bg-teal-950 border border-teal-700/60 p-1 text-teal-400 shrink-0 mt-0.5">
-                <Check className="h-3 w-3" />
+            <div className="flex items-start gap-3 p-3 rounded-xl bg-[#081B34]/60 border border-[#172D4D]">
+              <div className="rounded-lg bg-[#007F83]/30 border border-[#00C9C0]/50 p-1 text-[#00F5D4] shrink-0 mt-0.5">
+                <Check className="h-3.5 w-3.5" />
               </div>
               <div>
                 <strong className="text-white block font-semibold">For BPUT Students</strong>
@@ -137,9 +164,9 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            <div className="flex items-start gap-3">
-              <div className="rounded-full bg-teal-950 border border-teal-700/60 p-1 text-teal-400 shrink-0 mt-0.5">
-                <Check className="h-3 w-3" />
+            <div className="flex items-start gap-3 p-3 rounded-xl bg-[#081B34]/60 border border-[#172D4D]">
+              <div className="rounded-lg bg-[#007F83]/30 border border-[#00C9C0]/50 p-1 text-[#00F5D4] shrink-0 mt-0.5">
+                <Check className="h-3.5 w-3.5" />
               </div>
               <div>
                 <strong className="text-white block font-semibold">For Corporate Recruiters</strong>
@@ -149,9 +176,9 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            <div className="flex items-start gap-3">
-              <div className="rounded-full bg-teal-950 border border-teal-700/60 p-1 text-teal-400 shrink-0 mt-0.5">
-                <Check className="h-3 w-3" />
+            <div className="flex items-start gap-3 p-3 rounded-xl bg-[#081B34]/60 border border-[#172D4D]">
+              <div className="rounded-lg bg-[#007F83]/30 border border-[#00C9C0]/50 p-1 text-[#00F5D4] shrink-0 mt-0.5">
+                <Check className="h-3.5 w-3.5" />
               </div>
               <div>
                 <strong className="text-white block font-semibold">For Placement Officers (TPO)</strong>
@@ -163,40 +190,44 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        <div className="relative z-10 flex items-center justify-between text-xs text-slate-500 border-t border-slate-800/60 pt-6">
+        <div className="relative z-10 flex items-center justify-between text-xs text-slate-400 border-t border-[#152744] pt-6">
           <div className="flex items-center gap-2">
-            <Shield className="h-4 w-4 text-teal-500" />
+            <Shield className="h-4 w-4 text-[#00C9C0]" />
             <span>Strict RBAC Security Enforcement</span>
           </div>
-          <span className="font-mono text-[11px]">BPUT PS10</span>
+          <span className="font-mono text-[11px] text-[#00F5D4]">BPUT PS10</span>
         </div>
       </div>
 
-      {/* Right Column: Register Form */}
-      <div className="flex-1 flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-16 bg-[#F8FAFC] text-slate-900 overflow-y-auto">
+      {/* Right Column: Register Form in Dark 3D Glass */}
+      <div className="flex-1 flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-16 bg-[#040D1A] text-slate-100 overflow-y-auto relative z-10">
         <div className="w-full max-w-lg mx-auto">
           {/* Mobile Header */}
           <div className="lg:hidden mb-6 text-center">
             <Link href="/" className="inline-flex items-center gap-2.5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-600 text-white font-bold tracking-wider shadow-sm">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-[#007F83] to-[#00C9C0] text-white font-bold tracking-wider shadow-md shadow-[#00C9C0]/25">
                 CL
               </div>
-              <span className="text-2xl font-bold tracking-tight text-slate-900">CAMPUSLINK</span>
+              <span className="text-2xl font-black tracking-tight text-white">CAMPUSLINK</span>
             </Link>
           </div>
 
           <div className="mb-6">
-            <h2 className="text-2xl font-black tracking-tight text-slate-900">
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="h-2 w-2 rounded-full bg-[#00F5D4] shadow-[0_0_8px_rgba(0,245,212,0.8)]" />
+              <span className="text-[11px] font-mono uppercase tracking-wider text-[#00F5D4]">WORKSPACE PROVISIONING</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white drop-shadow-sm">
               Create your account
             </h2>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-slate-400 mt-1">
               Select your institutional role to provision your secure workspace.
             </p>
           </div>
 
           {/* Role Selection */}
           <div className="mb-6">
-            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">
+            <label className="block text-[11px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">
               Select Role
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -205,13 +236,13 @@ export default function RegisterPage() {
                 onClick={() => setRole('STUDENT')}
                 className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
                   role === 'STUDENT'
-                    ? 'border-indigo-600 bg-indigo-50/80 text-indigo-950 ring-2 ring-indigo-600/20 shadow-xs'
-                    : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                    ? 'border-[#00C9C0] bg-[#007F83]/30 text-[#00F5D4] ring-2 ring-[#00C9C0]/40 shadow-[0_0_16px_rgba(0,201,192,0.25)]'
+                    : 'border-[#152744] bg-[#081B34]/60 text-slate-400 hover:text-white hover:border-[#1E375C]'
                 }`}
               >
-                <GraduationCap className={`h-5 w-5 mb-1.5 ${role === 'STUDENT' ? 'text-indigo-600' : 'text-slate-400'}`} />
-                <span className="block text-xs font-bold">Student</span>
-                <span className="block text-[10px] text-slate-500 mt-0.5">Candidate OS</span>
+                <GraduationCap className={`h-5 w-5 mb-1.5 ${role === 'STUDENT' ? 'text-[#00F5D4]' : 'text-slate-400'}`} />
+                <span className="block text-xs font-bold text-white">Student</span>
+                <span className="block text-[10px] text-slate-400 mt-0.5">Candidate OS</span>
               </button>
 
               <button
@@ -219,13 +250,13 @@ export default function RegisterPage() {
                 onClick={() => setRole('RECRUITER')}
                 className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
                   role === 'RECRUITER'
-                    ? 'border-teal-600 bg-teal-50/80 text-teal-950 ring-2 ring-teal-600/20 shadow-xs'
-                    : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                    ? 'border-sky-400 bg-sky-950/60 text-sky-300 ring-2 ring-sky-500/40 shadow-[0_0_16px_rgba(14,165,233,0.25)]'
+                    : 'border-[#152744] bg-[#081B34]/60 text-slate-400 hover:text-white hover:border-[#1E375C]'
                 }`}
               >
-                <Briefcase className={`h-5 w-5 mb-1.5 ${role === 'RECRUITER' ? 'text-teal-700' : 'text-slate-400'}`} />
-                <span className="block text-xs font-bold">Recruiter</span>
-                <span className="block text-[10px] text-slate-500 mt-0.5">Corporate ATS</span>
+                <Briefcase className={`h-5 w-5 mb-1.5 ${role === 'RECRUITER' ? 'text-sky-400' : 'text-slate-400'}`} />
+                <span className="block text-xs font-bold text-white">Recruiter</span>
+                <span className="block text-[10px] text-slate-400 mt-0.5">Corporate ATS</span>
               </button>
 
               <button
@@ -233,36 +264,36 @@ export default function RegisterPage() {
                 onClick={() => setRole('PLACEMENT_OFFICER')}
                 className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
                   role === 'PLACEMENT_OFFICER'
-                    ? 'border-blue-700 bg-blue-50/80 text-blue-950 ring-2 ring-blue-700/20 shadow-xs'
-                    : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                    ? 'border-emerald-400 bg-emerald-950/60 text-emerald-300 ring-2 ring-emerald-500/40 shadow-[0_0_16px_rgba(16,185,129,0.25)]'
+                    : 'border-[#152744] bg-[#081B34]/60 text-slate-400 hover:text-white hover:border-[#1E375C]'
                 }`}
               >
-                <ShieldCheck className={`h-5 w-5 mb-1.5 ${role === 'PLACEMENT_OFFICER' ? 'text-blue-700' : 'text-slate-400'}`} />
-                <span className="block text-xs font-bold">TPO Officer</span>
-                <span className="block text-[10px] text-slate-500 mt-0.5">Governance</span>
+                <ShieldCheck className={`h-5 w-5 mb-1.5 ${role === 'PLACEMENT_OFFICER' ? 'text-emerald-400' : 'text-slate-400'}`} />
+                <span className="block text-xs font-bold text-white">TPO Officer</span>
+                <span className="block text-[10px] text-slate-400 mt-0.5">Governance</span>
               </button>
             </div>
           </div>
 
-          {/* Form Card */}
-          <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+          {/* Form Card in Dark Glass */}
+          <div className="bg-[#081B34]/85 p-6 sm:p-8 rounded-2xl border border-[#152744] shadow-[0_12px_40px_rgba(0,0,0,0.5)] backdrop-blur-md space-y-4">
             {errorMessage && (
-              <div className="rounded-xl border border-rose-200 bg-rose-50/90 p-3.5 text-xs text-rose-800 flex items-start gap-2">
-                <AlertCircle className="h-4 w-4 text-rose-600 shrink-0 mt-0.5" />
+              <div className="rounded-xl border border-rose-500/40 bg-rose-950/60 p-3.5 text-xs text-rose-200 flex items-start gap-2">
+                <AlertCircle className="h-4 w-4 text-rose-400 shrink-0 mt-0.5" />
                 <div className="flex-1 font-medium leading-relaxed">{errorMessage}</div>
               </div>
             )}
 
             {successMessage && (
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3.5 text-xs text-emerald-800 flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+              <div className="rounded-xl border border-emerald-500/40 bg-emerald-950/60 p-3.5 text-xs text-emerald-200 flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
                 <span className="font-semibold">{successMessage}</span>
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                   Full Name
                 </label>
                 <div className="relative">
@@ -273,14 +304,14 @@ export default function RegisterPage() {
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="e.g. Priyanshu Mohanty"
-                    className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-3.5 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600/20"
+                    className="w-full rounded-xl border border-[#152744] bg-[#06172B] py-2.5 pl-10 pr-3.5 text-xs font-medium text-white placeholder:text-slate-500 focus:border-[#00C9C0] focus:outline-none focus:ring-2 focus:ring-[#00C9C0]/25 transition-all"
                     disabled={isLoading}
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                   Email Address
                 </label>
                 <div className="relative">
@@ -297,7 +328,7 @@ export default function RegisterPage() {
                         ? 'recruiter@company.com'
                         : 'tpo@university.ac.in'
                     }
-                    className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-3.5 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600/20"
+                    className="w-full rounded-xl border border-[#152744] bg-[#06172B] py-2.5 pl-10 pr-3.5 text-xs font-medium text-white placeholder:text-slate-500 focus:border-[#00C9C0] focus:outline-none focus:ring-2 focus:ring-[#00C9C0]/25 transition-all"
                     disabled={isLoading}
                   />
                 </div>
@@ -307,7 +338,7 @@ export default function RegisterPage() {
               {role === 'STUDENT' && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                       BPUT Registration No.
                     </label>
                     <input
@@ -315,12 +346,12 @@ export default function RegisterPage() {
                       value={regOrId}
                       onChange={(e) => setRegOrId(e.target.value)}
                       placeholder="e.g. 2201090123"
-                      className="w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3.5 text-xs font-mono font-medium text-slate-900 placeholder:text-slate-400 focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600/20"
+                      className="w-full rounded-xl border border-[#152744] bg-[#06172B] py-2.5 px-3.5 text-xs font-mono font-medium text-white placeholder:text-slate-500 focus:border-[#00C9C0] focus:outline-none focus:ring-2 focus:ring-[#00C9C0]/25 transition-all"
                       disabled={isLoading}
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                       College / Institution
                     </label>
                     <input
@@ -328,7 +359,7 @@ export default function RegisterPage() {
                       value={institutionOrCompany}
                       onChange={(e) => setInstitutionOrCompany(e.target.value)}
                       placeholder="e.g. Silicon Institute"
-                      className="w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3.5 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600/20"
+                      className="w-full rounded-xl border border-[#152744] bg-[#06172B] py-2.5 px-3.5 text-xs font-medium text-white placeholder:text-slate-500 focus:border-[#00C9C0] focus:outline-none focus:ring-2 focus:ring-[#00C9C0]/25 transition-all"
                       disabled={isLoading}
                     />
                   </div>
@@ -337,7 +368,7 @@ export default function RegisterPage() {
 
               {role === 'RECRUITER' && (
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                     Hiring Company Name
                   </label>
                   <div className="relative">
@@ -348,7 +379,7 @@ export default function RegisterPage() {
                       value={institutionOrCompany}
                       onChange={(e) => setInstitutionOrCompany(e.target.value)}
                       placeholder="e.g. Tata Consultancy Services, Deloitte, Amazon"
-                      className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-3.5 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600/20"
+                      className="w-full rounded-xl border border-[#152744] bg-[#06172B] py-2.5 pl-10 pr-3.5 text-xs font-medium text-white placeholder:text-slate-500 focus:border-[#00C9C0] focus:outline-none focus:ring-2 focus:ring-[#00C9C0]/25 transition-all"
                       disabled={isLoading}
                     />
                   </div>
@@ -357,7 +388,7 @@ export default function RegisterPage() {
 
               {role === 'PLACEMENT_OFFICER' && (
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                     TPO Office / Department
                   </label>
                   <div className="relative">
@@ -368,7 +399,7 @@ export default function RegisterPage() {
                       value={institutionOrCompany}
                       onChange={(e) => setInstitutionOrCompany(e.target.value)}
                       placeholder="e.g. Central Placement Cell, BPUT Rourkela"
-                      className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-3.5 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600/20"
+                      className="w-full rounded-xl border border-[#152744] bg-[#06172B] py-2.5 pl-10 pr-3.5 text-xs font-medium text-white placeholder:text-slate-500 focus:border-[#00C9C0] focus:outline-none focus:ring-2 focus:ring-[#00C9C0]/25 transition-all"
                       disabled={isLoading}
                     />
                   </div>
@@ -378,7 +409,7 @@ export default function RegisterPage() {
               {/* Password Fields */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                     Password (min. 6 chars)
                   </label>
                   <div className="relative">
@@ -389,13 +420,13 @@ export default function RegisterPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-9 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600/20"
+                      className="w-full rounded-xl border border-[#152744] bg-[#06172B] py-2.5 pl-10 pr-9 text-xs font-medium text-white placeholder:text-slate-500 focus:border-[#00C9C0] focus:outline-none focus:ring-2 focus:ring-[#00C9C0]/25 transition-all"
                       disabled={isLoading}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer transition-colors"
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
@@ -403,7 +434,7 @@ export default function RegisterPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                     Confirm Password
                   </label>
                   <div className="relative">
@@ -414,7 +445,7 @@ export default function RegisterPage() {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-3.5 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600/20"
+                      className="w-full rounded-xl border border-[#152744] bg-[#06172B] py-2.5 pl-10 pr-3.5 text-xs font-medium text-white placeholder:text-slate-500 focus:border-[#00C9C0] focus:outline-none focus:ring-2 focus:ring-[#00C9C0]/25 transition-all"
                       disabled={isLoading}
                     />
                   </div>
@@ -424,7 +455,7 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-teal-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-teal-500 transition-colors shadow-xs cursor-pointer disabled:opacity-50"
+                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#007F83] via-[#00A89E] to-[#00C9C0] px-4 py-2.5 text-xs font-bold text-white hover:from-[#00A89E] hover:to-[#00F5D4] transition-all shadow-[0_4px_16px_rgba(0,127,131,0.4)] cursor-pointer disabled:opacity-50"
               >
                 {isLoading ? (
                   <>
@@ -441,11 +472,11 @@ export default function RegisterPage() {
             </form>
           </div>
 
-          <div className="mt-6 text-center text-xs text-slate-500">
+          <div className="mt-6 text-center text-xs text-slate-400">
             Already have an active account?{' '}
             <Link
               href="/login"
-              className="font-bold text-teal-700 hover:text-teal-800 transition-colors"
+              className="font-bold text-[#00F5D4] hover:underline transition-colors"
             >
               Sign in to workspace
             </Link>

@@ -144,7 +144,7 @@ export default function StudentApplicationsPage() {
 
             <Link
               href="/student/schedule"
-              className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white hover:bg-indigo-500 transition-colors shadow-xs"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#007F83] hover:bg-[#00A89E] px-4 py-2 text-xs font-bold text-white transition-colors shadow-xs"
             >
               <span>Interview Calendar</span>
               <Calendar className="h-3.5 w-3.5" />
@@ -154,16 +154,16 @@ export default function StudentApplicationsPage() {
 
         <div className="space-y-6 pb-16">
           {/* Filter Tabs */}
-          <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200 shadow-2xs">
-            <div className="flex items-center gap-1.5 p-1 bg-slate-100/80 rounded-xl">
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-[#E2E8F0] shadow-2xs">
+            <div className="flex items-center gap-1.5 p-1 bg-[#F3F7FB] rounded-xl border border-[#E2E8F0]">
               {(['All', 'Shortlisted', 'Under Review', 'Closed'] as const).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setFilter(tab)}
                   className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
                     filter === tab
-                      ? 'bg-white text-indigo-950 shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-white text-[#0B1B32] shadow-xs'
+                      : 'text-slate-600 hover:text-[#0B1B32]'
                   }`}
                 >
                   {tab === 'All'

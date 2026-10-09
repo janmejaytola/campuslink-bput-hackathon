@@ -8,8 +8,9 @@ interface ProgressRingProps {
   strokeWidth?: number;
   label?: string;
   sublabel?: string;
-  color?: 'teal' | 'emerald' | 'indigo' | 'amber' | 'rose' | 'sky';
+  color?: 'teal' | 'emerald' | 'indigo' | 'amber' | 'rose' | 'sky' | 'turquoise' | 'white';
   className?: string;
+  textColorOverride?: string;
 }
 
 export function ProgressRing({
@@ -18,8 +19,9 @@ export function ProgressRing({
   strokeWidth = 7,
   label,
   sublabel,
-  color = 'teal',
+  color = 'turquoise',
   className = '',
+  textColorOverride,
 }: ProgressRingProps) {
   const clampedValue = Math.min(100, Math.max(0, value));
   const radius = (size - strokeWidth) / 2;
@@ -27,11 +29,23 @@ export function ProgressRing({
   const offset = circumference - (clampedValue / 100) * circumference;
 
   const colorStyles = {
+    turquoise: {
+      stroke: 'stroke-[#00C9C0]',
+      text: 'text-[#00C9C0]',
+      track: 'stroke-[#152744]',
+      glow: 'drop-shadow-[0_0_8px_rgba(0,201,192,0.35)]',
+    },
+    white: {
+      stroke: 'stroke-[#00C9C0]',
+      text: 'text-white',
+      track: 'stroke-white/15',
+      glow: 'drop-shadow-[0_0_8px_rgba(0,201,192,0.4)]',
+    },
     teal: {
-      stroke: 'stroke-teal-500',
-      text: 'text-teal-950',
-      track: 'stroke-teal-100',
-      glow: 'drop-shadow-[0_0_6px_rgba(13,148,136,0.25)]',
+      stroke: 'stroke-[#007F83]',
+      text: 'text-[#0B1B32]',
+      track: 'stroke-slate-100',
+      glow: 'drop-shadow-[0_0_6px_rgba(0,127,131,0.25)]',
     },
     emerald: {
       stroke: 'stroke-emerald-500',
@@ -94,7 +108,7 @@ export function ProgressRing({
 
         {/* Center Text */}
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-          <span className={`text-sm md:text-base font-extrabold font-mono tabular-nums leading-none ${colorStyles.text}`}>
+          <span className={`text-sm md:text-base font-black font-mono tabular-nums leading-none ${textColorOverride || colorStyles.text}`}>
             {Math.round(clampedValue)}%
           </span>
           {sublabel && (

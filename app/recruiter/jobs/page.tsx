@@ -25,9 +25,11 @@ import {
   Eye,
   Building,
   MapPin,
+  Zap,
 } from 'lucide-react';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AppLayoutShell } from '@/components/navigation/AppLayoutShell';
+import { StatusBadge } from '@/components/common/StatusBadge';
 import { useAuth } from '@/context/AuthContext';
 import { RecruiterJob, JobStatus, WORK_MODE_LABELS, EMPLOYMENT_TYPE_LABELS } from '@/types/job';
 import { jobService } from '@/lib/services/jobService';
@@ -114,7 +116,7 @@ export default function RecruiterJobsDashboardPage() {
     setIsSubmittingAction(true);
     try {
       await jobService.updateJobStatus(actionJob.id, currentUser.uid, 'CLOSED');
-      setSuccessMessage(`Job "${actionJob.title}" has been closed.`);
+      setSuccessMessage(`Job "${actionJob.title}" closed successfully.`);
       setActionJob(null);
       setActionType(null);
       await fetchJobs();
@@ -163,80 +165,57 @@ export default function RecruiterJobsDashboardPage() {
     }
   };
 
-  const getStatusBadge = (status: JobStatus) => {
-    switch (status) {
-      case 'OPEN':
-        return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 border border-emerald-200">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 animate-pulse" />
-            OPEN
-          </span>
-        );
-      case 'DRAFT':
-        return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800 border border-amber-200">
-            DRAFT
-          </span>
-        );
-      case 'CLOSED':
-      default:
-        return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600 border border-slate-200">
-            CLOSED
-          </span>
-        );
-    }
-  };
-
   return (
     <ProtectedRoute allowedRole="RECRUITER">
       <AppLayoutShell role="recruiter">
         <div className="space-y-6 pb-12">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#152744] pb-5">
             <div>
               <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1 rounded-full bg-teal-50 px-2.5 py-0.5 text-[11px] font-semibold text-teal-800 border border-teal-200/60">
-                  <Briefcase className="h-3 w-3 text-teal-600" />
-                  Recruiter Console
+                <span className="inline-flex items-center gap-1 rounded-md bg-[#007F83]/30 border border-[#00C9C0]/50 px-2.5 py-0.5 text-[11px] font-extrabold text-[#00F5D4] uppercase tracking-wider">
+                  <Briefcase className="h-3 w-3 text-[#00F5D4]" />
+                  RECRUITER CONSOLE
                 </span>
-                <span className="text-[11px] font-medium text-slate-500">Corporate Requisitions</span>
+                <span className="text-[11px] font-medium text-slate-400">Corporate Requisitions</span>
               </div>
-              <h1 className="mt-1.5 text-2xl font-bold tracking-tight text-slate-900">
-                Jobs
+              <h1 className="mt-1.5 text-2xl sm:text-3xl font-black tracking-tight text-white drop-shadow-sm">
+                Job Requisitions
               </h1>
-              <p className="mt-1 text-xs text-slate-500">
-                Create, manage and publish campus placement opportunities.
+              <p className="mt-1 text-xs sm:text-sm text-slate-400">
+                Create, manage and publish campus placement opportunities with deterministic eligibility rules.
               </p>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               <Link
                 href="/recruiter/jobs/new?tab=upload"
-                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-xs"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-[#00C9C0]/40 bg-[#081B34] px-4 py-2 text-xs font-bold text-[#00F5D4] hover:bg-[#00C9C0]/15 hover:border-[#00C9C0] transition-all shadow-xs cursor-pointer"
               >
-                <Upload className="h-3.5 w-3.5 text-teal-600" />
+                <Upload className="h-3.5 w-3.5 text-[#00F5D4]" />
                 <span>Upload JD</span>
               </Link>
               <Link
                 href="/recruiter/jobs/new"
-                className="inline-flex items-center gap-1.5 rounded-xl bg-teal-600 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-teal-500 transition-colors"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-[#007F83] to-[#00C9C0] hover:from-[#00A89E] hover:to-[#00F5D4] px-4 py-2 text-xs font-bold text-white transition-all shadow-[0_4px_16px_rgba(0,127,131,0.4)] cursor-pointer"
               >
-                <Plus className="h-4 w-4" />
-                <span>Create Job</span>
+                <Plus className="h-3.5 w-3.5" />
+                <span>Create Requisition</span>
               </Link>
             </div>
           </div>
 
-          {/* Feedback alerts */}
+          {/* Feedback banners */}
           {errorMessage && (
-            <div className="rounded-xl border border-rose-200 bg-rose-50/90 p-4 text-xs font-medium text-rose-800 flex items-start gap-2.5">
-              <AlertCircle className="h-4 w-4 text-rose-600 shrink-0 mt-0.5" />
-              <div className="flex-1">{errorMessage}</div>
+            <div className="rounded-2xl border border-rose-500/40 bg-rose-950/60 p-4 text-xs font-semibold text-rose-200 flex items-center justify-between shadow-md">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-rose-400 shrink-0" />
+                <span>{errorMessage}</span>
+              </div>
               <button
                 type="button"
                 onClick={() => setErrorMessage(null)}
-                className="text-rose-500 hover:text-rose-700"
+                className="text-rose-400 hover:text-white"
               >
                 &times;
               </button>
@@ -244,41 +223,43 @@ export default function RecruiterJobsDashboardPage() {
           )}
 
           {successMessage && (
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-xs font-medium text-emerald-800 flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-              <span className="flex-1">{successMessage}</span>
+            <div className="rounded-2xl border border-emerald-500/40 bg-emerald-950/60 p-4 text-xs font-semibold text-emerald-200 flex items-center justify-between shadow-md">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                <span>{successMessage}</span>
+              </div>
               <button
                 type="button"
                 onClick={() => setSuccessMessage(null)}
-                className="text-emerald-600 hover:text-emerald-800"
+                className="text-emerald-400 hover:text-white"
               >
                 &times;
               </button>
             </div>
           )}
 
-          {/* Stats Cards */}
+          {/* Stats Cards in Dark 3D Glass */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
-              <span className="text-xs font-semibold text-slate-500">Total Jobs</span>
-              <p className="mt-1 text-2xl font-bold text-slate-900">{totalJobs}</p>
+            <div className="rounded-2xl border border-[#152744] bg-[#081B34]/85 p-4 shadow-[0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-md">
+              <span className="text-xs font-semibold text-slate-400">Total Listings</span>
+              <p className="mt-1 text-2xl font-black text-white font-mono tabular-nums">{totalJobs}</p>
             </div>
-            <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-4 shadow-xs">
-              <span className="text-xs font-semibold text-amber-800">Draft</span>
-              <p className="mt-1 text-2xl font-bold text-amber-900">{draftJobs}</p>
+            <div className="rounded-2xl border border-amber-500/30 bg-amber-950/30 p-4 shadow-[0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-md">
+              <span className="text-xs font-semibold text-amber-400">Draft</span>
+              <p className="mt-1 text-2xl font-black text-amber-300 font-mono tabular-nums">{draftJobs}</p>
             </div>
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-4 shadow-xs">
-              <span className="text-xs font-semibold text-emerald-800">Open & Active</span>
-              <p className="mt-1 text-2xl font-bold text-emerald-900">{openJobs}</p>
+            <div className="rounded-2xl border border-emerald-500/30 bg-emerald-950/30 p-4 shadow-[0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-md">
+              <span className="text-xs font-semibold text-emerald-400">Open & Active</span>
+              <p className="mt-1 text-2xl font-black text-emerald-300 font-mono tabular-nums">{openJobs}</p>
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-xs">
-              <span className="text-xs font-semibold text-slate-500">Closed</span>
-              <p className="mt-1 text-2xl font-bold text-slate-700">{closedJobs}</p>
+            <div className="rounded-2xl border border-[#152744] bg-[#06172B] p-4 shadow-[0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-md">
+              <span className="text-xs font-semibold text-slate-400">Closed</span>
+              <p className="mt-1 text-2xl font-black text-slate-300 font-mono tabular-nums">{closedJobs}</p>
             </div>
           </div>
 
           {/* Search & Filter Bar */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="rounded-2xl border border-[#152744] bg-[#081B34]/85 p-4 shadow-[0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="relative w-full sm:w-80">
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
               <input
@@ -286,13 +267,13 @@ export default function RecruiterJobsDashboardPage() {
                 placeholder="Search job title, company, location..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-200 text-xs text-slate-800 focus:outline-hidden focus:border-teal-500"
+                className="w-full pl-9 pr-3 py-2 rounded-xl border border-[#152744] bg-[#06172B] text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-[#00C9C0]"
               />
             </div>
 
             <div className="flex items-center gap-2 w-full sm:w-auto">
-              <span className="text-xs text-slate-500 font-medium">Status:</span>
-              <div className="flex rounded-xl bg-slate-100 p-1 text-xs">
+              <span className="text-xs text-slate-400 font-medium">Status:</span>
+              <div className="flex rounded-xl bg-[#06172B] p-1 border border-[#152744] text-xs">
                 {(['ALL', 'OPEN', 'DRAFT', 'CLOSED'] as const).map((st) => (
                   <button
                     key={st}
@@ -300,8 +281,8 @@ export default function RecruiterJobsDashboardPage() {
                     onClick={() => setStatusFilter(st)}
                     className={`rounded-lg px-2.5 py-1 font-semibold transition-all cursor-pointer ${
                       statusFilter === st
-                        ? 'bg-white text-slate-900 shadow-2xs'
-                        : 'text-slate-600 hover:text-slate-900'
+                        ? 'bg-[#007F83] text-white shadow-xs'
+                        : 'text-slate-400 hover:text-white'
                     }`}
                   >
                     {st}
@@ -311,21 +292,21 @@ export default function RecruiterJobsDashboardPage() {
             </div>
           </div>
 
-          {/* Jobs Table / List Container */}
+          {/* Jobs Table in Dark Glass Panel */}
           {isLoading ? (
-            <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center shadow-xs">
-              <Loader2 className="mx-auto h-8 w-8 animate-spin text-teal-600" />
-              <p className="mt-3 text-xs font-medium text-slate-600">
+            <div className="rounded-2xl border border-[#152744] bg-[#081B34]/85 p-12 text-center shadow-md">
+              <Loader2 className="mx-auto h-8 w-8 animate-spin text-[#00C9C0]" />
+              <p className="mt-3 text-xs font-medium text-slate-400">
                 Loading recruiter job positions from Firestore...
               </p>
             </div>
           ) : filteredJobs.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center shadow-xs">
-              <Briefcase className="mx-auto h-10 w-10 text-slate-300" />
-              <h3 className="mt-3 text-sm font-bold text-slate-900">
+            <div className="rounded-2xl border border-dashed border-[#172D4D] bg-[#081B34]/60 p-12 text-center shadow-md">
+              <Briefcase className="mx-auto h-10 w-10 text-slate-500" />
+              <h3 className="mt-3 text-sm font-bold text-white">
                 {jobs.length === 0 ? 'No jobs created yet.' : 'No matching jobs found.'}
               </h3>
-              <p className="mt-1 text-xs text-slate-500 max-w-sm mx-auto">
+              <p className="mt-1 text-xs text-slate-400 max-w-sm mx-auto">
                 {jobs.length === 0
                   ? 'Start by creating your first campus job position manually or upload an existing JD.'
                   : 'Try adjusting your search terms or status filter.'}
@@ -334,27 +315,27 @@ export default function RecruiterJobsDashboardPage() {
                 <div className="mt-5 flex items-center justify-center gap-3">
                   <Link
                     href="/recruiter/jobs/new"
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-teal-600 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-teal-500 transition-colors"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-[#007F83] to-[#00C9C0] px-4 py-2 text-xs font-semibold text-white shadow-md hover:from-[#00A89E] hover:to-[#00F5D4] transition-all cursor-pointer"
                   >
                     <Plus className="h-4 w-4" />
                     <span>Create your first job</span>
                   </Link>
                   <Link
                     href="/recruiter/jobs/new?tab=upload"
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-[#00C9C0]/40 bg-[#06172B] px-4 py-2 text-xs font-semibold text-[#00F5D4] hover:bg-[#00C9C0]/15 transition-colors cursor-pointer"
                   >
-                    <Upload className="h-3.5 w-3.5 text-teal-600" />
+                    <Upload className="h-3.5 w-3.5 text-[#00F5D4]" />
                     <span>Upload JD Document</span>
                   </Link>
                 </div>
               )}
             </div>
           ) : (
-            <div className="rounded-2xl border border-slate-200 bg-white shadow-xs overflow-hidden">
+            <div className="rounded-2xl border border-[#152744] bg-[#081B34]/85 shadow-[0_8px_32px_rgba(0,0,0,0.4)] backdrop-blur-md overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
-                  <thead>
-                    <tr className="border-b border-slate-200 bg-slate-50/75 text-slate-600 font-semibold">
+                  <thead className="bg-[#06172B]/90 border-b border-[#152744] text-slate-400 uppercase tracking-wider text-[10px] font-bold">
+                    <tr>
                       <th className="py-3 px-4">Position & Company</th>
                       <th className="py-3 px-4">Work Mode / Type</th>
                       <th className="py-3 px-4">Location</th>
@@ -364,21 +345,21 @@ export default function RecruiterJobsDashboardPage() {
                       <th className="py-3 px-4 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 text-slate-700">
+                  <tbody className="divide-y divide-[#152744] text-slate-300">
                     {filteredJobs.map((job) => (
-                      <tr key={job.id} className="hover:bg-slate-50/60 transition-colors">
+                      <tr key={job.id} className="hover:bg-[#0A2242]/50 transition-colors">
                         <td className="py-3.5 px-4">
                           <Link
                             href={`/recruiter/jobs/${job.id}`}
-                            className="font-bold text-slate-900 hover:text-teal-700 transition-colors block"
+                            className="font-bold text-white hover:text-[#00F5D4] transition-colors block"
                           >
                             {job.title}
                           </Link>
-                          <div className="flex items-center gap-1.5 text-[11px] text-slate-500 mt-0.5">
-                            <span className="font-medium text-slate-700">{job.company}</span>
+                          <div className="flex items-center gap-1.5 text-[11px] text-slate-400 mt-0.5">
+                            <span className="font-medium text-slate-300">{job.company}</span>
                             {job.aiParsed && (
-                              <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-teal-800 bg-teal-50 px-1.5 py-0.2 rounded border border-teal-200/60">
-                                <Sparkles className="h-2.5 w-2.5 text-teal-600" />
+                              <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-[#00F5D4] bg-[#007F83]/30 px-1.5 py-0.2 rounded border border-[#00C9C0]/40">
+                                <Sparkles className="h-2.5 w-2.5 text-[#00F5D4]" />
                                 AI Parsed
                               </span>
                             )}
@@ -386,59 +367,64 @@ export default function RecruiterJobsDashboardPage() {
                         </td>
 
                         <td className="py-3.5 px-4">
-                          <div className="font-medium text-slate-800">
+                          <div className="font-medium text-slate-200">
                             {WORK_MODE_LABELS[job.workMode] || job.workMode}
                           </div>
-                          <div className="text-[11px] text-slate-500">
+                          <div className="text-[11px] text-slate-400">
                             {EMPLOYMENT_TYPE_LABELS[job.employmentType] || job.employmentType}
                           </div>
                         </td>
 
                         <td className="py-3.5 px-4">
-                          <span className="inline-flex items-center gap-1 text-slate-700">
+                          <span className="inline-flex items-center gap-1 text-slate-300">
                             <MapPin className="h-3 w-3 text-slate-400 shrink-0" />
                             {job.location}
                           </span>
                         </td>
 
                         <td className="py-3.5 px-4">
-                          <div className="font-medium text-slate-900 font-mono">
+                          <div className="font-medium text-[#00F5D4] font-mono">
                             {job.salaryMin != null && job.salaryMax != null
                               ? `₹${job.salaryMin} - ₹${job.salaryMax} LPA`
                               : job.salaryMin != null
                               ? `₹${job.salaryMin}+ LPA`
                               : 'Not specified'}
                           </div>
-                          <div className="text-[11px] text-slate-500">
+                          <div className="text-[11px] text-slate-400">
                             {job.openings ? `${job.openings} Openings` : 'Unspecified Openings'}
                           </div>
                         </td>
 
-                        <td className="py-3.5 px-4 text-slate-600">
+                        <td className="py-3.5 px-4 text-slate-400">
                           {job.applicationDeadline ? (
-                            <span className="font-medium">
+                            <span className="font-medium text-slate-300">
                               {new Date(job.applicationDeadline).toLocaleDateString()}
                             </span>
                           ) : (
-                            <span className="text-slate-400">Open</span>
+                            <span className="text-slate-500">Open</span>
                           )}
                         </td>
 
-                        <td className="py-3.5 px-4">{getStatusBadge(job.status)}</td>
+                        <td className="py-3.5 px-4">
+                          <StatusBadge
+                            status={job.status}
+                            variant={job.status === 'OPEN' ? 'success' : job.status === 'DRAFT' ? 'warning' : 'neutral'}
+                          />
+                        </td>
 
                         <td className="py-3.5 px-4 text-right">
                           <div className="flex items-center justify-end gap-1.5">
                             <Link
                               href={`/recruiter/jobs/${job.id}/matches`}
-                              className="p-1.5 text-slate-500 hover:text-teal-700 hover:bg-slate-100 rounded-lg transition-colors"
+                              className="p-1.5 text-slate-400 hover:text-[#00F5D4] hover:bg-[#06172B] rounded-lg transition-colors"
                               title="View Candidate Matches"
                             >
-                              <Users className="h-3.5 w-3.5 text-teal-600" />
+                              <Users className="h-3.5 w-3.5 text-[#00C9C0]" />
                             </Link>
 
                             <Link
                               href={`/recruiter/jobs/${job.id}`}
-                              className="p-1.5 text-slate-500 hover:text-teal-700 hover:bg-slate-100 rounded-lg transition-colors"
+                              className="p-1.5 text-slate-400 hover:text-white hover:bg-[#06172B] rounded-lg transition-colors"
                               title="View Job Details"
                             >
                               <Eye className="h-3.5 w-3.5" />
@@ -446,7 +432,7 @@ export default function RecruiterJobsDashboardPage() {
 
                             <Link
                               href={`/recruiter/jobs/${job.id}/edit`}
-                              className="p-1.5 text-slate-500 hover:text-teal-700 hover:bg-slate-100 rounded-lg transition-colors"
+                              className="p-1.5 text-slate-400 hover:text-teal-400 hover:bg-[#06172B] rounded-lg transition-colors"
                               title="Edit Job"
                             >
                               <Edit3 className="h-3.5 w-3.5" />
@@ -458,7 +444,7 @@ export default function RecruiterJobsDashboardPage() {
                                 setActionJob(job);
                                 setActionType('DUPLICATE');
                               }}
-                              className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                              className="p-1.5 text-slate-400 hover:text-white hover:bg-[#06172B] rounded-lg transition-colors cursor-pointer"
                               title="Duplicate as Draft"
                             >
                               <Copy className="h-3.5 w-3.5" />
@@ -471,7 +457,7 @@ export default function RecruiterJobsDashboardPage() {
                                   setActionJob(job);
                                   setActionType('CLOSE');
                                 }}
-                                className="p-1.5 text-slate-500 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
+                                className="p-1.5 text-slate-400 hover:text-amber-400 hover:bg-[#06172B] rounded-lg transition-colors cursor-pointer"
                                 title="Close Position"
                               >
                                 <XCircle className="h-3.5 w-3.5" />
@@ -484,7 +470,7 @@ export default function RecruiterJobsDashboardPage() {
                                 setActionJob(job);
                                 setActionType('DELETE');
                               }}
-                              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                              className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-[#06172B] rounded-lg transition-colors cursor-pointer"
                               title="Delete Job"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
@@ -499,34 +485,34 @@ export default function RecruiterJobsDashboardPage() {
             </div>
           )}
 
-          {/* CONFIRMATION MODALS */}
+          {/* CONFIRMATION MODALS in Dark 3D Glass */}
           {actionJob && actionType && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
-              <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#040D1A]/80 backdrop-blur-md p-4">
+              <div className="w-full max-w-md rounded-2xl bg-[#081B34] p-6 shadow-[0_16px_50px_rgba(0,0,0,0.7)] border border-[#152744] text-white animate-in fade-in zoom-in-95 duration-150">
                 <div className="flex items-start gap-3">
                   {actionType === 'DELETE' ? (
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-rose-600">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-950/80 border border-rose-700/60 text-rose-400">
                       <Trash2 className="h-5 w-5" />
                     </div>
                   ) : actionType === 'CLOSE' ? (
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-950/80 border border-amber-700/60 text-amber-400">
                       <XCircle className="h-5 w-5" />
                     </div>
                   ) : (
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-100 text-teal-600">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#007F83]/30 border border-[#00C9C0]/40 text-[#00F5D4]">
                       <Copy className="h-5 w-5" />
                     </div>
                   )}
 
                   <div className="flex-1">
-                    <h3 className="text-sm font-bold text-slate-900">
+                    <h3 className="text-sm font-bold text-white">
                       {actionType === 'DELETE'
                         ? 'Delete Job Posting'
                         : actionType === 'CLOSE'
                         ? 'Close Job Posting'
                         : 'Duplicate Job Posting'}
                     </h3>
-                    <p className="mt-1 text-xs text-slate-600 leading-relaxed">
+                    <p className="mt-1 text-xs text-slate-400 leading-relaxed">
                       {actionType === 'DELETE'
                         ? `Are you sure you want to permanently delete "${actionJob.title}"? Any uploaded JD file will also be removed. This action cannot be undone.`
                         : actionType === 'CLOSE'
@@ -536,7 +522,7 @@ export default function RecruiterJobsDashboardPage() {
                   </div>
                 </div>
 
-                <div className="mt-6 flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                <div className="mt-6 flex items-center justify-end gap-2 pt-3 border-t border-[#152744]">
                   <button
                     type="button"
                     onClick={() => {
@@ -544,7 +530,7 @@ export default function RecruiterJobsDashboardPage() {
                       setActionType(null);
                     }}
                     disabled={isSubmittingAction}
-                    className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                    className="rounded-xl border border-[#152744] bg-[#06172B] px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -554,7 +540,7 @@ export default function RecruiterJobsDashboardPage() {
                       type="button"
                       onClick={handleDeleteJob}
                       disabled={isSubmittingAction}
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-rose-600 px-4 py-2 text-xs font-semibold text-white hover:bg-rose-500 shadow-xs transition-colors disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-rose-600 px-4 py-2 text-xs font-semibold text-white hover:bg-rose-500 shadow-xs transition-colors disabled:opacity-50 cursor-pointer"
                     >
                       {isSubmittingAction && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                       <span>Delete Job</span>
@@ -566,7 +552,7 @@ export default function RecruiterJobsDashboardPage() {
                       type="button"
                       onClick={handleCloseJob}
                       disabled={isSubmittingAction}
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-amber-600 px-4 py-2 text-xs font-semibold text-white hover:bg-amber-500 shadow-xs transition-colors disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-amber-600 px-4 py-2 text-xs font-semibold text-white hover:bg-amber-500 shadow-xs transition-colors disabled:opacity-50 cursor-pointer"
                     >
                       {isSubmittingAction && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                       <span>Close Job</span>
@@ -578,7 +564,7 @@ export default function RecruiterJobsDashboardPage() {
                       type="button"
                       onClick={handleDuplicateJob}
                       disabled={isSubmittingAction}
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-teal-600 px-4 py-2 text-xs font-semibold text-white hover:bg-teal-500 shadow-xs transition-colors disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-[#007F83] to-[#00C9C0] px-4 py-2 text-xs font-semibold text-white hover:from-[#00A89E] hover:to-[#00F5D4] shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                     >
                       {isSubmittingAction && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                       <span>Duplicate as Draft</span>

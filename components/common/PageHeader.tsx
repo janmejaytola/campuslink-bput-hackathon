@@ -17,20 +17,20 @@ export function PageHeader({
 }: PageHeaderProps) {
   return (
     <div
-      className={`mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200/90 pb-5 ${className}`}
+      className={`mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-[#152744] pb-5 ${className}`}
     >
       <div className="space-y-1">
         {badge && (
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-teal-800 bg-teal-50 border border-teal-200/70 px-2 py-0.5 rounded">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#00F5D4] bg-[#00C9C0]/15 border border-[#00C9C0]/40 px-2.5 py-0.5 rounded-md shadow-[0_0_10px_rgba(0,201,192,0.15)]">
               {badge}
             </span>
           </div>
         )}
-        <h1 className="text-2xl md:text-3xl font-black tracking-tight text-slate-900">
+        <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white drop-shadow-sm">
           {title}
         </h1>
-        <p className="text-xs sm:text-sm text-slate-500 leading-relaxed max-w-2xl">
+        <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-2xl">
           {description}
         </p>
       </div>
