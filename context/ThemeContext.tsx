@@ -27,8 +27,8 @@ const STORAGE_KEY_MOTION = 'campuslink_reduced_motion';
 const STORAGE_KEY_CONTRAST = 'campuslink_high_contrast';
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<ThemeMode>('dark');
-  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>('dark');
+  const [theme, setThemeState] = useState<ThemeMode>('light');
+  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>('light');
   const [density, setDensityState] = useState<LayoutDensity>('comfortable');
   const [reducedMotion, setReducedMotionState] = useState<boolean>(false);
   const [highContrast, setHighContrastState] = useState<boolean>(false);
@@ -36,7 +36,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   // Helper to determine system preference
   const getSystemTheme = useCallback((): ResolvedTheme => {
-    if (typeof window === 'undefined') return 'dark';
+    if (typeof window === 'undefined') return 'light';
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   }, []);
 
@@ -65,7 +65,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       const savedTheme = localStorage.getItem(STORAGE_KEY_THEME) as ThemeMode | null;
       const initialTheme: ThemeMode = savedTheme === 'light' || savedTheme === 'dark' || savedTheme === 'system'
         ? savedTheme
-        : 'dark'; // default dark for futuristic cyberpunk palette
+        : 'light'; // default clean light mode per dashboard reference specification
 
       setThemeState(initialTheme);
       const computedResolved = initialTheme === 'system' ? getSystemTheme() : initialTheme;

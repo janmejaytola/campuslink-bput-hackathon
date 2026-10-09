@@ -958,7 +958,7 @@ export function SettingsView({ role }: SettingsViewProps) {
                         AI Placement Matching & Skill Radar Indexing
                       </p>
                       <p className="text-[11px] text-slate-400">
-                        Allow the Gemini 3.8 Flash intelligence engine to parse technical skill proficiencies for conflict-aware job matching.
+                        Allow the AI career intelligence engine to parse technical skill proficiencies for conflict-aware job matching.
                       </p>
                     </div>
                     <button

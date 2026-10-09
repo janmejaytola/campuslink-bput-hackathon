@@ -264,7 +264,7 @@ export default function StudentDashboardPage() {
           {/* ======================================================== */}
           {/* HERO BANNER: Wide cinematic campus photograph with dark navy overlay */}
           {/* ======================================================== */}
-          <div className="relative rounded-3xl overflow-hidden border border-[#172D4D] shadow-[0_16px_50px_rgba(0,0,0,0.6)] text-white">
+          <div className="dark-hero-banner relative rounded-3xl overflow-hidden border border-[#172D4D] shadow-[0_16px_50px_rgba(0,0,0,0.6)] text-white">
             {/* Background Image with Dark Navy Gradient Overlay */}
             <div className="absolute inset-0 pointer-events-none -z-10 overflow-hidden">
               <Image
@@ -273,11 +273,11 @@ export default function StudentDashboardPage() {
                 fill
                 priority
                 referrerPolicy="no-referrer"
-                className="object-cover object-center opacity-25 filter contrast-125 brightness-80 scale-105"
+                className="object-cover object-center opacity-30 filter contrast-125 brightness-90 scale-105"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#06172B] via-[#091D38]/95 to-[#0B1B32]/90" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#06172B]/95 via-[#091D38]/90 to-[#0B1B32]/85" />
             </div>
-            <div className="absolute inset-0 bg-radial-[at_top_right] from-[#00C9C0]/20 via-transparent to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-radial-[at_top_right] from-[#00C9C0]/25 via-transparent to-transparent pointer-events-none" />
 
             {/* Content Container */}
             <div className="relative z-10 p-6 md:p-8 lg:p-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
@@ -285,14 +285,14 @@ export default function StudentDashboardPage() {
                 {/* Meta text with clean separators */}
                 <div className="flex flex-wrap items-center gap-2 text-xs">
                   <span className="font-extrabold uppercase tracking-wider text-[#00F5D4]">
-                    CAREER OPERATING SYSTEM
+                    CAMPUS PLACEMENT INTELLIGENCE
                   </span>
-                  <span aria-hidden="true" className="text-slate-600">·</span>
-                  <span className="font-mono text-slate-300">
+                  <span aria-hidden="true" className="text-slate-500">·</span>
+                  <span className="font-mono text-slate-200">
                     Reg #{regNumber}
                   </span>
-                  <span aria-hidden="true" className="text-slate-600">·</span>
-                  <span className="text-slate-300 font-medium">
+                  <span aria-hidden="true" className="text-slate-500">·</span>
+                  <span className="text-slate-200 font-medium">
                     {department}
                   </span>
                 </div>
@@ -303,7 +303,7 @@ export default function StudentDashboardPage() {
                 </h1>
 
                 {/* Motivational Subtitle */}
-                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-xl">
+                <p className="text-xs sm:text-sm text-slate-200 leading-relaxed max-w-xl">
                   Your placement journey is <strong className="text-[#00F5D4] font-bold">{overallScore}% on track</strong>. You have {shortlistedApplications.length || 3} corporate drives reviewing your profile with zero academic timetable clashes.
                 </p>
 
@@ -313,13 +313,13 @@ export default function StudentDashboardPage() {
                     href="/student/readiness"
                     className="gradient-btn-primary rounded-xl px-5 py-2.5 text-xs font-black transition-all flex items-center gap-2 shadow-[0_4px_20px_rgba(22,207,255,0.35)] cursor-pointer"
                   >
-                    <Sparkles className="h-4 w-4 text-[#020817]" />
+                    <Sparkles className="h-4 w-4" />
                     <span>Run AI Readiness Benchmark</span>
                   </Link>
 
                   <Link
                     href="/student/profile"
-                    className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 hover:bg-white/15 px-4 py-2.5 text-xs font-bold text-slate-100 transition-colors backdrop-blur-xs"
+                    className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 hover:bg-white/15 px-4 py-2.5 text-xs font-bold text-slate-100 transition-colors backdrop-blur-xs cursor-pointer"
                   >
                     <User className="h-4 w-4 text-[#00C9C0]" />
                     <span>Complete Profile Dossier</span>
@@ -339,13 +339,13 @@ export default function StudentDashboardPage() {
                 />
                 <div className="space-y-1">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[#00F5D4] block drop-shadow-[0_0_6px_rgba(0,245,212,0.3)]">
-                    Institutional Lock
+                    Profile Completion
                   </span>
                   <p className="text-sm font-extrabold text-white">
                     {profileCompletion}% Verified
                   </p>
                   <p className="text-[11px] text-slate-300 max-w-[140px] leading-snug">
-                    Academic standing certified for BPUT placement cell
+                    Academic profile verified for placement drives
                   </p>
                 </div>
               </div>
@@ -353,14 +353,14 @@ export default function StudentDashboardPage() {
           </div>
 
           {/* ======================================================== */}
-          {/* FOUR METRIC CARDS HORIZONTALLY ALIGNED */}
+          {/* FIVE METRIC CARDS HORIZONTALLY ALIGNED PER REFERENCE */}
           {/* ======================================================== */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <Link href="/student/readiness" className="block group">
               <StatCard
-                label="AI Readiness Score"
+                label="Readiness Index"
                 value={`${overallScore} / 100`}
-                subtext={`Status: ${readinessTier} placement tier`}
+                subtext={`Status: ${readinessTier}`}
                 icon={Sparkles}
                 trend={{ value: '6%', positive: true }}
                 highlight
@@ -368,34 +368,44 @@ export default function StudentDashboardPage() {
               />
             </Link>
 
+            <Link href="/student/resume" className="block group">
+              <StatCard
+                label="Resume Status"
+                value="99.4%"
+                subtext="Verified parser accuracy"
+                icon={FileCheck2}
+                trend={{ value: '1.2%', positive: true }}
+                accent="indigo"
+              />
+            </Link>
+
+            <Link href="/student/readiness" className="block group">
+              <StatCard
+                label="Response Time"
+                value="< 0.8s"
+                subtext="Instant cached evaluation"
+                icon={Zap}
+                accent="amber"
+              />
+            </Link>
+
             <Link href="/student/applications" className="block group">
               <StatCard
-                label="Shortlisted Drives"
+                label="Applications"
                 value={shortlistedApplications.length || 3}
-                subtext="TCS, Deloitte, Amazon in review"
+                subtext="In review across drives"
                 icon={CheckCircle2}
-                highlight={shortlistedApplications.length > 0}
                 accent="emerald"
               />
             </Link>
 
             <Link href="/student/schedule" className="block group">
               <StatCard
-                label="Confirmed Interviews"
-                value={`${displayInterviews.length} Rounds`}
-                subtext="Next: 15 Oct, 10:00 AM · 0 clashes"
+                label="Interviews"
+                value={`${displayInterviews.length} Slots`}
+                subtext="Confirmed · 0 clashes"
                 icon={CalendarDays}
                 accent="sky"
-              />
-            </Link>
-
-            <Link href="/student/profile" className="block group">
-              <StatCard
-                label="Academic CGPA"
-                value={currentUser?.cgpa ? currentUser.cgpa.toFixed(2) : '8.45'}
-                subtext="Zero active arrears · Verified"
-                icon={GraduationCap}
-                accent="indigo"
               />
             </Link>
           </div>

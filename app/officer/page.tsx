@@ -191,7 +191,7 @@ export default function OfficerDashboardPage() {
       <AppLayoutShell role="officer">
         <PageTransition>
           {/* Officer Institutional Command 3D Header Banner */}
-          <div className="relative rounded-3xl border border-[#152744] bg-gradient-to-r from-[#06172B] via-[#091D38] to-[#0B1B32] p-6 sm:p-8 text-white shadow-[0_16px_50px_rgba(0,0,0,0.6)] mb-8 overflow-hidden">
+          <div className="dark-hero-banner relative rounded-3xl border border-[#152744] bg-gradient-to-r from-[#06172B] via-[#091D38] to-[#0B1B32] p-6 sm:p-8 text-white shadow-[0_16px_50px_rgba(0,0,0,0.6)] mb-8 overflow-hidden">
           {/* Neon emerald/cyan ambient glow corner */}
           <div className="absolute top-0 right-0 -mt-10 -mr-10 w-96 h-96 bg-[#10B981]/15 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute bottom-0 left-1/4 w-80 h-80 bg-[#00C9C0]/15 rounded-full blur-3xl pointer-events-none" />
@@ -214,18 +214,18 @@ export default function OfficerDashboardPage() {
                 </span>
                 <span className="text-slate-500">·</span>
                 <span className="text-slate-300 font-semibold text-xs">
-                  BPUT Placement Cell Governance
+                  Campus Placement Operations
                 </span>
                 <span className="text-slate-500">·</span>
                 <span className="text-slate-400 font-mono text-[11px]">Batch of 2026</span>
               </div>
 
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white drop-shadow-md">
-                Institutional Placement Operations & Governance
+                Campus Placement Operations & Governance
               </h1>
 
               <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-xl">
-                Authoritative institutional oversight across 2026 engineering cohorts, multi-corporate recruitment drives, exam-free lab coordination, and PS10 regulatory compliance.
+                Authoritative institutional oversight across 2026 engineering cohorts, multi-corporate recruitment drives, exam-free lab coordination, and compliance verification.
               </p>
 
               <div className="flex flex-wrap items-center gap-3 pt-2">

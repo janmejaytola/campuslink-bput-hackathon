@@ -169,7 +169,7 @@ export default function RecruiterDashboardPage() {
       <AppLayoutShell role="recruiter">
         <PageTransition>
           {/* Recruiter ATS 3D Command Header Banner */}
-          <div className="relative rounded-3xl border border-[#152744] bg-gradient-to-r from-[#06172B] via-[#091D38] to-[#0B1B32] p-6 sm:p-8 text-white shadow-[0_16px_50px_rgba(0,0,0,0.6)] mb-8 overflow-hidden">
+          <div className="dark-hero-banner relative rounded-3xl border border-[#152744] bg-gradient-to-r from-[#06172B] via-[#091D38] to-[#0B1B32] p-6 sm:p-8 text-white shadow-[0_16px_50px_rgba(0,0,0,0.6)] mb-8 overflow-hidden">
           {/* Neon cyan ambient glow corner */}
           <div className="absolute top-0 right-0 -mt-12 -mr-12 w-96 h-96 bg-[#00C9C0]/15 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-[#007F83]/15 rounded-full blur-3xl pointer-events-none" />
@@ -196,7 +196,7 @@ export default function RecruiterDashboardPage() {
                   {currentUser?.company || 'Corporate Hiring Partner'}
                 </span>
                 <span className="text-slate-500">·</span>
-                <span className="text-slate-400 font-mono text-[11px]">BPUT 2026 Drive</span>
+                <span className="text-slate-400 font-mono text-[11px]">Campus 2026 Drive</span>
               </div>
 
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white drop-shadow-md">

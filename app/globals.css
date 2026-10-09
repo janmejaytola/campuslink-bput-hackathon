@@ -2,6 +2,20 @@
 
 @layer base {
   :root {
+    --brand-bg: #F8FAFC;
+    --brand-surface-1: #FFFFFF;
+    --brand-surface-2: #F1F5F9;
+    --brand-neon-cyan: #0284C7;
+    --brand-turquoise: #0D9488;
+    --brand-teal: #0F766E;
+    --text-primary: #0F172A;
+    --text-muted: #475569;
+    --border-subtle: #E2E8F0;
+    color-scheme: light;
+  }
+
+  html.dark,
+  html[data-theme="dark"] {
     --brand-bg: #020817;
     --brand-surface-1: #06162D;
     --brand-surface-2: #0A203B;
@@ -11,11 +25,12 @@
     --text-primary: #F4FAFF;
     --text-muted: #9CB4CC;
     --border-subtle: #152744;
+    color-scheme: dark;
   }
 
   body {
-    background-color: #020817;
-    color: #F4FAFF;
+    background-color: var(--brand-bg);
+    color: var(--text-primary);
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     -webkit-font-smoothing: antialiased;
@@ -29,13 +44,23 @@
     height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: #020817;
+    background: #F1F5F9;
   }
   ::-webkit-scrollbar-thumb {
-    background: #152744;
+    background: #CBD5E1;
     border-radius: 9999px;
   }
   ::-webkit-scrollbar-thumb:hover {
+    background: #0D9488;
+  }
+
+  html.dark ::-webkit-scrollbar-track {
+    background: #020817;
+  }
+  html.dark ::-webkit-scrollbar-thumb {
+    background: #152744;
+  }
+  html.dark ::-webkit-scrollbar-thumb:hover {
     background: #16CFFF;
   }
 }
@@ -47,9 +72,15 @@
 
 /* Glass-like layered card styling */
 .glass-panel {
-  background: rgba(6, 22, 45, 0.75);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(13, 148, 136, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05), 0 0 12px rgba(13, 148, 136, 0.05);
+}
+
+html.dark .glass-panel {
+  background: rgba(6, 22, 45, 0.75);
   border: 1px solid rgba(22, 207, 255, 0.18);
   box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.55), 0 0 24px 0 rgba(22, 207, 255, 0.05);
 }
@@ -59,120 +90,128 @@
 }
 
 .glass-panel-hover:hover {
+  border-color: rgba(13, 148, 136, 0.45);
+  box-shadow: 0 14px 38px 0 rgba(0, 0, 0, 0.08), 0 0 20px 0 rgba(13, 148, 136, 0.12);
+  transform: translateY(-2px);
+}
+
+html.dark .glass-panel-hover:hover {
   border-color: rgba(22, 207, 255, 0.5);
   box-shadow: 0 16px 48px 0 rgba(0, 0, 0, 0.65), 0 0 32px 0 rgba(22, 207, 255, 0.2);
-  transform: translateY(-2px);
 }
 
 /* Glow effects */
 .glow-cyan {
+  box-shadow: 0 0 20px rgba(2, 132, 199, 0.25);
+}
+html.dark .glow-cyan {
   box-shadow: 0 0 25px rgba(22, 207, 255, 0.35);
 }
 
 .glow-turquoise {
+  box-shadow: 0 0 20px rgba(13, 148, 136, 0.25);
+}
+html.dark .glow-turquoise {
   box-shadow: 0 0 25px rgba(0, 229, 212, 0.35);
 }
 
-.glow-text-cyan {
-  text-shadow: 0 0 12px rgba(22, 207, 255, 0.65);
-}
-
-.glow-text-turquoise {
-  text-shadow: 0 0 12px rgba(0, 229, 212, 0.65);
-}
-
-/* Cyan to turquoise luminous gradients */
+/* Primary buttons */
 .gradient-btn-primary {
-  background: linear-gradient(135deg, #16CFFF 0%, #00E5D4 50%, #00BFA6 100%);
-  color: #020817;
+  background: linear-gradient(135deg, #0284C7 0%, #0D9488 100%);
+  color: #FFFFFF !important;
   font-weight: 800;
-  box-shadow: 0 4px 20px rgba(22, 207, 255, 0.35);
+  box-shadow: 0 4px 18px rgba(2, 132, 199, 0.28);
   transition: all 0.3s ease;
 }
 
 .gradient-btn-primary:hover {
-  box-shadow: 0 6px 28px rgba(0, 229, 212, 0.55);
+  box-shadow: 0 6px 24px rgba(13, 148, 136, 0.4);
   transform: translateY(-1px);
 }
 
 .gradient-btn-primary:active {
   transform: translateY(0.5px);
-  box-shadow: 0 2px 14px rgba(0, 229, 212, 0.4);
+  box-shadow: 0 2px 14px rgba(13, 148, 136, 0.3);
 }
 
 .gradient-btn-primary:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px #020817, 0 0 0 4px #16CFFF, 0 6px 30px rgba(0, 229, 212, 0.6);
+  box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 4px #0D9488;
+}
+
+html.dark .gradient-btn-primary {
+  background: linear-gradient(135deg, #16CFFF 0%, #00E5D4 50%, #00BFA6 100%);
+  color: #020817 !important;
+  box-shadow: 0 4px 20px rgba(22, 207, 255, 0.35);
+}
+
+html.dark .gradient-btn-primary:hover {
+  box-shadow: 0 6px 28px rgba(0, 229, 212, 0.55);
 }
 
 .btn-cyber-outline {
-  background: rgba(8, 27, 52, 0.8);
-  border: 1px solid rgba(0, 201, 192, 0.4);
-  color: #00F5D4;
+  background: #FFFFFF;
+  border: 1px solid rgba(13, 148, 136, 0.4);
+  color: #0D9488;
   font-weight: 700;
   transition: all 0.25s ease;
 }
 
 .btn-cyber-outline:hover {
+  background: rgba(13, 148, 136, 0.08);
+  border-color: #0D9488;
+  color: #0F766E;
+}
+
+html.dark .btn-cyber-outline {
+  background: rgba(8, 27, 52, 0.8);
+  border: 1px solid rgba(0, 201, 192, 0.4);
+  color: #00F5D4;
+}
+
+html.dark .btn-cyber-outline:hover {
   background: rgba(0, 201, 192, 0.15);
   border-color: #00F5D4;
-  box-shadow: 0 0 16px rgba(0, 201, 192, 0.25);
   color: #FFFFFF;
 }
 
-.btn-cyber-outline:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 2px #020817, 0 0 0 4px #00F5D4;
+/* ======================================================== */
+/* INTENTIONALLY DARK HERO BANNER RULE (PROTECTED EVERYWHERE) */
+/* ======================================================== */
+.dark-hero-banner,
+.dark-hero-banner * {
+  /* Retain pristine white text and neon cyan accents in both themes */
 }
 
-/* Subtle dot mesh background for dark hero sections */
-.bg-mesh-dark {
-  background-color: #020817;
-  background-image: radial-gradient(rgba(22, 207, 255, 0.12) 1px, transparent 1px);
-  background-size: 28px 28px;
+.dark-hero-banner {
+  background: linear-gradient(135deg, #06172B 0%, #091D38 60%, #0B1B32 100%) !important;
+  color: #FFFFFF !important;
+  border-color: #1E375C !important;
+  box-shadow: 0 16px 50px rgba(6, 23, 43, 0.4) !important;
 }
 
-/* 3D perspective wrapper */
-.perspective-1000 {
-  perspective: 1000px;
+.dark-hero-banner h1,
+.dark-hero-banner h2,
+.dark-hero-banner h3,
+.dark-hero-banner strong {
+  color: #FFFFFF !important;
 }
 
-/* Subtle cyan light sweep animation */
-@keyframes lightSweep {
-  0% {
-    transform: translateX(-150%);
-    opacity: 0;
-  }
-  30% {
-    opacity: 1;
-  }
-  70% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateX(250%);
-    opacity: 0;
-  }
+.dark-hero-banner p,
+.dark-hero-banner span:not(.hero-neon):not(.hero-badge) {
+  color: #CBD5E1 !important;
 }
 
-.animate-light-sweep {
-  animation: lightSweep 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+.dark-hero-banner .hero-neon,
+.dark-hero-banner strong.text-\[\#00F5D4\] {
+  color: #00F5D4 !important;
 }
 
 /* ======================================================== */
-/* LIGHT MODE STYLING ARCHITECTURE                          */
+/* COMPREHENSIVE LIGHT THEME RULES                          */
 /* ======================================================== */
 html.light,
 html[data-theme="light"] {
-  --brand-bg: #F8FAFC;
-  --brand-surface-1: #FFFFFF;
-  --brand-surface-2: #F1F5F9;
-  --brand-neon-cyan: #0284C7;
-  --brand-turquoise: #0D9488;
-  --brand-teal: #0F766E;
-  --text-primary: #0F172A;
-  --text-muted: #475569;
-  --border-subtle: #E2E8F0;
   color-scheme: light;
 }
 
@@ -182,113 +221,97 @@ html[data-theme="light"] body {
   color: #0F172A !important;
 }
 
-/* Canvas background overrides in Light Mode */
-html.light .bg-\[\#020817\],
-html.light .bg-\[\#040D1A\],
-html.light .bg-\[\#030B17\] {
+/* 1. Main Backgrounds: Convert dark canvas shades to crisp light blue-gray */
+html.light .bg-\[\#020817\]:not(.dark-hero-banner):not(.dark-hero-banner *):not([data-keep-dark="true"]),
+html.light .bg-\[\#040D1A\]:not(.dark-hero-banner):not(.dark-hero-banner *):not([data-keep-dark="true"]),
+html.light .bg-\[\#030B17\]:not(.dark-hero-banner):not(.dark-hero-banner *):not([data-keep-dark="true"]) {
   background-color: #F8FAFC !important;
 }
 
-/* Surface backgrounds in Light Mode */
-html.light .bg-\[\#06162D\],
-html.light .bg-\[\#06172B\],
-html.light .bg-\[\#06172B\]\/90,
-html.light .bg-\[\#06172B\]\/80 {
+/* 2. Surfaces & Cards: Convert dark navy tiles to pure white cards with soft shadows */
+html.light .bg-\[\#06162D\]:not(.dark-hero-banner):not(.dark-hero-banner *):not([data-keep-dark="true"]),
+html.light .bg-\[\#06162D\]\/85:not(.dark-hero-banner):not(.dark-hero-banner *):not([data-keep-dark="true"]),
+html.light .bg-\[\#06172B\]:not(.dark-hero-banner):not(.dark-hero-banner *):not([data-keep-dark="true"]),
+html.light .bg-\[\#06172B\]\/90:not(.dark-hero-banner):not(.dark-hero-banner *):not([data-keep-dark="true"]),
+html.light .bg-\[\#06172B\]\/85:not(.dark-hero-banner):not(.dark-hero-banner *):not([data-keep-dark="true"]),
+html.light .bg-\[\#06172B\]\/80:not(.dark-hero-banner):not(.dark-hero-banner *):not([data-keep-dark="true"]),
+html.light .bg-\[\#081B34\]:not(.dark-hero-banner):not(.dark-hero-banner *):not([data-keep-dark="true"]),
+html.light .bg-\[\#081B34\]\/90:not(.dark-hero-banner):not(.dark-hero-banner *):not([data-keep-dark="true"]),
+html.light .bg-\[\#081B34\]\/85:not(.dark-hero-banner):not(.dark-hero-banner *):not([data-keep-dark="true"]),
+html.light .bg-\[\#081B34\]\/80:not(.dark-hero-banner):not(.dark-hero-banner *):not([data-keep-dark="true"]),
+html.light .bg-\[\#091D38\]:not(.dark-hero-banner):not(.dark-hero-banner *):not([data-keep-dark="true"]),
+html.light .bg-\[\#091D38\]\/80:not(.dark-hero-banner):not(.dark-hero-banner *):not([data-keep-dark="true"]),
+html.light .bg-\[\#0A203B\]:not(.dark-hero-banner):not(.dark-hero-banner *):not([data-keep-dark="true"]),
+html.light .bg-\[\#0B2242\]:not(.dark-hero-banner):not(.dark-hero-banner *):not([data-keep-dark="true"]),
+html.light .bg-\[\#0B2242\]\/70:not(.dark-hero-banner):not(.dark-hero-banner *):not([data-keep-dark="true"]),
+html.light .bg-\[\#0E2A52\]:not(.dark-hero-banner):not(.dark-hero-banner *):not([data-keep-dark="true"]),
+html.light .bg-\[\#102442\]:not(.dark-hero-banner):not(.dark-hero-banner *):not([data-keep-dark="true"]) {
   background-color: #FFFFFF !important;
 }
 
-html.light .bg-\[\#081B34\],
-html.light .bg-\[\#081B34\]\/90,
-html.light .bg-\[\#081B34\]\/85,
-html.light .bg-\[\#081B34\]\/80,
-html.light .bg-\[\#091D38\],
-html.light .bg-\[\#0A203B\],
-html.light .bg-\[\#0B2242\],
-html.light .bg-\[\#102442\] {
-  background-color: #FFFFFF !important;
-}
-
+/* Secondary nested surfaces */
 html.light .bg-\[\#08223E\]\/90,
 html.light .bg-\[\#08233C\]\/90,
 html.light .bg-\[\#0A1F3D\]\/90 {
   background-color: #F8FAFC !important;
 }
 
-/* Glass panels in Light Mode */
-html.light .glass-panel {
-  background: rgba(255, 255, 255, 0.95) !important;
-  border-color: rgba(2, 132, 199, 0.25) !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06), 0 0 12px rgba(2, 132, 199, 0.05) !important;
-}
-
-/* Borders in Light Mode */
-html.light .border-\[\#152744\],
-html.light .border-\[\#172D4D\],
-html.light .border-\[\#1E375C\] {
+/* 3. Borders: Convert harsh dark navy borders to subtle light gray */
+html.light .border-\[\#152744\]:not(.dark-hero-banner):not(.dark-hero-banner *),
+html.light .border-\[\#172D4D\]:not(.dark-hero-banner):not(.dark-hero-banner *),
+html.light .border-\[\#1E375C\]:not(.dark-hero-banner):not(.dark-hero-banner *),
+html.light .border-\[\#1E3E6B\]:not(.dark-hero-banner):not(.dark-hero-banner *) {
   border-color: #E2E8F0 !important;
 }
 
-/* Typography contrast in Light Mode */
-html.light .text-white {
+/* 4. Typography Contrast in Light Mode: Dark navy for headings and body content */
+html.light .text-white:not(.dark-hero-banner *):not(.gradient-btn-primary):not(.gradient-btn-primary *):not([data-keep-white="true"]):not([data-keep-white="true"] *):not(.bg-teal-600 *):not(.bg-emerald-600 *):not(.bg-indigo-600 *):not(.bg-sky-600 *) {
   color: #0F172A !important;
 }
 
-html.light .text-slate-100,
-html.light .text-slate-200,
-html.light .text-slate-300 {
+html.light .text-\[\#F4FAFF\]:not(.dark-hero-banner *) {
+  color: #0F172A !important;
+}
+
+html.light .text-slate-100:not(.dark-hero-banner *):not(.gradient-btn-primary *):not([data-keep-white="true"] *),
+html.light .text-slate-200:not(.dark-hero-banner *):not(.gradient-btn-primary *):not([data-keep-white="true"] *),
+html.light .text-slate-300:not(.dark-hero-banner *):not(.gradient-btn-primary *):not([data-keep-white="true"] *) {
   color: #1E293B !important;
 }
 
-html.light .text-slate-400 {
+html.light .text-slate-400:not(.dark-hero-banner *):not(.gradient-btn-primary *):not([data-keep-white="true"] *) {
   color: #475569 !important;
 }
 
-html.light .text-slate-500 {
+html.light .text-slate-500:not(.dark-hero-banner *):not(.gradient-btn-primary *):not([data-keep-white="true"] *) {
   color: #64748B !important;
 }
 
-/* Neon accents adjusted for vibrant contrast in Light Mode */
-html.light .text-\[\#00F5D4\],
-html.light .text-\[\#00C9C0\],
-html.light .text-\[\#16CFFF\] {
-  color: #0284C7 !important;
+html.light .text-\[\#9CB4CC\]:not(.dark-hero-banner *) {
+  color: #64748B !important;
 }
 
-html.light .bg-\[\#00C9C0\]\/15,
-html.light .bg-\[\#00C9C0\]\/10 {
-  background-color: rgba(2, 132, 199, 0.12) !important;
-  color: #0369A1 !important;
+/* 5. Accents: High contrast teal/cyan instead of washed-out pastels */
+html.light .text-\[\#00F5D4\]:not(.dark-hero-banner *),
+html.light .text-\[\#00C9C0\]:not(.dark-hero-banner *),
+html.light .text-\[\#16CFFF\]:not(.dark-hero-banner *),
+html.light .text-\[\#00E5D4\]:not(.dark-hero-banner *) {
+  color: #0D9488 !important;
 }
 
-html.light .border-\[\#00C9C0\]\/40,
-html.light .border-\[\#00C9C0\]\/30 {
-  border-color: rgba(2, 132, 199, 0.35) !important;
+html.light .bg-\[\#00C9C0\]\/15:not(.dark-hero-banner *),
+html.light .bg-\[\#00C9C0\]\/10:not(.dark-hero-banner *) {
+  background-color: rgba(13, 148, 136, 0.12) !important;
+  color: #0F766E !important;
 }
 
-/* Primary buttons in Light Mode */
-html.light .gradient-btn-primary {
-  background: linear-gradient(135deg, #0284C7 0%, #0D9488 100%) !important;
-  color: #FFFFFF !important;
-  box-shadow: 0 4px 18px rgba(2, 132, 199, 0.28) !important;
+html.light .border-\[\#00C9C0\]\/40:not(.dark-hero-banner *),
+html.light .border-\[\#00C9C0\]\/30:not(.dark-hero-banner *) {
+  border-color: rgba(13, 148, 136, 0.35) !important;
 }
 
-html.light .gradient-btn-primary:hover {
-  box-shadow: 0 6px 24px rgba(13, 148, 136, 0.4) !important;
-}
-
-html.light .btn-cyber-outline {
-  background: #FFFFFF !important;
-  border-color: #0284C7 !important;
-  color: #0284C7 !important;
-}
-
-html.light .btn-cyber-outline:hover {
-  background: rgba(2, 132, 199, 0.08) !important;
-  color: #0369A1 !important;
-}
-
-/* Inputs in Light Mode */
-html.light input,
+/* 6. Form Inputs */
+html.light input:not([type="checkbox"]):not([type="radio"]),
 html.light textarea,
 html.light select {
   background-color: #FFFFFF !important;
@@ -301,36 +324,24 @@ html.light textarea::placeholder {
   color: #94A3B8 !important;
 }
 
-/* Scrollbars in Light Mode */
-html.light ::-webkit-scrollbar-track {
-  background: #F1F5F9 !important;
-}
-
-html.light ::-webkit-scrollbar-thumb {
-  background: #CBD5E1 !important;
-}
-
-html.light ::-webkit-scrollbar-thumb:hover {
-  background: #0284C7 !important;
-}
-
-/* Sidebar and Header in Light Mode */
+/* 7. Header and Sidebar Light Surface Treatment */
 html.light aside {
-  background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%) !important;
+  background: #FFFFFF !important;
   border-color: #E2E8F0 !important;
   color: #1E293B !important;
+  box-shadow: 1px 0 12px rgba(0, 0, 0, 0.04) !important;
 }
 
 html.light header {
-  background: rgba(255, 255, 255, 0.95) !important;
+  background: rgba(255, 255, 255, 0.96) !important;
   border-color: #E2E8F0 !important;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05) !important;
+  color: #0F172A !important;
 }
 
 /* ======================================================== */
 /* ACCESSIBILITY & DENSITY CONTROL MODES                    */
 /* ======================================================== */
-/* Reduced motion class */
 html.reduced-motion *,
 html.reduced-motion *::before,
 html.reduced-motion *::after {
@@ -340,7 +351,6 @@ html.reduced-motion *::after {
   scroll-behavior: auto !important;
 }
 
-/* Compact layout density */
 html.density-compact .py-4 {
   padding-top: 0.65rem !important;
   padding-bottom: 0.65rem !important;
@@ -356,7 +366,6 @@ html.density-compact .p-6 {
   padding: 1rem !important;
 }
 
-/* High contrast mode */
 html.high-contrast {
   --border-subtle: #000000;
 }
@@ -366,11 +375,10 @@ html.dark.high-contrast {
 html.high-contrast button:focus-visible,
 html.high-contrast a:focus-visible,
 html.high-contrast input:focus-visible {
-  outline: 3px solid #00F5D4 !important;
+  outline: 3px solid #0D9488 !important;
   outline-offset: 2px !important;
 }
 
-/* Accessible system reduced-motion discipline */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
     animation-duration: 0.01ms !important;
@@ -379,3 +387,4 @@ html.high-contrast input:focus-visible {
     scroll-behavior: auto !important;
   }
 }
+

@@ -528,7 +528,7 @@ export default function JobDetailPage() {
                   </div>
                   <div>
                     <span className="text-slate-400 block text-[11px]">AI Parsed</span>
-                    <strong className="text-slate-800">{job.aiParsed ? 'Yes (Gemini 3.8 Flash)' : 'No'}</strong>
+                    <strong className="text-slate-800">{job.aiParsed ? 'Yes (Verified Parser)' : 'No'}</strong>
                   </div>
                   <div>
                     <span className="text-slate-400 block text-[11px]">Created At</span>

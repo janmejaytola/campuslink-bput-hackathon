@@ -23,17 +23,17 @@ export function AppLayoutShell({ children, role }: AppLayoutShellProps) {
 
   return (
     <ProtectedRoute allowedRole={strictAllowedRole}>
-      <div className="min-h-screen bg-[#040D1A] text-slate-100 flex overflow-x-hidden selection:bg-[#00C9C0]/25 selection:text-white relative">
-        {/* Subtle ambient neon glow elements across background */}
+      <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#040D1A] text-slate-900 dark:text-slate-100 flex overflow-x-hidden selection:bg-teal-500/25 dark:selection:bg-[#00C9C0]/25 selection:text-white relative">
+        {/* Subtle ambient light dot mesh */}
         <div
-          className="fixed inset-0 pointer-events-none opacity-20 z-0"
+          className="fixed inset-0 pointer-events-none opacity-40 dark:opacity-20 z-0"
           style={{
-            backgroundImage: `radial-gradient(rgba(0, 201, 192, 0.12) 1px, transparent 1px)`,
+            backgroundImage: `radial-gradient(rgba(13, 148, 136, 0.12) 1px, transparent 1px)`,
             backgroundSize: '28px 28px',
           }}
         />
-        <div className="fixed top-0 right-1/4 w-96 h-96 bg-[#00C9C0]/5 rounded-full blur-3xl pointer-events-none -z-10" />
-        <div className="fixed bottom-10 left-1/3 w-[30rem] h-[30rem] bg-[#007F83]/5 rounded-full blur-3xl pointer-events-none -z-10" />
+        <div className="fixed top-0 right-1/4 w-96 h-96 bg-teal-500/5 dark:bg-[#00C9C0]/5 rounded-full blur-3xl pointer-events-none -z-10" />
+        <div className="fixed bottom-10 left-1/3 w-[30rem] h-[30rem] bg-sky-500/5 dark:bg-[#007F83]/5 rounded-full blur-3xl pointer-events-none -z-10" />
 
         {/* Role-Themed Collapsible Sidebar */}
         <AppSidebar

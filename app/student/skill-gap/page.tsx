@@ -536,7 +536,7 @@ export default function SkillGapPage() {
                 {isAiLoading ? (
                   <div className="flex items-center gap-2 text-xs text-slate-600 py-2">
                     <Loader2 className="h-4 w-4 animate-spin text-teal-600" />
-                    <span>Synthesizing skill gap strategy with Gemini...</span>
+                    <span>Synthesizing skill gap strategy...</span>
                   </div>
                 ) : (
                   <p className="text-xs text-slate-700 leading-relaxed font-medium">

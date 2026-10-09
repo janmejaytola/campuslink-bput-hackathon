@@ -243,7 +243,7 @@ export default function ResumePage() {
       const base64Data = await fileToBase64(selectedFile);
 
       // 4. Send to server-side Gemini API route
-      setProcessingStep('AI is analyzing resume structure with Gemini 3.8 Flash...');
+      setProcessingStep('AI Career Assistant is analyzing resume structure...');
       const res = await fetch('/api/resume/extract', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -567,7 +567,7 @@ export default function ResumePage() {
               <div className="flex items-center gap-2">
                 <span className="inline-flex items-center gap-1 rounded-full bg-teal-50 px-2.5 py-0.5 text-[11px] font-semibold text-teal-800 border border-teal-200/60">
                   <Sparkles className="h-3 w-3 text-teal-600" />
-                  Gemini 3.8 Flash Extraction
+                  Resume Analysis
                 </span>
                 <span className="text-[11px] font-medium text-slate-500">Document Parsing & Profile Sync</span>
               </div>

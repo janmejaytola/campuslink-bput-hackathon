@@ -482,7 +482,7 @@ export default function CareerGoalsPage() {
                 {isAiLoading ? (
                   <div className="flex items-center gap-2 text-xs text-slate-600 py-2">
                     <Loader2 className="h-4 w-4 animate-spin text-teal-600" />
-                    <span>Synthesizing career trajectory advisory notes with Gemini...</span>
+                    <span>Synthesizing career trajectory advisory notes...</span>
                   </div>
                 ) : (
                   <p className="text-xs text-slate-700 leading-relaxed font-medium">

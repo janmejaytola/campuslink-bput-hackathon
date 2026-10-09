@@ -51,11 +51,11 @@ export default function LandingPage() {
       route: '/student',
       demoMetrics: [
         { label: 'Readiness Benchmark', value: '84 / 100', sub: 'Target 80%' },
-        { label: 'Verified CGPA', value: '8.45', sub: 'Controller Verified' },
-        { label: 'Eligible Drives', value: '6 Drives', sub: 'Active BPUT 2026' },
+        { label: 'Verified CGPA', value: '8.45', sub: 'Academic Registry' },
+        { label: 'Eligible Drives', value: '6 Drives', sub: 'Active Cohort 2026' },
       ],
       features: [
-        'Deterministic eligibility validation against BPUT engineering criteria',
+        'Deterministic eligibility validation against campus recruitment criteria',
         'AI-assisted readiness score breakdown across technical & aptitude rubrics',
         'Direct skill-gap diagnostics with curated learning recommendations',
         'Conflict-free personal interview schedule with live venue notifications',
@@ -203,9 +203,9 @@ export default function LandingPage() {
             {/* Clean unboxed metadata kicker */}
             <div className="flex items-center justify-center gap-2 text-xs font-semibold text-[#16CFFF]">
               <Sparkles className="h-4 w-4 text-[#00E5D4]" />
-              <span>AI-Powered Placement Intelligence</span>
+              <span>Campus Placement Intelligence</span>
               <span aria-hidden="true" className="text-slate-600">·</span>
-              <span className="text-slate-300">BPUT 2026 PS10 Framework</span>
+              <span className="text-slate-300">Intelligent Placement Operations</span>
             </div>
 
             {/* Main Headline with balanced wrap */}
@@ -533,7 +533,7 @@ export default function LandingPage() {
                 </div>
                 <h3 className="text-base font-bold text-white translate-z-10">AI Career Readiness Diagnostic</h3>
                 <p className="text-xs text-[#9CB4CC] leading-relaxed translate-z-10">
-                  Scores student resumes, portfolio projects, and technical competency against industry job descriptions using Gemini 3.8 Flash with structured schema extraction.
+                  Scores student resumes, portfolio projects, and technical competency against industry job descriptions using structured schema extraction.
                 </p>
               </div>
             </Card3D>
@@ -557,7 +557,7 @@ export default function LandingPage() {
                 </div>
                 <h3 className="text-base font-bold text-white translate-z-10">Central Placement Governance</h3>
                 <p className="text-xs text-[#9CB4CC] leading-relaxed translate-z-10">
-                  Institutional oversight with branch-wise placement rates, salary distribution telemetry, verified offer letters, and BPUT PS10 regulatory audit logging.
+                  Institutional oversight with branch-wise placement rates, salary distribution telemetry, verified offer letters, and regulatory audit logging.
                 </p>
               </div>
             </Card3D>
@@ -631,7 +631,7 @@ export default function LandingPage() {
             <div className="space-y-2.5 max-w-2xl">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-[#020817]/20 border border-[#020817]/30 px-3 py-1 text-[11px] font-black uppercase tracking-wider text-[#020817]">
                 <Sparkles className="h-3.5 w-3.5" />
-                <span>BPUT Hackathon 2026 PS10 Platform</span>
+                <span>Campus Placement Intelligence</span>
               </span>
 
               <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-[#020817] leading-tight">
@@ -674,7 +674,7 @@ export default function LandingPage() {
                 </span>
               </div>
               <p className="text-xs text-[#9CB4CC]">
-                AI-Powered University Placement Coordination & Intelligence Platform
+                Campus Placement Coordination & Intelligence Platform
               </p>
             </div>
 
@@ -696,11 +696,11 @@ export default function LandingPage() {
 
           <div className="pt-6 border-t border-[#152744] flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-500">
             <div>
-              © 2026 BPUT Placement Intelligence Cell · Biju Patnaik University of Technology, Rourkela
+              © 2026 CAMPUSLINK · Campus Placement Intelligence Platform
             </div>
             <div className="flex items-center gap-2 text-[#00E5D4] font-mono">
               <ShieldCheck className="h-3.5 w-3.5" />
-              <span>PS10 Regulatory Gating Compliance</span>
+              <span>Placement Governance Compliance</span>
             </div>
           </div>
         </div>

@@ -440,7 +440,7 @@ function CreateJobContent() {
                       AI Extracted Requirements — Review Before Saving
                     </h3>
                     <span className="rounded bg-teal-100 text-teal-800 text-[10px] font-semibold px-2 py-0.5">
-                      Gemini 3.8 Flash Parser
+                      Intelligent JD Parser
                     </span>
                   </div>
                   <p className="text-xs text-teal-900 mt-1 leading-relaxed">
@@ -552,7 +552,7 @@ function CreateJobContent() {
                   {isParsing ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      <span>Parsing JD with Gemini...</span>
+                      <span>Parsing Job Description...</span>
                     </>
                   ) : (
                     <>
