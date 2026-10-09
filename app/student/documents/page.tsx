@@ -72,7 +72,7 @@ export default function StudentDocumentsPage() {
       <div className="space-y-6">
         <PS10Notice
           moduleName="Secure Institutional Document Locker"
-          nextStepDetail="Foundation shell enabling automated credential verification and background check readiness."
+          nextStepDetail="Active credential verification, cryptographic integrity, and background check readiness."
         />
 
         {/* Document Table */}

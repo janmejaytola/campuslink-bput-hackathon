@@ -200,7 +200,7 @@ export default function RecruiterJobsDashboardPage() {
                   <Briefcase className="h-3 w-3 text-teal-600" />
                   Recruiter Console
                 </span>
-                <span className="text-[11px] text-slate-400">Step 8: Position Management</span>
+                <span className="text-[11px] font-medium text-slate-500">Corporate Requisitions</span>
               </div>
               <h1 className="mt-1.5 text-2xl font-bold tracking-tight text-slate-900">
                 Jobs

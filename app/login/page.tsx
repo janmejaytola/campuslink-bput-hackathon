@@ -5,8 +5,8 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   GraduationCap,
-  ShieldCheck,
   Briefcase,
+  ShieldCheck,
   Lock,
   Mail,
   ArrowRight,
@@ -19,11 +19,10 @@ import {
   Check,
   ExternalLink,
   Loader2,
-  Building2,
   Sparkles,
-  ChevronRight,
   Shield,
   Layers,
+  Building,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { StrictRole, ROLE_LABELS, ROLE_DASHBOARD_ROUTES } from '@/types/auth';
@@ -49,9 +48,8 @@ function LoginForm() {
   const currentDomain =
     typeof window !== 'undefined'
       ? window.location.hostname
-      : 'ais-dev-4p5djfnofihhkfodyz4rbb-444151331719.asia-southeast1.run.app';
+      : 'ais-dev-byx7arfa6kki5pscj7vhsd-595379566803.asia-east1.run.app';
 
-  // If already authenticated with matching role, redirect
   useEffect(() => {
     if (isAuthenticated && currentUser) {
       const dest = redirectPath || ROLE_DASHBOARD_ROUTES[currentUser.role] || '/student';
@@ -71,6 +69,20 @@ function LoginForm() {
     navigator.clipboard.writeText(domain);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleQuickFill = (role: StrictRole) => {
+    handleRoleSelect(role);
+    if (role === 'STUDENT') {
+      setEmail('priyanshu.m@bput.ac.in');
+      setPassword('Student@123');
+    } else if (role === 'RECRUITER') {
+      setEmail('talent@tcs.com');
+      setPassword('Recruiter@123');
+    } else {
+      setEmail('tpo.officer@bput.ac.in');
+      setPassword('Officer@123');
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -102,7 +114,7 @@ function LoginForm() {
       if (err instanceof Error) {
         setErrorMessage(err.message);
       } else {
-        setErrorMessage('Authentication failed. Please check your email and password.');
+        setErrorMessage('Authentication failed. Please check your credentials.');
       }
     }
   };
@@ -137,44 +149,44 @@ function LoginForm() {
     (errorMessage && errorMessage.includes('not authorized for Firebase Google Sign-In'));
 
   return (
-    <div className="min-h-screen bg-[#0F172A] flex flex-col lg:flex-row text-slate-100">
-      {/* Left Column: Premium Brand Authority Showcase (Desktop) */}
-      <div className="hidden lg:flex lg:w-1/2 flex-col justify-between p-12 lg:p-16 relative bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F766E]/30 border-r border-slate-800">
-        {/* Subtle geometric grid background */}
+    <div className="min-h-screen bg-[#0A0F1D] flex flex-col lg:flex-row text-slate-100 selection:bg-teal-500/30">
+      {/* Left Column: Authority & Institutional Overview */}
+      <div className="hidden lg:flex lg:w-1/2 flex-col justify-between p-12 lg:p-16 relative bg-gradient-to-br from-[#0A0F1D] via-[#0F172A] to-[#0A2540] border-r border-slate-800/80">
+        {/* Subtle grid pattern */}
         <div
-          className="absolute inset-0 opacity-[0.03] pointer-events-none"
+          className="absolute inset-0 opacity-[0.02] pointer-events-none"
           style={{
-            backgroundImage: `radial-gradient(#0D9488 1px, transparent 1px)`,
+            backgroundImage: `radial-gradient(#38BDF8 1px, transparent 1px)`,
             backgroundSize: '24px 24px',
           }}
         />
 
-        {/* Top Header */}
+        {/* Top Brand Mark */}
         <div className="relative z-10">
           <Link href="/" className="inline-flex items-center gap-3 group">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-teal-600 text-white font-bold tracking-wider shadow-lg shadow-teal-900/40 group-hover:bg-teal-500 transition-colors">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-600 text-white font-black tracking-wider shadow-md shadow-teal-950 transition-colors group-hover:bg-teal-500">
               CL
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xl font-bold tracking-tight text-white">CAMPUSLINK</span>
-                <span className="text-[10px] font-semibold uppercase tracking-widest text-teal-400 bg-teal-950/80 border border-teal-800/60 px-2 py-0.5 rounded">
-                  ENTERPRISE
+                <span className="text-[10px] font-mono text-teal-400 bg-teal-950/80 border border-teal-800/60 px-2 py-0.5 rounded">
+                  ENTERPRISE OS
                 </span>
               </div>
-              <p className="text-xs text-slate-400">BPUT Placement Intelligence & Coordination</p>
+              <p className="text-xs text-slate-400">University Placement Coordination Platform</p>
             </div>
           </Link>
         </div>
 
-        {/* Hero Narrative */}
+        {/* Center Narrative */}
         <div className="relative z-10 my-auto max-w-lg space-y-6">
-          <div className="inline-flex items-center gap-2 rounded-full border border-teal-500/30 bg-teal-950/60 px-3 py-1 text-xs font-semibold text-teal-300">
+          <div className="inline-flex items-center gap-2 rounded-full border border-teal-500/20 bg-teal-950/50 px-3 py-1 text-xs font-medium text-teal-300">
             <Sparkles className="h-3.5 w-3.5 text-teal-400" />
             <span>Deterministic Campus Recruitment Infrastructure</span>
           </div>
 
-          <h1 className="text-4xl font-extrabold tracking-tight text-white leading-tight">
+          <h1 className="text-4xl font-black tracking-tight text-white leading-tight">
             Connecting university cohorts with corporate hiring at scale.
           </h1>
 
@@ -182,36 +194,37 @@ function LoginForm() {
             A unified, multi-role operating system engineered for students, corporate recruiters, and the training & placement office. Built with deterministic eligibility gating, explainable candidate matching, and conflict-free interview scheduling.
           </p>
 
+          {/* Quick Metrics */}
           <div className="grid grid-cols-3 gap-4 pt-4 border-t border-slate-800/80">
-            <div className="space-y-1">
-              <span className="text-2xl font-black text-white font-mono">1,420+</span>
-              <p className="text-[11px] text-slate-400 font-medium">BPUT Cohort 2026</p>
+            <div>
+              <span className="text-2xl font-black text-white font-mono tabular-nums">1,420+</span>
+              <p className="text-xs text-slate-400 font-medium mt-0.5">BPUT Batch 2026</p>
             </div>
-            <div className="space-y-1">
-              <span className="text-2xl font-black text-teal-400 font-mono">100%</span>
-              <p className="text-[11px] text-slate-400 font-medium">Deterministic Gating</p>
+            <div>
+              <span className="text-2xl font-black text-teal-400 font-mono tabular-nums">100%</span>
+              <p className="text-xs text-slate-400 font-medium mt-0.5">Deterministic Rules</p>
             </div>
-            <div className="space-y-1">
-              <span className="text-2xl font-black text-white font-mono">0 Clashes</span>
-              <p className="text-[11px] text-slate-400 font-medium">Schedule Conflict Engine</p>
+            <div>
+              <span className="text-2xl font-black text-sky-400 font-mono tabular-nums">0 Clashes</span>
+              <p className="text-xs text-slate-400 font-medium mt-0.5">Timetable Conflict Engine</p>
             </div>
           </div>
         </div>
 
-        {/* Footer Security Badge */}
+        {/* Bottom Trust Tag */}
         <div className="relative z-10 flex items-center justify-between text-xs text-slate-500 border-t border-slate-800/60 pt-6">
           <div className="flex items-center gap-2">
             <Shield className="h-4 w-4 text-teal-500" />
-            <span>Role-Based Access Control (RBAC) Verified</span>
+            <span>Enterprise Role-Based Access Control</span>
           </div>
-          <span className="text-[11px] font-mono">CAMPUSLINK PS10</span>
+          <span className="font-mono text-[11px]">BPUT PS10</span>
         </div>
       </div>
 
-      {/* Right Column: Premium Authentication Console */}
-      <div className="flex-1 flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-16 bg-[#F8FAFC] text-slate-900">
+      {/* Right Column: Interactive Login Console */}
+      <div className="flex-1 flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-16 bg-[#F8FAFC] text-slate-900 overflow-y-auto">
         <div className="w-full max-w-md mx-auto">
-          {/* Mobile Top Brand (visible on small screens) */}
+          {/* Mobile Header */}
           <div className="lg:hidden mb-8 text-center">
             <Link href="/" className="inline-flex items-center gap-2.5">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-600 text-white font-bold tracking-wider shadow-sm">
@@ -219,22 +232,21 @@ function LoginForm() {
               </div>
               <span className="text-2xl font-bold tracking-tight text-slate-900">CAMPUSLINK</span>
             </Link>
-            <p className="mt-1 text-xs text-slate-500">BPUT Placement Coordination Platform</p>
           </div>
 
           <div className="mb-6">
-            <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">
-              Sign in to your portal
+            <h2 className="text-2xl font-black tracking-tight text-slate-900">
+              Sign In to Workspace
             </h2>
             <p className="text-xs text-slate-500 mt-1">
-              Select your role to access your dedicated workspace and verified records.
+              Select your institutional role to access your dedicated portal.
             </p>
           </div>
 
           {/* Role Selection Tabs */}
           <div className="mb-6">
-            <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-2">
-              Select Workspace Profile
+            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">
+              Select Workspace Portal
             </label>
             <div className="grid grid-cols-3 gap-2">
               <button
@@ -242,11 +254,11 @@ function LoginForm() {
                 onClick={() => handleRoleSelect('STUDENT')}
                 className={`flex flex-col items-center justify-center rounded-xl border p-3 text-xs font-bold transition-all cursor-pointer ${
                   selectedRole === 'STUDENT'
-                    ? 'border-teal-600 bg-teal-50/80 text-teal-900 ring-2 ring-teal-600/20 shadow-xs'
+                    ? 'border-indigo-600 bg-indigo-50/80 text-indigo-950 ring-2 ring-indigo-600/20 shadow-xs'
                     : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300'
                 }`}
               >
-                <GraduationCap className={`h-4 w-4 mb-1.5 ${selectedRole === 'STUDENT' ? 'text-teal-700' : 'text-slate-400'}`} />
+                <GraduationCap className={`h-4 w-4 mb-1.5 ${selectedRole === 'STUDENT' ? 'text-indigo-600' : 'text-slate-400'}`} />
                 <span>Student</span>
               </button>
 
@@ -255,7 +267,7 @@ function LoginForm() {
                 onClick={() => handleRoleSelect('RECRUITER')}
                 className={`flex flex-col items-center justify-center rounded-xl border p-3 text-xs font-bold transition-all cursor-pointer ${
                   selectedRole === 'RECRUITER'
-                    ? 'border-teal-600 bg-teal-50/80 text-teal-900 ring-2 ring-teal-600/20 shadow-xs'
+                    ? 'border-teal-600 bg-teal-50/80 text-teal-950 ring-2 ring-teal-600/20 shadow-xs'
                     : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300'
                 }`}
               >
@@ -268,21 +280,18 @@ function LoginForm() {
                 onClick={() => handleRoleSelect('PLACEMENT_OFFICER')}
                 className={`flex flex-col items-center justify-center rounded-xl border p-3 text-xs font-bold transition-all cursor-pointer ${
                   selectedRole === 'PLACEMENT_OFFICER'
-                    ? 'border-teal-600 bg-teal-50/80 text-teal-900 ring-2 ring-teal-600/20 shadow-xs'
+                    ? 'border-blue-700 bg-blue-50/80 text-blue-950 ring-2 ring-blue-700/20 shadow-xs'
                     : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300'
                 }`}
               >
-                <ShieldCheck className={`h-4 w-4 mb-1.5 ${selectedRole === 'PLACEMENT_OFFICER' ? 'text-teal-700' : 'text-slate-400'}`} />
-                <span>Officer</span>
+                <ShieldCheck className={`h-4 w-4 mb-1.5 ${selectedRole === 'PLACEMENT_OFFICER' ? 'text-blue-700' : 'text-slate-400'}`} />
+                <span>TPO Officer</span>
               </button>
             </div>
-            <p className="mt-1.5 text-[11px] text-slate-500">
-              Role target: <strong className="text-slate-900">{ROLE_LABELS[selectedRole]}</strong> · Protected by RBAC
-            </p>
           </div>
 
           {/* Card Body */}
-          <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200/90 shadow-sm space-y-5">
+          <div className="bg-white p-6 sm:p-7 rounded-2xl border border-slate-200 shadow-xs space-y-4">
             {/* Domain Authorization Helper */}
             {isUnauthorizedDomain ? (
               <div className="rounded-xl border border-amber-200 bg-amber-50/90 p-4 text-xs text-amber-950 shadow-xs">
@@ -290,7 +299,7 @@ function LoginForm() {
                   <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
                   <div className="flex-1 space-y-2">
                     <h4 className="font-bold text-amber-950">Domain Authorization Required</h4>
-                    <p className="text-amber-800 leading-relaxed">
+                    <p className="text-amber-800 leading-relaxed text-xs">
                       Firebase requires adding this hostname to authorized domains in project{' '}
                       <strong className="font-semibold text-amber-950">campuslink-4e78d</strong>.
                     </p>
@@ -303,19 +312,18 @@ function LoginForm() {
                         className="shrink-0 px-2 py-1 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded font-sans text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
                       >
                         {copied ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
-                        <span>{copied ? 'Copied!' : 'Copy'}</span>
+                        <span>{copied ? 'Copied' : 'Copy'}</span>
                       </button>
                     </div>
 
                     <div className="text-[11px] text-amber-900/90 space-y-1 pt-1">
-                      <p className="font-semibold">Quick setup in Firebase Console:</p>
                       <a
                         href="https://console.firebase.google.com/project/campuslink-4e78d/authentication/settings"
                         target="_blank"
                         rel="noreferrer"
                         className="inline-flex items-center gap-1 font-bold text-teal-800 hover:text-teal-950 underline"
                       >
-                        <span>Open Authorized Domains Settings</span>
+                        <span>Open Authorized Domains in Firebase Console</span>
                         <ExternalLink className="h-3 w-3" />
                       </a>
                     </div>
@@ -397,7 +405,7 @@ function LoginForm() {
               <button
                 type="submit"
                 disabled={isLoading || isGoogleLoading}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-teal-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-teal-500 transition-colors shadow-sm cursor-pointer disabled:opacity-50"
+                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-teal-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-teal-500 transition-colors shadow-xs cursor-pointer disabled:opacity-50"
               >
                 {isLoading ? (
                   <>
@@ -413,12 +421,42 @@ function LoginForm() {
               </button>
             </form>
 
+            {/* Quick Demo Pre-Fill Helper */}
+            <div className="pt-2 border-t border-slate-100">
+              <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">
+                Quick Evaluation Pre-Fills
+              </span>
+              <div className="grid grid-cols-3 gap-1.5 text-[11px]">
+                <button
+                  type="button"
+                  onClick={() => handleQuickFill('STUDENT')}
+                  className="rounded-lg border border-slate-200 bg-slate-50/70 hover:bg-slate-100 py-1.5 px-2 text-slate-700 font-medium transition-colors text-center cursor-pointer"
+                >
+                  Student Demo
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleQuickFill('RECRUITER')}
+                  className="rounded-lg border border-slate-200 bg-slate-50/70 hover:bg-slate-100 py-1.5 px-2 text-slate-700 font-medium transition-colors text-center cursor-pointer"
+                >
+                  Recruiter Demo
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleQuickFill('PLACEMENT_OFFICER')}
+                  className="rounded-lg border border-slate-200 bg-slate-50/70 hover:bg-slate-100 py-1.5 px-2 text-slate-700 font-medium transition-colors text-center cursor-pointer"
+                >
+                  Officer Demo
+                </button>
+              </div>
+            </div>
+
             {/* Divider */}
-            <div className="relative my-4">
+            <div className="relative my-3">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-slate-200" />
               </div>
-              <div className="relative flex justify-center text-[11px] uppercase tracking-wider">
+              <div className="relative flex justify-center text-[10px] uppercase tracking-wider">
                 <span className="bg-white px-3 text-slate-400 font-semibold">Or continue with</span>
               </div>
             </div>
@@ -481,7 +519,7 @@ export default function LoginPage() {
   return (
     <React.Suspense
       fallback={
-        <div className="min-h-screen bg-[#0F172A] flex items-center justify-center text-white">
+        <div className="min-h-screen bg-[#0A0F1D] flex items-center justify-center text-white">
           <Loader2 className="h-8 w-8 animate-spin text-teal-400" />
         </div>
       }

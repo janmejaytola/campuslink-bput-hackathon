@@ -51,7 +51,6 @@ export function AppHeader({ onMenuClick, activeRole }: AppHeaderProps) {
   const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
 
-  // Close popovers on click outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
@@ -65,7 +64,6 @@ export function AppHeader({ onMenuClick, activeRole }: AppHeaderProps) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Global keyboard shortcut for Command Palette (Cmd+K / Ctrl+K)
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -85,47 +83,70 @@ export function AppHeader({ onMenuClick, activeRole }: AppHeaderProps) {
     await logout();
   };
 
-  // Compute clean breadcrumb
   const pathParts = pathname.split('/').filter(Boolean);
   const currentSection = pathParts[1]
     ? pathParts[1]
         .split('-')
         .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
         .join(' ')
-    : 'Overview';
+    : 'Dashboard';
 
   const userStrictRole: StrictRole = currentUser?.role || 'STUDENT';
   const roleLabel = ROLE_LABELS[userStrictRole] || userStrictRole;
 
-  // Search commands based on role
+  const roleAccent = {
+    student: {
+      avatarBg: 'bg-indigo-600',
+      sectionColor: 'text-indigo-700',
+      pingColor: 'bg-indigo-600',
+      borderTone: 'border-indigo-100',
+    },
+    recruiter: {
+      avatarBg: 'bg-teal-600',
+      sectionColor: 'text-teal-700',
+      pingColor: 'bg-teal-600',
+      borderTone: 'border-slate-200',
+    },
+    officer: {
+      avatarBg: 'bg-blue-600',
+      sectionColor: 'text-blue-700',
+      pingColor: 'bg-blue-600',
+      borderTone: 'border-blue-100',
+    },
+  }[activeRole];
+
   const searchableActions = [
     ...(activeRole === 'student'
       ? [
-          { title: 'My Readiness Score', href: '/student/readiness', category: 'Diagnostics' },
+          { title: 'Readiness Benchmark', href: '/student/readiness', category: 'Diagnostics' },
           { title: 'Skill Gap Breakdown', href: '/student/skill-gap', category: 'Diagnostics' },
-          { title: 'Career Goals', href: '/student/career-goals', category: 'Planning' },
-          { title: 'Job Catalog', href: '/student/jobs', category: 'Opportunities' },
-          { title: 'My Applications', href: '/student/applications', category: 'Tracking' },
-          { title: 'Interview Schedule', href: '/student/schedule', category: 'Calendar' },
-          { title: 'Official Offers', href: '/student/offers', category: 'Placement' },
-          { title: 'Profile & Resume', href: '/student/profile', category: 'Account' },
+          { title: 'Career Objectives', href: '/student/career-goals', category: 'Planning' },
+          { title: 'Eligibility Gate', href: '/student/eligibility', category: 'Compliance' },
+          { title: 'Role Fit Matches', href: '/student/job-matches', category: 'Matching' },
+          { title: 'Campus Drives Catalog', href: '/student/jobs', category: 'Opportunities' },
+          { title: 'Application Tracker', href: '/student/applications', category: 'Tracking' },
+          { title: 'Interview Calendar', href: '/student/schedule', category: 'Calendar' },
+          { title: 'Official Employment Offers', href: '/student/offers', category: 'Placement' },
+          { title: 'Profile & Academic Transcripts', href: '/student/profile', category: 'Account' },
+          { title: 'Resume Documents', href: '/student/resume', category: 'Documents' },
         ]
       : activeRole === 'recruiter'
       ? [
-          { title: 'Job Postings', href: '/recruiter/jobs', category: 'Jobs' },
+          { title: 'Job Requisitions', href: '/recruiter/jobs', category: 'Jobs' },
           { title: 'Create Job Opening', href: '/recruiter/jobs/new', category: 'Jobs' },
           { title: 'Candidate Pipeline', href: '/recruiter/candidates', category: 'Candidates' },
           { title: 'Shortlisting Board', href: '/recruiter/shortlist', category: 'Hiring' },
-          { title: 'Schedule Interviews', href: '/recruiter/schedule', category: 'Calendar' },
+          { title: 'Interview Scheduling', href: '/recruiter/schedule', category: 'Calendar' },
           { title: 'Offer Rollouts', href: '/recruiter/offers', category: 'Offers' },
         ]
       : [
-          { title: 'Student Directory', href: '/officer/students', category: 'Database' },
+          { title: 'Student Master Registry', href: '/officer/students', category: 'Database' },
           { title: 'Batch Eligibility Engine', href: '/officer/eligibility', category: 'Audit' },
           { title: 'Candidate Match Rankings', href: '/officer/matches', category: 'Intelligence' },
-          { title: 'Placement Drives', href: '/officer/drives', category: 'Operations' },
+          { title: 'Placement Drives Coordination', href: '/officer/drives', category: 'Operations' },
           { title: 'Venue & Lab Scheduling', href: '/officer/scheduling', category: 'Coordination' },
-          { title: 'Placement Analytics', href: '/officer/analytics', category: 'Reporting' },
+          { title: 'Institutional Analytics', href: '/officer/analytics', category: 'Reporting' },
+          { title: 'Placement Grievance Desk', href: '/officer/support', category: 'Support' },
         ]),
   ];
 
@@ -148,20 +169,20 @@ export function AppHeader({ onMenuClick, activeRole }: AppHeaderProps) {
 
           <div className="hidden sm:flex items-center gap-2 text-xs text-slate-500 font-medium">
             <span className="font-bold text-slate-900">{roleLabel}</span>
-            <span>/</span>
-            <span className="text-teal-800 font-semibold">{currentSection}</span>
+            <span aria-hidden="true" className="text-slate-300">/</span>
+            <span className={`font-semibold ${roleAccent.sectionColor}`}>{currentSection}</span>
           </div>
         </div>
 
-        {/* Center: Command Palette Trigger Button */}
+        {/* Center: Command Palette Trigger */}
         <div className="flex-1 max-w-md mx-4 hidden md:block">
           <button
             onClick={() => setIsCommandOpen(true)}
-            className="w-full flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50/80 px-3.5 py-1.5 text-xs text-slate-400 hover:border-slate-300 hover:bg-white transition-all shadow-2xs cursor-pointer"
+            className="w-full flex items-center justify-between rounded-xl border border-slate-200/90 bg-slate-50/70 px-3.5 py-1.5 text-xs text-slate-400 hover:border-slate-300 hover:bg-white transition-all shadow-2xs cursor-pointer"
           >
             <div className="flex items-center gap-2">
               <Search className="h-3.5 w-3.5 text-slate-400" />
-              <span>Search routes, candidates, jobs...</span>
+              <span>Quick navigation or search...</span>
             </div>
             <kbd className="inline-flex items-center gap-0.5 rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-mono text-slate-400 shadow-2xs">
               ⌘K
@@ -169,17 +190,17 @@ export function AppHeader({ onMenuClick, activeRole }: AppHeaderProps) {
           </button>
         </div>
 
-        {/* Right: Notification Center & User Profile */}
-        <div className="flex items-center gap-3">
-          {/* Mobile search trigger */}
+        {/* Right: Notifications & User Profile */}
+        <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={() => setIsCommandOpen(true)}
             className="md:hidden rounded-lg p-2 text-slate-500 hover:bg-slate-100 cursor-pointer"
+            aria-label="Search"
           >
             <Search className="h-4 w-4" />
           </button>
 
-          {/* Notification Center Popover */}
+          {/* Notifications Popover */}
           <div className="relative" ref={notifRef}>
             <button
               onClick={() => setIsNotifOpen(!isNotifOpen)}
@@ -189,8 +210,8 @@ export function AppHeader({ onMenuClick, activeRole }: AppHeaderProps) {
               <Bell className="h-4 w-4" />
               {unreadCount > 0 && (
                 <span className="absolute top-1.5 right-1.5 flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-600" />
+                  <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${roleAccent.pingColor} opacity-75`} />
+                  <span className={`relative inline-flex rounded-full h-2 w-2 ${roleAccent.pingColor}`} />
                 </span>
               )}
             </button>
@@ -201,8 +222,8 @@ export function AppHeader({ onMenuClick, activeRole }: AppHeaderProps) {
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-xs text-slate-900">Notifications</span>
                     {unreadCount > 0 && (
-                      <span className="rounded-full bg-teal-50 text-teal-800 border border-teal-200 px-2 py-0.5 text-[10px] font-bold">
-                        {unreadCount} new
+                      <span className="text-[10px] font-bold text-teal-800 tabular-nums">
+                        ({unreadCount} new)
                       </span>
                     )}
                   </div>
@@ -211,7 +232,7 @@ export function AppHeader({ onMenuClick, activeRole }: AppHeaderProps) {
                       onClick={markAllNotificationsRead}
                       className="text-[11px] font-bold text-teal-700 hover:text-teal-900 cursor-pointer"
                     >
-                      Mark all as read
+                      Mark all read
                     </button>
                   )}
                 </div>
@@ -227,14 +248,14 @@ export function AppHeader({ onMenuClick, activeRole }: AppHeaderProps) {
                         key={notif.id}
                         onClick={() => markNotificationRead(notif.id)}
                         className={`p-3.5 transition-colors cursor-pointer hover:bg-slate-50 ${
-                          !notif.read ? 'bg-teal-50/30' : ''
+                          !notif.read ? 'bg-slate-50/70' : ''
                         }`}
                       >
                         <div className="flex items-start justify-between gap-2">
                           <h4 className="text-xs font-bold text-slate-900 leading-snug">
                             {notif.title}
                           </h4>
-                          <span className="text-[10px] text-slate-400 whitespace-nowrap">
+                          <span className="text-[10px] text-slate-400 whitespace-nowrap tabular-nums">
                             {notif.timestamp}
                           </span>
                         </div>
@@ -255,12 +276,14 @@ export function AppHeader({ onMenuClick, activeRole }: AppHeaderProps) {
               onClick={() => setIsProfileOpen(!isProfileOpen)}
               className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white py-1.5 px-2.5 hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer"
             >
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-teal-600 text-white font-bold text-xs">
-                {currentUser?.name?.slice(0, 2).toUpperCase() || 'US'}
+              <div
+                className={`flex h-7 w-7 items-center justify-center rounded-lg ${roleAccent.avatarBg} text-white font-black text-xs`}
+              >
+                {currentUser?.name?.slice(0, 2).toUpperCase() || 'CL'}
               </div>
               <div className="text-left hidden md:block">
                 <p className="text-xs font-bold text-slate-900 leading-none truncate max-w-[120px]">
-                  {currentUser?.name || 'User'}
+                  {currentUser?.name || 'Workspace User'}
                 </p>
                 <p className="text-[10px] text-slate-500 font-medium leading-none mt-1">
                   {roleLabel}
@@ -288,7 +311,7 @@ export function AppHeader({ onMenuClick, activeRole }: AppHeaderProps) {
                   className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
                 >
                   <User className="h-4 w-4 text-slate-400" />
-                  <span>Workspace Settings</span>
+                  <span>Workspace Profile</span>
                 </Link>
 
                 <button
@@ -304,16 +327,16 @@ export function AppHeader({ onMenuClick, activeRole }: AppHeaderProps) {
         </div>
       </header>
 
-      {/* Global Command Palette Modal */}
+      {/* Global Command Palette */}
       {isCommandOpen && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 bg-slate-900/60 backdrop-blur-xs p-4">
+        <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 bg-slate-950/60 backdrop-blur-xs p-4">
           <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center border-b border-slate-100 px-4 py-3">
               <Search className="h-4 w-4 text-slate-400 mr-2.5" />
               <input
                 type="text"
                 autoFocus
-                placeholder="Type a destination or feature..."
+                placeholder="Jump to route, feature, or tool..."
                 value={commandQuery}
                 onChange={(e) => setCommandQuery(e.target.value)}
                 className="w-full text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none"
@@ -340,7 +363,7 @@ export function AppHeader({ onMenuClick, activeRole }: AppHeaderProps) {
                     className="w-full flex items-center justify-between rounded-lg px-3 py-2.5 text-left hover:bg-slate-50 cursor-pointer"
                   >
                     <span className="font-semibold text-slate-800">{cmd.title}</span>
-                    <span className="rounded bg-slate-100 px-2 py-0.5 text-[10px] font-mono text-slate-500">
+                    <span className="text-[10px] font-mono text-slate-500">
                       {cmd.category}
                     </span>
                   </button>

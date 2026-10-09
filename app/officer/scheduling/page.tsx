@@ -37,7 +37,7 @@ export default function OfficerSchedulingPage() {
       <div className="space-y-6">
         <PS10Notice
           moduleName="Conflict-Aware Venue & Slot Coordinator"
-          nextStepDetail="Foundation shell with automated clash detection across lab capacities, candidate schedules, and recruiter panels."
+          nextStepDetail="Automated clash detection across lab capacities, candidate schedules, and recruiter panels."
         />
 
         {/* Clash Status Banner */}

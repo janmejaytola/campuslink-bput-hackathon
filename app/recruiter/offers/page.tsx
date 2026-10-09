@@ -98,7 +98,7 @@ export default function RecruiterOffersPage() {
       <div className="space-y-6">
         <PS10Notice
           moduleName="Recruiter Offer Ledger & Acceptance Synchronization"
-          nextStepDetail="Foundation shell maintaining digital offer records, acceptance states, and university one-offer rule adherence."
+          nextStepDetail="Active digital offer records, acceptance states, and university one-offer policy compliance."
         />
 
         {/* Modal for Generating Offer */}

@@ -60,8 +60,8 @@ const RECRUITER_NAV: NavItem[] = [
   { label: 'Recruiting Console', href: '/recruiter', icon: LayoutDashboard },
   { label: 'Job Requisitions', href: '/recruiter/jobs', icon: Briefcase },
   { label: 'Candidate Pipeline', href: '/recruiter/candidates', icon: Users },
-  { label: 'Shortlisting Board', href: '/recruiter/shortlist', icon: UserCheck, badge: 'Step 11' },
-  { label: 'Conflict-Free Scheduler', href: '/recruiter/schedule', icon: CalendarDays, badge: 'Step 12' },
+  { label: 'Shortlisting Board', href: '/recruiter/shortlist', icon: UserCheck, badge: 'Pipeline' },
+  { label: 'Conflict-Free Scheduler', href: '/recruiter/schedule', icon: CalendarDays, badge: '0 Clashes' },
   { label: 'Offer Rollouts', href: '/recruiter/offers', icon: CheckCircle2 },
 ];
 

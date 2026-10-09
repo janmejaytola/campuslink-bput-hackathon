@@ -59,7 +59,7 @@ export default function OfficerSupportPage() {
       <div className="space-y-6">
         <PS10Notice
           moduleName="Placement Grievance & Query Desk"
-          nextStepDetail="Foundation shell logging student support tickets and institutional response pipelines."
+          nextStepDetail="Active student support tickets, eligibility appeals, and institutional response resolution."
         />
 
         {/* Tickets List */}

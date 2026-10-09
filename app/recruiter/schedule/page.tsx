@@ -69,7 +69,7 @@ export default function RecruiterSchedulePage() {
       <div className="space-y-6">
         <PS10Notice
           moduleName="Recruiter Panel & Venue Scheduler"
-          nextStepDetail="Foundation shell connecting corporate interviewer availability with campus lab infrastructure and student calendars."
+          nextStepDetail="Active corporate interviewer coordination with campus lab infrastructure and student timetables."
         />
 
         {/* Conflict Detection Banner */}

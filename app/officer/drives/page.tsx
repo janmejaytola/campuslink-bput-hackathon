@@ -39,7 +39,7 @@ export default function OfficerDrivesPage() {
       <div className="space-y-6">
         <PS10Notice
           moduleName="Campus Drive Lifecycle Manager"
-          nextStepDetail="Foundation shell coordinating drive approval workflows, eligibility lock-in, and multi-stage recruiter tracking."
+          nextStepDetail="Active drive approval workflows, eligibility lock-in, and multi-stage recruiter tracking."
         />
 
         {/* Drives Grid */}

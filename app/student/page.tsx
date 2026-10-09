@@ -22,9 +22,12 @@ import {
   Users,
   Compass,
   ArrowUpRight,
+  FileText,
+  Scale,
+  FolderLock,
+  Layers,
 } from 'lucide-react';
 import { AppLayoutShell } from '@/components/navigation/AppLayoutShell';
-import { PageHeader } from '@/components/common/PageHeader';
 import { useAuth } from '@/context/AuthContext';
 import { readinessService } from '@/lib/services/readinessService';
 import { ReadinessResult } from '@/types/readiness';
@@ -86,42 +89,82 @@ export default function StudentDashboardPage() {
   const shortlistedApplications = shortlists.filter((s) => s.status === 'SHORTLISTED');
   const upcomingInterviews = interviews.filter((i) => i.status === 'SCHEDULED' || i.status === 'RESCHEDULED');
 
+  if (isLoading) {
+    return (
+      <AppLayoutShell role="student">
+        <div className="space-y-6 animate-pulse">
+          {/* Skeleton Hero */}
+          <div className="h-44 rounded-2xl bg-white border border-slate-200/80 p-8 flex flex-col justify-between">
+            <div className="h-6 w-48 bg-slate-200 rounded" />
+            <div className="h-8 w-80 bg-slate-200 rounded" />
+            <div className="h-4 w-96 bg-slate-100 rounded" />
+          </div>
+
+          {/* Skeleton Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-28 rounded-2xl bg-white border border-slate-200/80 p-5 space-y-3">
+                <div className="h-4 w-28 bg-slate-200 rounded" />
+                <div className="h-8 w-16 bg-slate-200 rounded" />
+              </div>
+            ))}
+          </div>
+
+          {/* Skeleton Sections */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 h-96 rounded-2xl bg-white border border-slate-200/80 p-6 space-y-4">
+              <div className="h-5 w-40 bg-slate-200 rounded" />
+              <div className="h-64 bg-slate-100 rounded-xl" />
+            </div>
+            <div className="h-96 rounded-2xl bg-white border border-slate-200/80 p-6 space-y-4">
+              <div className="h-5 w-40 bg-slate-200 rounded" />
+              <div className="h-64 bg-slate-100 rounded-xl" />
+            </div>
+          </div>
+        </div>
+      </AppLayoutShell>
+    );
+  }
+
   return (
     <AppLayoutShell role="student">
       {/* Student Personal Career OS Hero Banner */}
-      <div className="rounded-3xl border border-slate-200/90 bg-white p-6 md:p-8 shadow-xs mb-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="rounded-2xl border border-slate-200/90 bg-white p-6 md:p-8 shadow-xs mb-8 relative overflow-hidden">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
           <div className="space-y-2">
-            <div className="flex flex-wrap items-center gap-2.5">
-              <span className="rounded-full bg-teal-50 border border-teal-200 px-3 py-1 text-[11px] font-bold text-teal-800">
-                Personal Career Operating System
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-md bg-teal-50 border border-teal-200/80 px-2.5 py-1 text-[11px] font-bold text-teal-800 tracking-tight">
+                STUDENT CAREER OS
               </span>
-              <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-mono text-slate-600 font-semibold">
-                BPUT #{currentUser?.regNumber || '2201106284'}
+              <span className="rounded-md bg-slate-100 px-2.5 py-1 text-[11px] font-mono text-slate-700 font-semibold border border-slate-200/60">
+                Roll #{currentUser?.regNumber || '2201106284'}
+              </span>
+              <span className="rounded-md bg-indigo-50 text-indigo-700 px-2.5 py-1 text-[11px] font-medium border border-indigo-200/60">
+                {currentUser?.department || 'Computer Science & Engineering'}
               </span>
             </div>
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900">
-              Welcome back, {studentName}
+              Welcome, {studentName}
             </h1>
             <p className="text-xs text-slate-500 max-w-xl leading-relaxed">
-              Tracking your verified engineering credentials, placement readiness metrics, live job opportunities, and conflict-free interview calendar.
+              Real-time placement intelligence, deterministic eligibility evaluation, and verified interview management for the 2026 graduation cycle.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
             <Link
               href="/student/readiness"
               className="inline-flex items-center gap-2 rounded-xl bg-teal-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-teal-500 transition-colors shadow-xs"
             >
               <Sparkles className="h-4 w-4" />
-              <span>Full Diagnostic Breakdown</span>
+              <span>Readiness Benchmark</span>
             </Link>
             <Link
-              href="/student/jobs"
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs"
+              href="/student/job-matches"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs"
             >
-              <span>Explore Open Roles</span>
-              <ArrowRight className="h-3.5 w-3.5" />
+              <Scale className="h-4 w-4 text-slate-500" />
+              <span>Role Compatibility</span>
             </Link>
           </div>
         </div>
@@ -131,80 +174,147 @@ export default function StudentDashboardPage() {
         {/* Core Career Metrics Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* 1. Readiness Metric */}
-          <div className="rounded-2xl border border-teal-200/80 bg-teal-50/50 p-5 shadow-2xs">
+          <Link
+            href="/student/readiness"
+            className="rounded-2xl border border-teal-200/80 bg-teal-50/50 p-5 shadow-2xs hover:border-teal-300 transition-all group"
+          >
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold uppercase tracking-wider text-teal-800">
                 Readiness Score
               </span>
-              <Sparkles className="h-4 w-4 text-teal-600" />
+              <Sparkles className="h-4 w-4 text-teal-600 group-hover:scale-110 transition-transform" />
             </div>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-3xl font-black text-teal-950 font-mono">
+              <span className="text-3xl font-black text-teal-950 font-mono tabular-nums">
                 {overallScore}
               </span>
               <span className="text-xs font-bold text-teal-700">/ 100</span>
             </div>
             <p className="mt-1 text-[11px] font-semibold text-teal-800 capitalize">
-              Tier: {readinessTier.toLowerCase()}
+              Benchmark: {readinessTier.toLowerCase()}
             </p>
-          </div>
+          </Link>
 
           {/* 2. Shortlisted Status */}
-          <div className="rounded-2xl border border-emerald-200/80 bg-emerald-50/50 p-5 shadow-2xs">
+          <Link
+            href="/student/applications"
+            className="rounded-2xl border border-emerald-200/80 bg-emerald-50/50 p-5 shadow-2xs hover:border-emerald-300 transition-all group"
+          >
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800">
-                Shortlisted Opportunities
+                Shortlisted Drives
               </span>
-              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+              <CheckCircle2 className="h-4 w-4 text-emerald-600 group-hover:scale-110 transition-transform" />
             </div>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-3xl font-black text-emerald-950 font-mono">
+              <span className="text-3xl font-black text-emerald-950 font-mono tabular-nums">
                 {shortlistedApplications.length}
               </span>
-              <span className="text-xs font-medium text-emerald-700">Verified</span>
+              <span className="text-xs font-medium text-emerald-700">Drives</span>
             </div>
             <p className="mt-1 text-[11px] font-semibold text-emerald-800">
-              {shortlists.length} total applications submitted
+              {shortlists.length} total active applications
             </p>
-          </div>
+          </Link>
 
           {/* 3. Upcoming Interviews */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-2xs">
+          <Link
+            href="/student/schedule"
+            className="rounded-2xl border border-slate-200 bg-white p-5 shadow-2xs hover:border-slate-300 transition-all group"
+          >
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                Interview Slots Booked
+                Interview Slots
               </span>
-              <Calendar className="h-4 w-4 text-slate-400" />
+              <Calendar className="h-4 w-4 text-slate-400 group-hover:scale-110 transition-transform" />
             </div>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-3xl font-black text-slate-900 font-mono">
+              <span className="text-3xl font-black text-slate-900 font-mono tabular-nums">
                 {upcomingInterviews.length}
               </span>
-              <span className="text-xs font-medium text-slate-500">Upcoming</span>
+              <span className="text-xs font-medium text-slate-500">Confirmed</span>
             </div>
-            <p className="mt-1 text-[11px] font-semibold text-slate-600">
+            <p className="mt-1 text-[11px] font-semibold text-emerald-700">
               0 Academic Clashes
             </p>
-          </div>
+          </Link>
 
           {/* 4. Verified CGPA */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-2xs">
+          <Link
+            href="/student/profile"
+            className="rounded-2xl border border-slate-200 bg-white p-5 shadow-2xs hover:border-slate-300 transition-all group"
+          >
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
                 Academic Standing
               </span>
-              <GraduationCap className="h-4 w-4 text-slate-400" />
+              <GraduationCap className="h-4 w-4 text-slate-400 group-hover:scale-110 transition-transform" />
             </div>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-3xl font-black text-slate-900 font-mono">
-                {currentUser?.cgpa || '8.45'}
+              <span className="text-3xl font-black text-slate-900 font-mono tabular-nums">
+                {currentUser?.cgpa ? currentUser.cgpa.toFixed(2) : '8.45'}
               </span>
               <span className="text-xs font-medium text-slate-500">CGPA</span>
             </div>
-            <p className="mt-1 text-[11px] font-semibold text-slate-600">
+            <p className="mt-1 text-[11px] font-semibold text-slate-600 truncate">
               {currentUser?.department || 'Computer Science & Eng.'}
             </p>
-          </div>
+          </Link>
+        </div>
+
+        {/* Quick Action Hub */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <Link
+            href="/student/resume"
+            className="flex items-center gap-3 p-3.5 rounded-xl border border-slate-200/90 bg-white hover:border-teal-300 hover:bg-slate-50 transition-colors shadow-2xs"
+          >
+            <div className="h-9 w-9 rounded-lg bg-teal-50 border border-teal-200 flex items-center justify-center text-teal-700 shrink-0">
+              <FileText className="h-4 w-4" />
+            </div>
+            <div className="min-w-0">
+              <span className="block text-xs font-bold text-slate-900 truncate">Resume Vault</span>
+              <span className="block text-[11px] text-slate-500 truncate">AI Parser & Sync</span>
+            </div>
+          </Link>
+
+          <Link
+            href="/student/eligibility"
+            className="flex items-center gap-3 p-3.5 rounded-xl border border-slate-200/90 bg-white hover:border-teal-300 hover:bg-slate-50 transition-colors shadow-2xs"
+          >
+            <div className="h-9 w-9 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 shrink-0">
+              <ShieldCheck className="h-4 w-4" />
+            </div>
+            <div className="min-w-0">
+              <span className="block text-xs font-bold text-slate-900 truncate">Eligibility Gate</span>
+              <span className="block text-[11px] text-slate-500 truncate">Pre-Check Drives</span>
+            </div>
+          </Link>
+
+          <Link
+            href="/student/skill-gap"
+            className="flex items-center gap-3 p-3.5 rounded-xl border border-slate-200/90 bg-white hover:border-teal-300 hover:bg-slate-50 transition-colors shadow-2xs"
+          >
+            <div className="h-9 w-9 rounded-lg bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-700 shrink-0">
+              <Target className="h-4 w-4" />
+            </div>
+            <div className="min-w-0">
+              <span className="block text-xs font-bold text-slate-900 truncate">Skill Diagnostics</span>
+              <span className="block text-[11px] text-slate-500 truncate">Market Benchmarks</span>
+            </div>
+          </Link>
+
+          <Link
+            href="/student/jobs"
+            className="flex items-center gap-3 p-3.5 rounded-xl border border-slate-200/90 bg-white hover:border-teal-300 hover:bg-slate-50 transition-colors shadow-2xs"
+          >
+            <div className="h-9 w-9 rounded-lg bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-700 shrink-0">
+              <Briefcase className="h-4 w-4" />
+            </div>
+            <div className="min-w-0">
+              <span className="block text-xs font-bold text-slate-900 truncate">Campus Drives</span>
+              <span className="block text-[11px] text-slate-500 truncate">Live Requisitions</span>
+            </div>
+          </Link>
         </div>
 
         {/* Two-Column Structured Section: Career Progression & Timeline */}
@@ -216,10 +326,10 @@ export default function StudentDashboardPage() {
               <div className="flex items-center justify-between border-b border-slate-100 pb-4">
                 <div>
                   <h3 className="text-sm font-bold text-slate-900">
-                    Rubric-Based Competency Factors
+                    Rubric-Based Competency Dimensions
                   </h3>
                   <p className="text-xs text-slate-500">
-                    Deterministic evaluation across academic performance, resume depth, and skills
+                    Deterministic evaluation across academic performance, technical skills, and project portfolio
                   </p>
                 </div>
                 <Link
@@ -267,15 +377,15 @@ export default function StudentDashboardPage() {
                   </h3>
                 </div>
                 <span className="text-[11px] font-semibold text-slate-500">
-                  Target: Software Development Engineer
+                  Target: {readiness?.targetRole || 'Software Development Engineer'}
                 </span>
               </div>
 
               {skillGap?.gaps && skillGap.gaps.length > 0 ? (
                 <div className="space-y-3">
                   <p className="text-xs text-slate-600">
-                    You have satisfied <strong className="text-emerald-700 font-bold">{skillGap.strongCount}</strong> core industry requirements ({skillGap.coverage}% coverage). We identified{' '}
-                    <strong className="text-amber-700 font-bold">{skillGap.missingCount + skillGap.developingCount}</strong> growth skills to boost your match scores:
+                    You have satisfied <strong className="text-emerald-700 font-bold">{skillGap.strongCount}</strong> core industry requirements ({skillGap.coverage}% coverage). Identified{' '}
+                    <strong className="text-amber-700 font-bold">{skillGap.missingCount + skillGap.developingCount}</strong> growth skills to boost candidate match scores:
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {skillGap.gaps.filter(g => g.status !== 'STRONG').slice(0, 5).map((g, idx) => (
@@ -299,7 +409,7 @@ export default function StudentDashboardPage() {
                 </div>
               ) : (
                 <p className="text-xs text-slate-500">
-                  Calculating real-time skill delta against target campus recruiters...
+                  Profile updated. Calculating real-time skill delta against target campus recruiters...
                 </p>
               )}
             </div>

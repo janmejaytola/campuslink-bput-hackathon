@@ -265,11 +265,11 @@ export default function LandingPage() {
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-sky-600 shrink-0" />
-                    <span>Step 11 candidate shortlisting engine</span>
+                    <span>Multi-stage candidate shortlisting board</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-sky-600 shrink-0" />
-                    <span>Step 12 conflict-aware slot booking</span>
+                    <span>Conflict-free interview slot booking</span>
                   </li>
                 </ul>
               </div>

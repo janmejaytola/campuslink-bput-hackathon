@@ -64,7 +64,7 @@ export default function OfficerStudentsPage() {
       <div className="space-y-6">
         <PS10Notice
           moduleName="Student Registry & Verification Service"
-          nextStepDetail="Foundation shell enabling automated academic audits, eligibility lockdown, and zero-backlog compliance."
+          nextStepDetail="Automated academic audits, eligibility lockdown, and zero-backlog compliance tracking."
         />
 
         {verifyMessage && (

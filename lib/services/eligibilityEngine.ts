@@ -479,8 +479,18 @@ export function evaluateCertificationsRule(
 
   for (const req of requiredCerts) {
     const normReq = normalizeText(req);
-    // Exact or normalized containment match for certified title
-    const found = studentCertNames.some((c) => c === normReq || c.includes(normReq) || normReq.includes(c));
+    const reqTokens = normReq
+      .split(/\s+/)
+      .filter((t) => t.length > 1 && !['certified', 'certification', 'certificate'].includes(t));
+
+    // Exact, containment, or key tokens match
+    const found = studentCertNames.some((c) => {
+      if (c === normReq || c.includes(normReq) || normReq.includes(c)) return true;
+      const cTokens = c
+        .split(/\s+/)
+        .filter((t) => t.length > 1 && !['certified', 'certification', 'certificate'].includes(t));
+      return reqTokens.length > 0 && reqTokens.every((token) => cTokens.includes(token));
+    });
 
     if (found) {
       subItems.push({

@@ -323,7 +323,7 @@ export default function CareerGoalsPage() {
                   <Award className="h-3 w-3 text-teal-600" />
                   Career Intelligence Vector
                 </span>
-                <span className="text-[11px] text-slate-400">Step 7: Placement Goals</span>
+                <span className="text-[11px] font-medium text-slate-500">Aspirations & Target Roles</span>
               </div>
               <h1 className="mt-1.5 text-2xl font-bold tracking-tight text-slate-900">
                 Career Goals

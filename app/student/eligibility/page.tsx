@@ -325,7 +325,7 @@ export default function StudentEligibilityPage() {
             <div>
               <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800 border border-emerald-200 mb-2">
                 <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
-                Step 9: Deterministic Eligibility Engine
+                Deterministic Eligibility Gatekeeper
               </div>
               <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
                 Campus Placement Job Eligibility

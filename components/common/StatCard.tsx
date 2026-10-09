@@ -16,26 +16,32 @@ interface StatCardProps {
 export function StatCard({ label, value, subtext, icon: Icon, trend, highlight }: StatCardProps) {
   return (
     <div
-      className={`rounded-xl border p-5 transition-shadow bg-white ${
+      className={`rounded-2xl border p-5 transition-all bg-white ${
         highlight
           ? 'border-teal-300 ring-1 ring-teal-200/50 shadow-xs'
-          : 'border-slate-200/80 shadow-xs hover:border-slate-300'
+          : 'border-slate-200/80 shadow-2xs hover:border-slate-300'
       }`}
     >
       <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
           {label}
         </span>
-        <div className={`p-2 rounded-lg ${highlight ? 'bg-teal-50 text-teal-700' : 'bg-slate-100 text-slate-700'}`}>
+        <div
+          className={`p-2 rounded-xl ${
+            highlight ? 'bg-teal-50 text-teal-700' : 'bg-slate-50 text-slate-600'
+          }`}
+        >
           <Icon className="h-4 w-4" />
         </div>
       </div>
 
-      <div className="mt-3 flex items-baseline gap-2">
-        <div className="text-2xl font-bold tracking-tight text-slate-900">{value}</div>
+      <div className="mt-3 flex items-baseline justify-between gap-2">
+        <div className="text-2xl font-black tracking-tight text-slate-900 font-mono tabular-nums">
+          {value}
+        </div>
         {trend && (
           <span
-            className={`text-xs font-medium ${
+            className={`text-xs font-semibold tabular-nums ${
               trend.positive ? 'text-emerald-700' : 'text-slate-500'
             }`}
           >
@@ -44,7 +50,7 @@ export function StatCard({ label, value, subtext, icon: Icon, trend, highlight }
         )}
       </div>
 
-      {subtext && <p className="mt-1 text-xs text-slate-500">{subtext}</p>}
+      {subtext && <p className="mt-1 text-xs text-slate-500 leading-relaxed">{subtext}</p>}
     </div>
   );
 }

@@ -395,7 +395,7 @@ function CreateJobContent() {
                   <Plus className="h-3 w-3 text-teal-600" />
                   New Campus Position
                 </span>
-                <span className="text-[11px] text-slate-400">Step 8B: Position Creation</span>
+                <span className="text-[11px] font-medium text-slate-500">Requisition & Criteria Builder</span>
               </div>
               <h1 className="mt-1.5 text-2xl font-bold tracking-tight text-slate-900">
                 Create Campus Job Opening

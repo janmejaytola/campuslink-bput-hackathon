@@ -59,7 +59,7 @@ export default function StudentJobsPage() {
       <div className="space-y-6">
         <PS10Notice
           moduleName="Placement Drive Catalog & Deterministic Eligibility"
-          nextStepDetail="Foundation shell displaying verified recruitment opportunities with rule-based qualification criteria."
+          nextStepDetail="Active recruitment opportunities synchronized with rule-based academic qualification criteria."
         />
 
         {modalJob && (

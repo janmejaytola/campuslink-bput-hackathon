@@ -42,7 +42,7 @@ export default function OfficerAnalyticsPage() {
       <div className="space-y-6">
         <PS10Notice
           moduleName="Placement Intelligence & Analytics Engine"
-          nextStepDetail="Foundation shell summarizing batch cohort analytics, discipline-wise trends, and compensation metrics."
+          nextStepDetail="Active institutional cohort analytics, discipline-wise placement trends, and compensation distributions."
         />
 
         {/* Top Metric Cards */}

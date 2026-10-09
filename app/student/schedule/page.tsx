@@ -36,7 +36,7 @@ export default function StudentSchedulePage() {
       <div className="space-y-6">
         <PS10Notice
           moduleName="Conflict-Aware Scheduling Coordinator"
-          nextStepDetail="Foundation shell monitoring slot overlap detection, room availability, and parallel drive constraints."
+          nextStepDetail="Active slot overlap detection, room availability validation, and clash-free timetable governance."
         />
 
         {/* Schedule List */}

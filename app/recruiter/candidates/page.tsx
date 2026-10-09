@@ -59,7 +59,7 @@ export default function RecruiterCandidatesPage() {
       <div className="space-y-6">
         <PS10Notice
           moduleName="Explainable Candidate Discovery & Filtering"
-          nextStepDetail="Foundation shell enabling multi-attribute filtering across verified transcripts, skill tags, and readiness metrics."
+          nextStepDetail="Active multi-attribute filtering across verified transcripts, skill tags, and readiness metrics."
         />
 
         {notification && (

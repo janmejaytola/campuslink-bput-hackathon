@@ -36,7 +36,7 @@ export default function StudentOffersPage() {
       <div className="space-y-6">
         <PS10Notice
           moduleName="Offer Management & Acceptance Workflow"
-          nextStepDetail="Foundation shell managing official institutional offer rolloffs and one-offer campus policy compliance."
+          nextStepDetail="Official institutional offer verification and one-offer campus policy compliance."
         />
 
         {actionMessage && (

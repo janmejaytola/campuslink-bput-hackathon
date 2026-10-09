@@ -158,7 +158,7 @@ export default function OfficerDashboardPage() {
                 </span>
                 <span className="text-xs font-semibold text-emerald-700">100% Validated</span>
               </div>
-              <p className="mt-1 text-[11px] text-emerald-800">Step 12 Scheduling Engine active</p>
+              <p className="mt-1 text-[11px] text-emerald-800">Deterministic slot verification active</p>
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-2xs">

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   FileCheck2,
@@ -22,8 +22,6 @@ import {
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AppLayoutShell } from '@/components/navigation/AppLayoutShell';
 import { PageHeader } from '@/components/common/PageHeader';
-import { StatusBadge } from '@/components/common/StatusBadge';
-import { PS10Notice } from '@/components/common/PS10Notice';
 import { useAuth } from '@/context/AuthContext';
 import { RecruiterJob } from '@/types/job';
 import { ShortlistRecord, ShortlistStatus } from '@/types/shortlist';
@@ -67,8 +65,6 @@ export default function StudentApplicationsPage() {
         if (!active) return;
 
         const items: StudentJobApplicationItem[] = [];
-
-        // Add jobs with recorded shortlist records first
         const jobMap = new Map<string, RecruiterJob>();
         openJobs.forEach((j) => jobMap.set(j.id, j));
 
@@ -89,7 +85,6 @@ export default function StudentApplicationsPage() {
           });
         });
 
-        // If no recorded applications yet, seed default active campus drives from open jobs
         if (items.length === 0 && openJobs.length > 0) {
           for (const j of openJobs) {
             items.push({
@@ -136,12 +131,12 @@ export default function StudentApplicationsPage() {
         <PageHeader
           title="Application Pipeline & Recruitment Status"
           description="Read-only tracker of your shortlisted placement drives, recruiter review statuses, and verified academic dossiers"
-          badge="Live Tracker"
+          badge="Applications Tracker"
         >
           <div className="flex items-center gap-2">
             <Link
               href="/student/jobs"
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-xs"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs"
             >
               <Briefcase className="h-3.5 w-3.5 text-slate-400" />
               <span>Explore More Jobs</span>
@@ -149,7 +144,7 @@ export default function StudentApplicationsPage() {
 
             <Link
               href="/student/schedule"
-              className="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2 text-xs font-semibold text-white hover:bg-teal-500 transition-colors shadow-xs"
+              className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white hover:bg-indigo-500 transition-colors shadow-xs"
             >
               <span>Interview Calendar</span>
               <Calendar className="h-3.5 w-3.5" />
@@ -158,22 +153,17 @@ export default function StudentApplicationsPage() {
         </PageHeader>
 
         <div className="space-y-6 pb-16">
-          <PS10Notice
-            moduleName="Candidate Application State Machine (Deterministic & Read-Only)"
-            nextStepDetail="Status updates reflect recruiter shortlisting decisions directly from Firestore. Students can inspect reasons and score snapshots with zero unilateral override permissions."
-          />
-
           {/* Filter Tabs */}
-          <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200 shadow-xs">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200 shadow-2xs">
+            <div className="flex items-center gap-1.5 p-1 bg-slate-100/80 rounded-xl">
               {(['All', 'Shortlisted', 'Under Review', 'Closed'] as const).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setFilter(tab)}
-                  className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                  className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
                     filter === tab
-                      ? 'bg-slate-900 text-white shadow-xs'
-                      : 'bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100'
+                      ? 'bg-white text-indigo-950 shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
                   {tab === 'All'
@@ -188,14 +178,14 @@ export default function StudentApplicationsPage() {
             </div>
 
             <span className="text-[11px] text-slate-400 font-medium">
-              Secured by BPUT University Role-Based Permissions
+              BPUT University Placement Governance
             </span>
           </div>
 
           {/* Applications List */}
           {isLoading ? (
             <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center shadow-xs">
-              <Loader2 className="mx-auto h-8 w-8 animate-spin text-teal-600" />
+              <Loader2 className="mx-auto h-8 w-8 animate-spin text-indigo-600" />
               <p className="mt-3 text-xs font-medium text-slate-600">
                 Fetching verified application progression statuses...
               </p>
@@ -209,14 +199,14 @@ export default function StudentApplicationsPage() {
               </p>
               <Link
                 href="/student/jobs"
-                className="inline-flex items-center gap-1.5 rounded-xl bg-teal-600 px-4 py-2 text-xs font-semibold text-white hover:bg-teal-500 transition-colors shadow-xs"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white hover:bg-indigo-500 transition-colors shadow-xs"
               >
                 <span>Browse Campus Jobs</span>
                 <ChevronRight className="h-3.5 w-3.5" />
               </Link>
             </div>
           ) : (
-            <div className="rounded-2xl border border-slate-200 bg-white shadow-xs overflow-hidden divide-y divide-slate-100">
+            <div className="rounded-2xl border border-slate-200 bg-white shadow-2xs overflow-hidden divide-y divide-slate-100">
               {filteredApps.map((app) => {
                 const isShortlisted = app.status === 'SHORTLISTED';
                 const isRejected = app.status === 'REJECTED';
@@ -230,22 +220,22 @@ export default function StudentApplicationsPage() {
                           <h3 className="text-base font-bold text-slate-900">{app.company}</h3>
 
                           {isShortlisted && (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-0.5 text-xs font-bold text-emerald-800 border border-emerald-300">
+                            <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-lg">
                               <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-                              SHORTLISTED FOR INTERVIEW ROUNDS
+                              Shortlisted for Interview Rounds
                             </span>
                           )}
 
                           {isPending && (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-0.5 text-xs font-bold text-amber-800 border border-amber-200">
+                            <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-lg">
                               <Clock className="h-3.5 w-3.5 text-amber-600" />
-                              APPLICATION UNDER RECRUITER REVIEW
+                              Application Under Review
                             </span>
                           )}
 
                           {isRejected && (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-0.5 text-xs font-bold text-slate-600 border border-slate-200">
-                              APPLICATION CONCLUDED
+                            <span className="inline-flex items-center gap-1 text-xs font-bold text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-lg">
+                              Application Concluded
                             </span>
                           )}
                         </div>
@@ -254,12 +244,12 @@ export default function StudentApplicationsPage() {
 
                         <div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-400">
                           <span>Location: {app.location}</span>
-                          <span>·</span>
+                          <span aria-hidden="true">·</span>
                           <span>Mode: {app.workMode}</span>
-                          <span>·</span>
+                          <span aria-hidden="true">·</span>
                           <span className="text-emerald-700 font-medium flex items-center gap-1">
                             <ShieldCheck className="h-3.5 w-3.5" />
-                            BPUT Transcript Dossier Verified
+                            BPUT Transcript Verified
                           </span>
                         </div>
                       </div>
@@ -267,11 +257,11 @@ export default function StudentApplicationsPage() {
                       {/* Score Snapshot Badge */}
                       <div className="flex items-center gap-3 shrink-0">
                         {app.matchScore > 0 && (
-                          <div className="rounded-xl border border-teal-200 bg-teal-50/70 px-3.5 py-2 text-right">
-                            <span className="text-[10px] font-bold text-teal-700 uppercase tracking-wider block">
+                          <div className="rounded-xl border border-indigo-200 bg-indigo-50/50 px-3.5 py-2 text-right">
+                            <span className="text-[10px] font-bold text-indigo-700 uppercase tracking-wider block">
                               Deterministic Match
                             </span>
-                            <span className="font-mono text-base font-extrabold text-teal-900">
+                            <span className="font-mono text-base font-black text-indigo-950 tabular-nums">
                               {app.matchScore} / 100
                             </span>
                           </div>
@@ -279,7 +269,7 @@ export default function StudentApplicationsPage() {
 
                         <Link
                           href={`/student/job-matches`}
-                          className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-xs"
+                          className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs"
                         >
                           <span>Inspect Fit</span>
                           <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
@@ -298,7 +288,7 @@ export default function StudentApplicationsPage() {
                           )}
                           Recruiter Evaluation Explanation:
                         </span>
-                        <span className="text-[10px] text-slate-400 font-mono">
+                        <span className="text-[10px] text-slate-400 font-mono tabular-nums">
                           Last Updated: {new Date(app.updatedAt).toLocaleDateString()}
                         </span>
                       </div>

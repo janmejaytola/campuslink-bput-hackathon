@@ -569,7 +569,7 @@ export default function ResumePage() {
                   <Sparkles className="h-3 w-3 text-teal-600" />
                   Gemini 3.8 Flash Extraction
                 </span>
-                <span className="text-[11px] text-slate-400">Step 4: AI Resume Parser</span>
+                <span className="text-[11px] font-medium text-slate-500">Document Parsing & Profile Sync</span>
               </div>
               <h1 className="mt-1.5 text-2xl font-bold tracking-tight text-slate-900">
                 Resume & AI Extraction
