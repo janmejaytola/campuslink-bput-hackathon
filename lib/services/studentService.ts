@@ -64,7 +64,7 @@ export const studentService = {
   async getStudentProfile(uid: string): Promise<StudentProfile | null> {
     if (!uid) return null;
 
-    if (typeof window !== 'undefined' && db) {
+    if (db) {
       try {
         const studentRef = doc(db, 'students', uid);
         const snap = await getDoc(studentRef);
@@ -129,12 +129,13 @@ export const studentService = {
       }
     }
 
+    const isDemoPriyanshu = uid === 'std_demo_priyanshu' || uid.includes('priyanshu');
     // Baseline verified student profile fallback
     return {
       ...DEFAULT_STUDENT_PROFILE,
       uid,
-      fullName: 'Priyanshu Mohanty',
-      email: 'priyanshu.m@bput.ac.in',
+      fullName: isDemoPriyanshu ? 'Priyanshu Mohanty' : 'BPUT Registered Candidate',
+      email: isDemoPriyanshu ? 'priyanshu.m@bput.ac.in' : 'student@bput.ac.in',
       phone: '+91 98765 43210',
       bputRegistrationNumber: '2201106284',
       college: 'Silicon Institute of Technology',
@@ -231,7 +232,7 @@ export const studentService = {
   /* ================= PROJECTS SUBCOLLECTION ================= */
 
   async getProjects(uid: string): Promise<ProjectItem[]> {
-    if (!uid || typeof window === 'undefined' || !db) return [];
+    if (!uid || !db) return [];
 
     const colRef = collection(db, 'students', uid, 'projects');
     const snap = await getDocs(colRef);
@@ -317,7 +318,7 @@ export const studentService = {
   /* ================= CERTIFICATIONS SUBCOLLECTION ================= */
 
   async getCertifications(uid: string): Promise<CertificationItem[]> {
-    if (!uid || typeof window === 'undefined' || !db) return [];
+    if (!uid || !db) return [];
 
     const colRef = collection(db, 'students', uid, 'certifications');
     const snap = await getDocs(colRef);
@@ -388,7 +389,7 @@ export const studentService = {
   /* ================= INTERNSHIPS SUBCOLLECTION ================= */
 
   async getInternships(uid: string): Promise<InternshipItem[]> {
-    if (!uid || typeof window === 'undefined' || !db) return [];
+    if (!uid || !db) return [];
 
     const colRef = collection(db, 'students', uid, 'internships');
     const snap = await getDocs(colRef);
@@ -462,7 +463,7 @@ export const studentService = {
    * Retrieves all registered student profiles for placement officer views.
    */
   async getAllStudents(): Promise<StudentProfile[]> {
-    if (typeof window === 'undefined' || !db) return [];
+    if (!db) return [];
 
     try {
       const colRef = collection(db, 'students');

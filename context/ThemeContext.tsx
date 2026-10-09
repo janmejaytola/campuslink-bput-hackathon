@@ -32,7 +32,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [density, setDensityState] = useState<LayoutDensity>('comfortable');
   const [reducedMotion, setReducedMotionState] = useState<boolean>(false);
   const [highContrast, setHighContrastState] = useState<boolean>(false);
-  const [mounted, setMounted] = useState<boolean>(false);
 
   // Helper to determine system preference
   const getSystemTheme = useCallback((): ResolvedTheme => {
@@ -59,52 +58,55 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   // Initialize from localStorage and matchMedia
   useEffect(() => {
-    setMounted(true);
-    try {
-      // 1. Theme
-      const savedTheme = localStorage.getItem(STORAGE_KEY_THEME) as ThemeMode | null;
-      const initialTheme: ThemeMode = savedTheme === 'light' || savedTheme === 'dark' || savedTheme === 'system'
-        ? savedTheme
-        : 'light'; // default clean light mode per dashboard reference specification
+    const frameId = requestAnimationFrame(() => {
+      try {
+        // 1. Theme
+        const savedTheme = localStorage.getItem(STORAGE_KEY_THEME) as ThemeMode | null;
+        const initialTheme: ThemeMode = savedTheme === 'light' || savedTheme === 'dark' || savedTheme === 'system'
+          ? savedTheme
+          : 'light'; // default clean light mode per dashboard reference specification
 
-      setThemeState(initialTheme);
-      const computedResolved = initialTheme === 'system' ? getSystemTheme() : initialTheme;
-      setResolvedTheme(computedResolved);
-      applyThemeToDOM(computedResolved);
+        setThemeState(initialTheme);
+        const computedResolved = initialTheme === 'system' ? getSystemTheme() : initialTheme;
+        setResolvedTheme(computedResolved);
+        applyThemeToDOM(computedResolved);
 
-      // 2. Density
-      const savedDensity = localStorage.getItem(STORAGE_KEY_DENSITY) as LayoutDensity | null;
-      if (savedDensity === 'compact' || savedDensity === 'comfortable') {
-        setDensityState(savedDensity);
-        if (savedDensity === 'compact') {
-          document.documentElement.classList.add('density-compact');
-        } else {
-          document.documentElement.classList.remove('density-compact');
+        // 2. Density
+        const savedDensity = localStorage.getItem(STORAGE_KEY_DENSITY) as LayoutDensity | null;
+        if (savedDensity === 'compact' || savedDensity === 'comfortable') {
+          setDensityState(savedDensity);
+          if (savedDensity === 'compact') {
+            document.documentElement.classList.add('density-compact');
+          } else {
+            document.documentElement.classList.remove('density-compact');
+          }
         }
-      }
 
-      // 3. Reduced Motion
-      const savedMotion = localStorage.getItem(STORAGE_KEY_MOTION);
-      const systemReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const isMotionReduced = savedMotion !== null ? savedMotion === 'true' : systemReducedMotion;
-      setReducedMotionState(isMotionReduced);
-      if (isMotionReduced) {
-        document.documentElement.classList.add('reduced-motion');
-      } else {
-        document.documentElement.classList.remove('reduced-motion');
-      }
+        // 3. Reduced Motion
+        const savedMotion = localStorage.getItem(STORAGE_KEY_MOTION);
+        const systemReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const isMotionReduced = savedMotion !== null ? savedMotion === 'true' : systemReducedMotion;
+        setReducedMotionState(isMotionReduced);
+        if (isMotionReduced) {
+          document.documentElement.classList.add('reduced-motion');
+        } else {
+          document.documentElement.classList.remove('reduced-motion');
+        }
 
-      // 4. High Contrast
-      const savedContrast = localStorage.getItem(STORAGE_KEY_CONTRAST) === 'true';
-      setHighContrastState(savedContrast);
-      if (savedContrast) {
-        document.documentElement.classList.add('high-contrast');
-      } else {
-        document.documentElement.classList.remove('high-contrast');
+        // 4. High Contrast
+        const savedContrast = localStorage.getItem(STORAGE_KEY_CONTRAST) === 'true';
+        setHighContrastState(savedContrast);
+        if (savedContrast) {
+          document.documentElement.classList.add('high-contrast');
+        } else {
+          document.documentElement.classList.remove('high-contrast');
+        }
+      } catch (e) {
+        console.warn('Failed to read theme from localStorage', e);
       }
-    } catch (e) {
-      console.warn('Failed to read theme from localStorage', e);
-    }
+    });
+
+    return () => cancelAnimationFrame(frameId);
   }, [getSystemTheme, applyThemeToDOM]);
 
   // Listen to system color scheme changes when theme is 'system'

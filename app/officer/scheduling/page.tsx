@@ -102,6 +102,8 @@ const CAMPUS_VENUES = [
   { name: 'Central University Auditorium', capacity: 600, available: true, type: 'AV & Keynote Bridge' },
 ];
 
+const STORAGE_KEY_CAMPUS_EVENTS = 'campuslink_officer_events';
+
 export default function OfficerSchedulingPage() {
   const [events, setEvents] = useState<CampusEvent[]>(INITIAL_CAMPUS_EVENTS);
   const [filterType, setFilterType] = useState('ALL');
@@ -117,6 +119,27 @@ export default function OfficerSchedulingPage() {
   const [time, setTime] = useState('10:00 AM - 01:00 PM');
   const [venue, setVenue] = useState('Central Computing Lab 1');
   const [candidatesCount, setCandidatesCount] = useState('120');
+
+  // Load persisted slots on mount
+  React.useEffect(() => {
+    const frameId = requestAnimationFrame(() => {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY_CAMPUS_EVENTS);
+        if (raw) {
+          const saved: CampusEvent[] = JSON.parse(raw);
+          if (Array.isArray(saved) && saved.length > 0) {
+            const combined = [...saved, ...INITIAL_CAMPUS_EVENTS];
+            const unique = Array.from(new Map(combined.map((evt) => [evt.id, evt])).values());
+            setEvents(unique);
+          }
+        }
+      } catch (e) {
+        console.warn('Could not read campus events from storage', e);
+      }
+    });
+
+    return () => cancelAnimationFrame(frameId);
+  }, []);
 
   const filteredEvents = events.filter((e) => {
     return filterType === 'ALL' || e.eventType === filterType;
@@ -140,7 +163,14 @@ export default function OfficerSchedulingPage() {
       status: 'Confirmed',
     };
 
-    setEvents([newEvt, ...events]);
+    const updated = [newEvt, ...events];
+    setEvents(updated);
+    try {
+      localStorage.setItem(STORAGE_KEY_CAMPUS_EVENTS, JSON.stringify(updated));
+    } catch (e) {
+      console.warn('Could not save campus event', e);
+    }
+
     setShowModal(false);
     setTitle('');
     setCompany('');

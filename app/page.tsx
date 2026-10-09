@@ -28,16 +28,23 @@ import {
   ChevronDown,
   Check,
   Compass,
+  Settings,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@/context/ThemeContext';
 import { StrictRole, ROLE_LABELS, ROLE_DASHBOARD_ROUTES } from '@/types/auth';
 import { Card3D } from '@/components/common/Card3D';
 import { FadeIn, StaggerContainer, StaggerItem } from '@/components/common/MotionWrapper';
+import { PublicSettingsModal } from '@/components/settings/PublicSettingsModal';
 
 export default function LandingPage() {
   const router = useRouter();
   const { currentUser, isAuthenticated } = useAuth();
+  const { theme, resolvedTheme, toggleTheme } = useTheme();
   const [activePortalTab, setActivePortalTab] = useState<'STUDENT' | 'RECRUITER' | 'OFFICER'>('STUDENT');
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const portalDetails = {
     STUDENT: {
@@ -144,8 +151,35 @@ export default function LandingPage() {
             </a>
           </nav>
 
-          {/* Zone 3: 1 primary action / auth actions */}
-          <div className="flex items-center gap-3 shrink-0">
+          {/* Zone 3: 1 primary action / auth actions / public settings */}
+          <div className="flex items-center gap-2.5 shrink-0">
+            {/* Theme Toggle */}
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="rounded-xl border border-slate-200 dark:border-[#152744] bg-white/80 dark:bg-[#06162D]/90 p-2 text-slate-700 dark:text-[#9CB4CC] hover:text-teal-600 dark:hover:text-[#16CFFF] hover:border-teal-500/50 transition-all cursor-pointer shadow-2xs"
+              aria-label="Toggle Light/Dark Theme"
+              title={`Switch to ${resolvedTheme === 'dark' ? 'Light' : 'Dark'} mode`}
+            >
+              {resolvedTheme === 'dark' ? (
+                <Sun className="h-4 w-4 text-amber-400" />
+              ) : (
+                <Moon className="h-4 w-4 text-indigo-600" />
+              )}
+            </button>
+
+            {/* Quick System Settings Trigger */}
+            <button
+              type="button"
+              onClick={() => setIsSettingsOpen(true)}
+              className="flex items-center gap-1.5 rounded-xl border border-slate-200 dark:border-[#152744] bg-white/80 dark:bg-[#06162D]/90 px-3 py-2 text-xs font-bold text-slate-700 dark:text-[#F4FAFF] hover:border-teal-500/60 hover:text-teal-600 dark:hover:text-[#16CFFF] transition-all shadow-2xs cursor-pointer whitespace-nowrap"
+              aria-label="System Settings & Accessibility"
+              title="Preferences & Accessibility (Themes, Contrast, Density)"
+            >
+              <Settings className="h-3.5 w-3.5 text-teal-600 dark:text-[#00F5D4]" />
+              <span className="hidden sm:inline">Settings</span>
+            </button>
+
             {isAuthenticated && currentUser ? (
               <Link
                 href={ROLE_DASHBOARD_ROUTES[currentUser.role]}
@@ -158,7 +192,7 @@ export default function LandingPage() {
               <>
                 <Link
                   href="/login"
-                  className="rounded-xl border border-[#152744] bg-[#06162D]/90 px-3.5 py-2 text-xs font-bold text-[#F4FAFF] hover:border-[#16CFFF]/60 hover:text-white transition-all shadow-xs cursor-pointer whitespace-nowrap"
+                  className="rounded-xl border border-slate-200 dark:border-[#152744] bg-white/80 dark:bg-[#06162D]/90 px-3.5 py-2 text-xs font-bold text-slate-700 dark:text-[#F4FAFF] hover:border-[#16CFFF]/60 hover:text-teal-600 dark:hover:text-white transition-all shadow-xs cursor-pointer whitespace-nowrap"
                 >
                   Sign In
                 </Link>
@@ -705,6 +739,9 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* Public Preferences & Accessibility Modal */}
+      <PublicSettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
     </div>
   );
 }

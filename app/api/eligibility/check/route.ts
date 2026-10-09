@@ -77,8 +77,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Fetch student profile
-    const studentDoc = await getDoc(doc(db, 'students', studentId));
+    // Fetch student profile, certifications, internships, and job posting concurrently
+    const [studentDoc, certsSnap, internsSnap, jobDoc] = await Promise.all([
+      getDoc(doc(db, 'students', studentId)),
+      getDocs(collection(db, 'students', studentId, 'certifications')),
+      getDocs(collection(db, 'students', studentId, 'internships')),
+      getDoc(doc(db, 'jobs', jobId)),
+    ]);
+
     if (!studentDoc.exists()) {
       return NextResponse.json(
         { error: `Student profile not found for ID: ${studentId}` },
@@ -87,18 +93,12 @@ export async function POST(req: NextRequest) {
     }
     const student = { uid: studentDoc.id, ...studentDoc.data() } as StudentProfile;
 
-    // Fetch certifications
-    const certsSnap = await getDocs(collection(db, 'students', studentId, 'certifications'));
     const certifications: CertificationItem[] = [];
     certsSnap.forEach((d) => certifications.push({ id: d.id, ...d.data() } as CertificationItem));
 
-    // Fetch internships
-    const internsSnap = await getDocs(collection(db, 'students', studentId, 'internships'));
     const internships: InternshipItem[] = [];
     internsSnap.forEach((d) => internships.push({ id: d.id, ...d.data() } as InternshipItem));
 
-    // Fetch job
-    const jobDoc = await getDoc(doc(db, 'jobs', jobId));
     if (!jobDoc.exists()) {
       return NextResponse.json(
         { error: `Job posting not found for ID: ${jobId}` },

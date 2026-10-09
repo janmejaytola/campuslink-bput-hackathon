@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Building2,
   Plus,
@@ -25,6 +25,9 @@ import { StatusBadge } from '@/components/common/StatusBadge';
 import { PS10Notice } from '@/components/common/PS10Notice';
 import { DEMO_JOBS } from '@/lib/demoData';
 
+import { useAuth } from '@/context/AuthContext';
+import { jobService } from '@/lib/services/jobService';
+
 interface DriveItem {
   id: string;
   title: string;
@@ -44,13 +47,17 @@ interface DriveItem {
   rounds: string[];
 }
 
+const STORAGE_KEY_CUSTOM_DRIVES = 'campuslink_officer_custom_drives';
+
 export default function OfficerDrivesPage() {
+  const { currentUser } = useAuth();
   const [drives, setDrives] = useState<DriveItem[]>(DEMO_JOBS);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [inspectDrive, setInspectDrive] = useState<DriveItem | null>(null);
   const [notification, setNotification] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // New drive form state
   const [company, setCompany] = useState('');
@@ -60,6 +67,54 @@ export default function OfficerDrivesPage() {
   const [deadline, setDeadline] = useState('2026-11-15');
   const [selectedBranches, setSelectedBranches] = useState<string[]>(['CSE', 'IT']);
   const [roundsText, setRoundsText] = useState('Online Assessment, Technical Interview, HR Round');
+
+  // Load custom and live drives on mount
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        let savedCustom: DriveItem[] = [];
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY_CUSTOM_DRIVES);
+          if (raw) savedCustom = JSON.parse(raw);
+        } catch (e) {
+          console.warn('Could not read custom drives from localStorage', e);
+        }
+
+        const liveJobs = await jobService.getAllJobs();
+        if (!active) return;
+
+        const liveDrives: DriveItem[] = liveJobs.map((j) => ({
+          id: j.id,
+          title: j.title,
+          company: j.company,
+          location: j.location || 'Bhubaneswar / Hybrid',
+          type: j.employmentType === 'INTERNSHIP' ? 'Internship' : 'Full-time',
+          packageCTC: j.salaryMin && j.salaryMax ? `₹${(j.salaryMin / 100000).toFixed(1)} - ${(j.salaryMax / 100000).toFixed(1)} LPA` : '₹8.00 - 12.00 LPA',
+          minCGPA: j.eligibility?.minCgpa || 7.0,
+          branches: j.eligibility?.branches?.length ? j.eligibility.branches : ['CSE', 'IT'],
+          batch: j.eligibility?.graduationYears?.length ? j.eligibility.graduationYears.join(', ') : '2026 Graduating',
+          status: j.status === 'OPEN' ? 'Active' : j.status === 'CLOSED' ? 'Completed' : 'Draft',
+          deadline: j.applicationDeadline || '2026-11-30',
+          rolesDescription: j.description || `Campus recruitment drive for ${j.title}`,
+          applicantsCount: 0,
+          shortlistedCount: 0,
+          offersCount: 0,
+          rounds: ['Online Assessment', 'Technical Round', 'HR Round'],
+        }));
+
+        const combined = [...savedCustom, ...liveDrives, ...DEMO_JOBS];
+        const unique = Array.from(new Map(combined.map((item) => [item.id, item])).values());
+        setDrives(unique);
+      } catch (err) {
+        console.warn('[Officer drives load note]:', err);
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const filteredDrives = drives.filter((d) => {
     const matchesSearch =
@@ -77,12 +132,14 @@ export default function OfficerDrivesPage() {
     }
   };
 
-  const handleRegisterDrive = (e: React.FormEvent) => {
+  const handleRegisterDrive = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!company.trim() || !title.trim()) return;
 
+    setIsSubmitting(true);
+    const newDriveId = `drive_${Date.now()}`;
     const newDrive: DriveItem = {
-      id: `drive_${Date.now()}`,
+      id: newDriveId,
       company: company.trim(),
       title: title.trim(),
       location: 'Bhubaneswar / Hybrid',
@@ -100,17 +157,59 @@ export default function OfficerDrivesPage() {
       rounds: roundsText.split(',').map((r) => r.trim()).filter(Boolean),
     };
 
-    setDrives([newDrive, ...drives]);
+    try {
+      // 1. If currentUser is present, persist to Firestore jobs collection
+      if (currentUser?.uid) {
+        await jobService.createJob(currentUser.uid, {
+          title: newDrive.title,
+          company: newDrive.company,
+          description: newDrive.rolesDescription,
+          location: newDrive.location,
+          workMode: 'HYBRID',
+          employmentType: 'FULL_TIME',
+          status: 'OPEN',
+          applicationDeadline: newDrive.deadline,
+          eligibility: {
+            minCgpa: newDrive.minCGPA,
+            maxBacklogs: 0,
+            graduationYears: ['2026'],
+            branches: newDrive.branches,
+            colleges: [],
+            minExperienceMonths: 0,
+            requiredCertifications: [],
+          },
+          requiredSkills: [
+            { name: 'Core CS Fundamentals', requiredLevel: 75 },
+            { name: 'Problem Solving', requiredLevel: 70 },
+          ],
+          preferredSkills: [],
+        });
+      }
+    } catch (saveErr) {
+      console.warn('[Firestore createJob note]:', saveErr);
+    }
+
+    // 2. Persist to localStorage for guaranteed cross-session continuity
+    try {
+      const existing = localStorage.getItem(STORAGE_KEY_CUSTOM_DRIVES);
+      const list: DriveItem[] = existing ? JSON.parse(existing) : [];
+      localStorage.setItem(STORAGE_KEY_CUSTOM_DRIVES, JSON.stringify([newDrive, ...list]));
+    } catch (lsErr) {
+      console.warn('LocalStorage save error:', lsErr);
+    }
+
+    setDrives((prev) => [newDrive, ...prev]);
     setShowRegisterModal(false);
     setCompany('');
     setTitle('');
-    setNotification(`Successfully registered campus drive for ${newDrive.company}. Drive slot locked.`);
+    setIsSubmitting(false);
+    setNotification(`Successfully registered and locked campus drive for ${newDrive.company}.`);
     setTimeout(() => setNotification(null), 4000);
   };
 
   const toggleDriveStatus = (id: string) => {
-    setDrives((prev) =>
-      prev.map((d) => {
+    setDrives((prev) => {
+      const updated = prev.map((d) => {
         if (d.id === id) {
           const nextStatus = d.status === 'Active' ? 'Completed' : 'Active';
           setNotification(`Updated ${d.company} drive status to ${nextStatus}.`);
@@ -118,8 +217,17 @@ export default function OfficerDrivesPage() {
           return { ...d, status: nextStatus };
         }
         return d;
-      })
-    );
+      });
+
+      try {
+        const customOnly = updated.filter((item) => item.id.startsWith('drive_'));
+        localStorage.setItem(STORAGE_KEY_CUSTOM_DRIVES, JSON.stringify(customOnly));
+      } catch (e) {
+        console.warn('LocalStorage update error:', e);
+      }
+
+      return updated;
+    });
   };
 
   return (

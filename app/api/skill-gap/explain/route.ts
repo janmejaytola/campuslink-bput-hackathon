@@ -31,28 +31,46 @@ export async function POST(req: NextRequest) {
 
 Please synthesize a concise 2-3 sentence advisor commentary analyzing where their target-role preparation stands and what single preparation action will yield the highest interview impact.`;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-3.8-flash',
-      contents: prompt,
-      config: {
-        systemInstruction: SYSTEM_INSTRUCTION,
-      },
-    });
+    let summary = '';
+    let modelUsed = 'gemini-3.8-flash';
 
-    const summary = response.text?.trim() || '';
+    if (process.env.GEMINI_API_KEY) {
+      try {
+        const response = await ai.models.generateContent({
+          model: 'gemini-3.8-flash',
+          contents: prompt,
+          config: {
+            systemInstruction: SYSTEM_INSTRUCTION,
+          },
+        });
+        summary = response.text?.trim() || '';
+      } catch (geminiErr) {
+        console.warn('[Gemini 3.8 Flash skill gap explain call note]:', geminiErr);
+      }
+    }
+
+    if (!summary) {
+      modelUsed = 'deterministic-institutional-engine';
+      const topSkill = (strongSkills || [])[0] || 'foundational core programming';
+      const firstOpportunity = (biggestOpportunities || [])[0];
+      const gapDetail = firstOpportunity ? `${firstOpportunity.skill} (${firstOpportunity.priority} priority, ${firstOpportunity.gap} pt gap)` : 'system design';
+      summary = `With ${coverage}% verified coverage for ${targetRole || 'Software Engineer'}, your strongest competency is in ${topSkill}. Your primary focus should be closing the gap in ${gapDetail} through structured problem solving and applied implementations before upcoming drive technical rounds.`;
+    }
 
     return NextResponse.json({
       success: true,
       summary,
+      modelUsed,
     });
   } catch (err: unknown) {
     console.error('[AI Skill Gap Explain API Error]:', err);
     return NextResponse.json(
       {
-        success: false,
-        error: err instanceof Error ? err.message : 'AI explanation service temporarily unavailable.',
+        success: true,
+        summary: 'Your skill gap coverage is evaluated against institutional benchmarks. Prioritize high-weight technical competencies and system fundamentals to maximize interview readiness.',
+        modelUsed: 'deterministic-institutional-fallback',
       },
-      { status: 500 }
+      { status: 200 }
     );
   }
 }

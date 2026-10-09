@@ -18,7 +18,7 @@ export const jobService = {
    * Retrieves all jobs created by the specific recruiter.
    */
   async getRecruiterJobs(recruiterId: string): Promise<RecruiterJob[]> {
-    if (!recruiterId || typeof window === 'undefined' || !db) return [];
+    if (!recruiterId || !db) return [];
 
     try {
       const q = query(collection(db, 'jobs'), where('recruiterId', '==', recruiterId));
@@ -48,7 +48,7 @@ export const jobService = {
    * Retrieves all OPEN jobs for student eligibility checking.
    */
   async getOpenJobs(): Promise<RecruiterJob[]> {
-    if (typeof window === 'undefined' || !db) return [];
+    if (!db) return [];
 
     try {
       const q = query(collection(db, 'jobs'), where('status', '==', 'OPEN'));
@@ -68,10 +68,31 @@ export const jobService = {
   },
 
   /**
+   * Retrieves all jobs across all recruiters for placement officer overview.
+   */
+  async getAllJobs(): Promise<RecruiterJob[]> {
+    if (!db) return [];
+
+    try {
+      const snap = await getDocs(collection(db, 'jobs'));
+      const jobs: RecruiterJob[] = [];
+      snap.forEach((d) => {
+        jobs.push({ id: d.id, ...d.data() } as RecruiterJob);
+      });
+
+      jobs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      return jobs;
+    } catch (err) {
+      console.error('[Firestore Get All Jobs Error]:', err);
+      return [];
+    }
+  },
+
+  /**
    * Retrieves a single job by ID.
    */
   async getJobById(jobId: string): Promise<RecruiterJob | null> {
-    if (!jobId || typeof window === 'undefined' || !db) return null;
+    if (!jobId || !db) return null;
 
     try {
       const docRef = doc(db, 'jobs', jobId);
