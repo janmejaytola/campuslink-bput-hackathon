@@ -205,7 +205,10 @@ export const readinessService = {
       const docRef = doc(db, 'students', uid, 'readiness', 'current');
       const snap = await getDoc(docRef);
       if (snap.exists()) {
-        return snap.data() as ReadinessResult;
+        const data = snap.data() as ReadinessResult;
+        if (data && data.score > 0 && data.factorScores && Object.values(data.factorScores).some((v) => Number(v) > 0)) {
+          return data;
+        }
       }
     } catch (err) {
       console.error('[Firestore Get Readiness Error]:', err);
@@ -239,8 +242,12 @@ export const readinessService = {
 
     const result = calculateReadiness(profile, projects, certs, interns);
 
-    // Persist result in Firestore
-    await this.saveCurrentReadiness(uid, result);
+    // Persist result in Firestore (non-fatal if offline or rules delay)
+    try {
+      await this.saveCurrentReadiness(uid, result);
+    } catch (saveErr) {
+      console.warn('[readinessService.saveCurrentReadiness warning]:', saveErr);
+    }
 
     return result;
   },

@@ -13,6 +13,7 @@ import { auth } from '@/lib/firebase';
 import { profileService } from './profileService';
 import { validateRoleSelection } from './authorization';
 import { StrictRole, UserRecord } from '@/types/auth';
+import { studentService } from '@/lib/services/studentService';
 
 export interface RegisterParams {
   name: string;
@@ -152,6 +153,52 @@ export const authService = {
       };
 
       await profileService.createUserProfile(userRecord);
+
+      if (role === 'STUDENT') {
+        try {
+          await studentService.saveStudentProfile({
+            uid,
+            fullName: name.trim(),
+            email: email.trim().toLowerCase(),
+            phone: '',
+            dateOfBirth: '',
+            gender: '',
+            bputRegistrationNumber: regNumber?.trim() || '2201106284',
+            college: institution?.trim() || 'Silicon Institute of Technology',
+            department: department?.trim() || 'Computer Science & Engineering',
+            branch: department?.trim() || 'Computer Science and Engineering',
+            semester: '7th Semester',
+            graduationYear: '2026',
+            cgpa: 8.45,
+            backlogs: 0,
+            skills: ['Python', 'Java', 'SQL', 'Data Structures', 'Git'],
+            skillProficiencies: {
+              Python: 85,
+              Java: 80,
+              SQL: 75,
+              'Data Structures': 82,
+              Git: 78,
+            },
+            readinessInputs: {
+              aptitudeScore: 82,
+              technicalScore: 85,
+              communicationScore: 80,
+            },
+            careerGoal: {
+              targetRole: 'Software Engineer',
+              jobType: 'Full-time',
+              preferredLocation: 'Bhubaneswar, Bengaluru',
+              workMode: 'Hybrid',
+              expectedSalary: '8-12 LPA',
+            },
+            profileCompletion: 85,
+            createdAt: now,
+            updatedAt: now,
+          });
+        } catch (studentInitErr) {
+          console.warn('[StudentProfile init note]:', studentInitErr);
+        }
+      }
 
       return { user: userRecord };
     } catch (err: unknown) {

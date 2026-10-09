@@ -1,6 +1,6 @@
 import { StrictRole, ROLE_LABELS, ROLE_DASHBOARD_ROUTES } from '@/types/auth';
 
-export const PUBLIC_ROUTES = ['/', '/login', '/register'];
+export const PUBLIC_ROUTES = ['/', '/login', '/register', '/forgot-password'];
 
 export function isPublicRoute(pathname: string): boolean {
   if (pathname === '/') return true;

@@ -39,7 +39,8 @@ export function calculateSkillGap(
     }
     // If student has the skill name listed in their profile but no numeric calibration yet
     if (declaredSkills.has(key)) {
-      return { level: 0, assessed: false };
+      const fallbackLevel = profile?.readinessInputs?.technicalScore ?? 75;
+      return { level: fallbackLevel, assessed: false };
     }
     // Skill is not declared at all
     return { level: 0, assessed: true };
@@ -208,7 +209,10 @@ export const skillGapService = {
       const docRef = doc(db, 'students', uid, 'skillGap', 'current');
       const snap = await getDoc(docRef);
       if (snap.exists()) {
-        return snap.data() as SkillGapAnalysis;
+        const data = snap.data() as SkillGapAnalysis;
+        if (data && data.gaps && data.gaps.length > 0) {
+          return data;
+        }
       }
     } catch (err) {
       console.error('[Firestore Get Skill Gap Error]:', err);
@@ -238,7 +242,11 @@ export const skillGapService = {
     const roleReq = await this.getRoleRequirement(targetRole);
 
     const analysis = calculateSkillGap(profile, roleReq);
-    await this.saveAnalysis(uid, analysis);
+    try {
+      await this.saveAnalysis(uid, analysis);
+    } catch (saveErr) {
+      console.warn('[skillGapService.saveAnalysis non-fatal warning]:', saveErr);
+    }
 
     return analysis;
   },

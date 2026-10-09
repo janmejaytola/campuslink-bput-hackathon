@@ -44,13 +44,12 @@ export default function StudentDashboardPage() {
   const [skillGap, setSkillGap] = useState<SkillGapAnalysis | null>(null);
   const [shortlists, setShortlists] = useState<ShortlistRecord[]>([]);
   const [interviews, setInterviews] = useState<InterviewRecord[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(Boolean(currentUser?.uid));
 
   useEffect(() => {
     let active = true;
     (async () => {
       if (!currentUser?.uid) return;
-      setIsLoading(true);
       try {
         const [readinessRes, skillGapRes, shortlistRes, interviewRes] = await Promise.all([
           readinessService.getCurrentReadiness(currentUser.uid).then(async (res) => {
