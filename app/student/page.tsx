@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Sparkles,
   FileCheck2,
@@ -44,6 +45,8 @@ import { AppLayoutShell } from '@/components/navigation/AppLayoutShell';
 import { ProgressRing } from '@/components/common/ProgressRing';
 import { SkillBar } from '@/components/common/SkillBar';
 import { StatCard } from '@/components/common/StatCard';
+import { Card3D } from '@/components/common/Card3D';
+import { PageTransition, FadeIn, StaggerContainer, StaggerItem } from '@/components/common/MotionWrapper';
 import { useAuth } from '@/context/AuthContext';
 import { readinessService } from '@/lib/services/readinessService';
 import { ReadinessResult } from '@/types/readiness';
@@ -257,34 +260,39 @@ export default function StudentDashboardPage() {
   return (
     <ProtectedRoute allowedRole="STUDENT">
       <AppLayoutShell role="student">
-        <div className="space-y-6 pb-12">
+        <PageTransition className="space-y-6 pb-12">
           {/* ======================================================== */}
           {/* HERO BANNER: Wide cinematic campus photograph with dark navy overlay */}
           {/* ======================================================== */}
-          <div className="relative rounded-3xl overflow-hidden border border-[#172D4D] shadow-[0_12px_40px_rgba(0,0,0,0.5)] text-white">
+          <div className="relative rounded-3xl overflow-hidden border border-[#172D4D] shadow-[0_16px_50px_rgba(0,0,0,0.6)] text-white">
             {/* Background Image with Dark Navy Gradient Overlay */}
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{
-                backgroundImage: `url('https://picsum.photos/seed/campusuniversity/1600/600')`,
-              }}
-            />
-            {/* Multi-layered Deep Navy Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#06172B] via-[#091D38]/95 to-[#0B1B32]/90" />
+            <div className="absolute inset-0 pointer-events-none -z-10 overflow-hidden">
+              <Image
+                src="/images/campuslink_hero_campus_1791562156457.jpg"
+                alt="Cinematic campus university architecture"
+                fill
+                priority
+                referrerPolicy="no-referrer"
+                className="object-cover object-center opacity-25 filter contrast-125 brightness-80 scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#06172B] via-[#091D38]/95 to-[#0B1B32]/90" />
+            </div>
             <div className="absolute inset-0 bg-radial-[at_top_right] from-[#00C9C0]/20 via-transparent to-transparent pointer-events-none" />
 
             {/* Content Container */}
             <div className="relative z-10 p-6 md:p-8 lg:p-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
               <div className="space-y-3 max-w-2xl">
-                {/* Meta Badges */}
+                {/* Meta text with clean separators */}
                 <div className="flex flex-wrap items-center gap-2 text-xs">
-                  <span className="rounded-md bg-[#00C9C0]/15 border border-[#00C9C0]/40 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-[#00F5D4] shadow-[0_0_10px_rgba(0,201,192,0.2)]">
+                  <span className="font-extrabold uppercase tracking-wider text-[#00F5D4]">
                     CAREER OPERATING SYSTEM
                   </span>
-                  <span className="rounded-md bg-white/10 border border-white/15 px-2.5 py-0.5 text-[10px] font-mono text-slate-200">
+                  <span aria-hidden="true" className="text-slate-600">·</span>
+                  <span className="font-mono text-slate-300">
                     Reg #{regNumber}
                   </span>
-                  <span className="rounded-md bg-white/10 border border-white/15 px-2.5 py-0.5 text-[10px] text-slate-200 font-medium">
+                  <span aria-hidden="true" className="text-slate-600">·</span>
+                  <span className="text-slate-300 font-medium">
                     {department}
                   </span>
                 </div>
@@ -303,9 +311,9 @@ export default function StudentDashboardPage() {
                 <div className="flex flex-wrap items-center gap-3 pt-2">
                   <Link
                     href="/student/readiness"
-                    className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#007F83] to-[#00A89E] hover:from-[#00A89E] hover:to-[#00C9C0] px-4 py-2.5 text-xs font-bold text-white transition-all shadow-lg shadow-[#007F83]/30 cursor-pointer"
+                    className="gradient-btn-primary rounded-xl px-5 py-2.5 text-xs font-black transition-all flex items-center gap-2 shadow-[0_4px_20px_rgba(22,207,255,0.35)] cursor-pointer"
                   >
-                    <Sparkles className="h-4 w-4 text-[#A5F3FC]" />
+                    <Sparkles className="h-4 w-4 text-[#020817]" />
                     <span>Run AI Readiness Benchmark</span>
                   </Link>
 
@@ -319,7 +327,7 @@ export default function StudentDashboardPage() {
                 </div>
               </div>
 
-              {/* Profile Completion Circular Indicator */}
+              {/* Profile Completion Circular Indicator with 3D Depth */}
               <div className="flex items-center gap-4 bg-[#06172B]/85 border border-[#172D4D] p-4 sm:p-5 rounded-2xl shrink-0 backdrop-blur-md shadow-2xl">
                 <ProgressRing
                   value={profileCompletion}
@@ -978,7 +986,7 @@ export default function StudentDashboardPage() {
               </div>
             </div>
           </div>
-        </div>
+        </PageTransition>
       </AppLayoutShell>
     </ProtectedRoute>
   );

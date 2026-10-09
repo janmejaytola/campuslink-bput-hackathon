@@ -171,12 +171,12 @@ function LoginForm() {
         {/* Cinematic university campus background with dark navy gradient overlay */}
         <div className="absolute inset-0 pointer-events-none -z-20 overflow-hidden">
           <Image
-            src="https://picsum.photos/seed/bput-campus-cinematic/1920/1080"
+            src="/images/campuslink_hero_campus_1791562156457.jpg"
             alt="Campus visual background"
             fill
             priority
             referrerPolicy="no-referrer"
-            className="object-cover object-center opacity-10 filter contrast-125 brightness-75 scale-105"
+            className="object-cover object-center opacity-20 filter contrast-125 brightness-75 scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-[#020817]/95 via-[#06162D]/90 to-[#020817]" />
         </div>

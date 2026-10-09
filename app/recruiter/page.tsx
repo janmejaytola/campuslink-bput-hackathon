@@ -37,6 +37,8 @@ import {
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AppLayoutShell } from '@/components/navigation/AppLayoutShell';
 import { StatCard } from '@/components/common/StatCard';
+import { Card3D } from '@/components/common/Card3D';
+import { PageTransition, FadeIn, StaggerContainer, StaggerItem } from '@/components/common/MotionWrapper';
 import { EmptyState } from '@/components/common/EmptyState';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { ProgressRing } from '@/components/common/ProgressRing';
@@ -165,8 +167,9 @@ export default function RecruiterDashboardPage() {
   return (
     <ProtectedRoute allowedRole="RECRUITER">
       <AppLayoutShell role="recruiter">
-        {/* Recruiter ATS 3D Command Header Banner */}
-        <div className="relative rounded-3xl border border-[#152744] bg-gradient-to-r from-[#06172B] via-[#091D38] to-[#0B1B32] p-6 sm:p-8 text-white shadow-[0_12px_40px_rgba(0,0,0,0.5)] mb-8 overflow-hidden">
+        <PageTransition>
+          {/* Recruiter ATS 3D Command Header Banner */}
+          <div className="relative rounded-3xl border border-[#152744] bg-gradient-to-r from-[#06172B] via-[#091D38] to-[#0B1B32] p-6 sm:p-8 text-white shadow-[0_16px_50px_rgba(0,0,0,0.6)] mb-8 overflow-hidden">
           {/* Neon cyan ambient glow corner */}
           <div className="absolute top-0 right-0 -mt-12 -mr-12 w-96 h-96 bg-[#00C9C0]/15 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-[#007F83]/15 rounded-full blur-3xl pointer-events-none" />
@@ -716,7 +719,8 @@ export default function RecruiterDashboardPage() {
             </Link>
           </div>
         </div>
-      </AppLayoutShell>
-    </ProtectedRoute>
+      </PageTransition>
+    </AppLayoutShell>
+  </ProtectedRoute>
   );
 }

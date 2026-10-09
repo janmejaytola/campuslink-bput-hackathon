@@ -34,6 +34,7 @@ import {
   ArrowRight,
   HelpCircle,
   Compass,
+  Settings,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { RouteRole, StrictRole } from '@/types/auth';
@@ -58,6 +59,7 @@ const STUDENT_NAV: NavItem[] = [
   { label: 'My Applications', href: '/student/applications', icon: FileCheck2 },
   { label: 'Interview Schedule', href: '/student/schedule', icon: CalendarDays },
   { label: 'Offer Letters', href: '/student/offers', icon: CheckCircle2 },
+  { label: 'Settings & System', href: '/student/settings', icon: Settings },
 ];
 
 const RECRUITER_NAV: NavItem[] = [
@@ -67,6 +69,7 @@ const RECRUITER_NAV: NavItem[] = [
   { label: 'Shortlist Pipeline', href: '/recruiter/shortlist', icon: UserCheck, badge: 'Board' },
   { label: 'Interview Slots', href: '/recruiter/schedule', icon: CalendarDays, badge: '0 Clashes' },
   { label: 'Issued Offers', href: '/recruiter/offers', icon: CheckCircle2 },
+  { label: 'Settings & System', href: '/recruiter/settings', icon: Settings },
 ];
 
 const OFFICER_NAV: NavItem[] = [
@@ -78,6 +81,7 @@ const OFFICER_NAV: NavItem[] = [
   { label: 'Venue Coordination', href: '/officer/scheduling', icon: CalendarDays, badge: 'Clash-Free' },
   { label: 'Cohort Telemetry', href: '/officer/analytics', icon: BarChart3 },
   { label: 'Grievance Desk', href: '/officer/support', icon: LifeBuoy },
+  { label: 'Settings & System', href: '/officer/settings', icon: Settings },
 ];
 
 interface AppSidebarProps {
@@ -330,6 +334,20 @@ export function AppSidebar({
               )}
             </button>
           )}
+
+          {/* Bottom Settings Shortcut */}
+          <Link
+            href={`/${activeRole}/settings`}
+            className={`w-full flex items-center rounded-xl py-2 text-xs font-semibold transition-colors cursor-pointer ${
+              pathname === `/${activeRole}/settings`
+                ? 'bg-[#102442] text-[#00F5D4] border border-[#00C9C0]/40'
+                : 'text-slate-400 hover:text-[#00C9C0] hover:bg-[#102442]'
+            } ${isCollapsed ? 'justify-center px-1' : 'justify-start gap-2.5 px-3'}`}
+            title="System Settings & Appearance"
+          >
+            <Settings className="h-3.5 w-3.5 shrink-0" />
+            {!isCollapsed && <span>Settings & System</span>}
+          </Link>
 
           {/* Sign Out Button */}
           <button

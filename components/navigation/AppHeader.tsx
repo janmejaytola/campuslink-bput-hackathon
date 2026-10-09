@@ -27,8 +27,10 @@ import {
   Sun,
   Moon,
   Sparkles,
+  Settings,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@/context/ThemeContext';
 import { RouteRole, StrictRole, ROLE_LABELS } from '@/types/auth';
 
 interface AppHeaderProps {
@@ -59,7 +61,7 @@ export function AppHeader({
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isCommandOpen, setIsCommandOpen] = useState(false);
   const [commandQuery, setCommandQuery] = useState('');
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const { theme, resolvedTheme, toggleTheme } = useTheme();
 
   const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -121,6 +123,7 @@ export function AppHeader({
           { title: 'Formal Placement Offers', href: '/student/offers', category: 'Placement' },
           { title: 'Profile Dossier & Transcripts', href: '/student/profile', category: 'Account' },
           { title: 'Resume Documents & Extraction', href: '/student/resume', category: 'Documents' },
+          { title: 'Settings & System Preferences', href: '/student/settings', category: 'Preferences' },
         ]
       : activeRole === 'recruiter'
       ? [
@@ -130,6 +133,7 @@ export function AppHeader({
           { title: 'Shortlisting Board', href: '/recruiter/shortlist', category: 'Hiring' },
           { title: 'Conflict-Free Scheduler', href: '/recruiter/schedule', category: 'Calendar' },
           { title: 'Offer Letter Rollouts', href: '/recruiter/offers', category: 'Offers' },
+          { title: 'Settings & System Preferences', href: '/recruiter/settings', category: 'Preferences' },
         ]
       : [
           { title: 'Student Master Registry', href: '/officer/students', category: 'Database' },
@@ -139,6 +143,7 @@ export function AppHeader({
           { title: 'Venue & Lab Scheduling', href: '/officer/scheduling', category: 'Coordination' },
           { title: 'Institutional Telemetry & CSV', href: '/officer/analytics', category: 'Reporting' },
           { title: 'Student Grievance Helpdesk', href: '/officer/support', category: 'Support' },
+          { title: 'Settings & System Preferences', href: '/officer/settings', category: 'Preferences' },
         ]),
   ];
 
@@ -211,19 +216,36 @@ export function AppHeader({
             <Search className="h-4 w-4" />
           </button>
 
-          {/* Dark Mode Toggle */}
+          {/* Dark Mode / Light Mode Quick Toggle */}
           <button
-            onClick={() => setIsDarkMode(!isDarkMode)}
+            onClick={toggleTheme}
             className="rounded-xl p-2 text-slate-400 hover:bg-[#102442] hover:text-[#00C9C0] transition-colors cursor-pointer"
-            aria-label="Toggle visual mode"
-            title="Theme indicator"
+            aria-label={`Toggle theme (Current: ${theme})`}
+            title={`Theme: ${theme.toUpperCase()} (Click to toggle)`}
           >
-            {isDarkMode ? (
+            {resolvedTheme === 'dark' ? (
               <Moon className="h-4 w-4 text-[#00C9C0]" />
             ) : (
               <Sun className="h-4 w-4 text-amber-400" />
             )}
           </button>
+
+          {/* Dedicated System Settings Gear Icon */}
+          <Link
+            href={`/${activeRole}/settings`}
+            className={`rounded-xl p-2 transition-colors cursor-pointer relative ${
+              pathname === `/${activeRole}/settings`
+                ? 'bg-[#102442] text-[#00F5D4] border border-[#00C9C0]/50 shadow-[0_0_12px_rgba(0,201,192,0.3)]'
+                : 'text-slate-400 hover:bg-[#102442] hover:text-[#00C9C0]'
+            }`}
+            aria-label="System Settings & Preferences"
+            title="System Settings & Preferences"
+          >
+            <Settings className="h-4 w-4" />
+            {pathname === `/${activeRole}/settings` && (
+              <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-[#00F5D4]" />
+            )}
+          </Link>
 
           {/* Notifications Popover */}
           <div className="relative" ref={notifRef}>
@@ -338,6 +360,15 @@ export function AppHeader({
                 >
                   <User className="h-4 w-4 text-[#00C9C0]" />
                   <span>Profile Dossier</span>
+                </Link>
+
+                <Link
+                  href={`/${activeRole}/settings`}
+                  onClick={() => setIsProfileOpen(false)}
+                  className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold text-slate-300 hover:bg-[#102442] hover:text-white"
+                >
+                  <Settings className="h-4 w-4 text-[#00C9C0]" />
+                  <span>Settings & System</span>
                 </Link>
 
                 <button

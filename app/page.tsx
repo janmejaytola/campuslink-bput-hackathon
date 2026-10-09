@@ -31,6 +31,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { StrictRole, ROLE_LABELS, ROLE_DASHBOARD_ROUTES } from '@/types/auth';
+import { Card3D } from '@/components/common/Card3D';
+import { FadeIn, StaggerContainer, StaggerItem } from '@/components/common/MotionWrapper';
 
 export default function LandingPage() {
   const router = useRouter();
@@ -113,69 +115,56 @@ export default function LandingPage() {
       <div className="fixed top-1/3 right-10 w-[30rem] h-[30rem] bg-[#00E5D4]/8 rounded-full blur-[130px] pointer-events-none -z-10" />
       <div className="fixed bottom-10 left-1/3 w-[36rem] h-[36rem] bg-[#00BFA6]/8 rounded-full blur-[140px] pointer-events-none -z-10" />
 
-      {/* Global Header / Navigation */}
+      {/* Global Header / Navigation (Strict Top Bar Contract: 3 zones separated by gap-8) */}
       <header className="sticky top-0 z-50 border-b border-[#152744] bg-[#020817]/90 backdrop-blur-xl">
-        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          {/* Logo & Tagline */}
-          <Link href="/" className="flex items-center gap-3.5 group">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-[#00BFA6] via-[#00E5D4] to-[#16CFFF] text-[#020817] font-black text-lg tracking-wider shadow-[0_0_20px_rgba(22,207,255,0.4)] group-hover:scale-105 transition-transform">
+        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-8 px-4 sm:px-6 lg:px-8">
+          {/* Zone 1: Single text element wordmark */}
+          <Link href="/" className="flex items-center gap-3 shrink-0 group">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-[#00BFA6] via-[#00E5D4] to-[#16CFFF] text-[#020817] font-black text-base tracking-wider shadow-[0_0_20px_rgba(22,207,255,0.4)] group-hover:scale-105 transition-transform">
               CL
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xl font-black tracking-tight text-white group-hover:text-[#16CFFF] transition-colors">
-                  CAMPUSLINK
-                </span>
-                <span className="rounded-md bg-[#16CFFF]/15 border border-[#16CFFF]/40 px-2 py-0.5 text-[9px] font-mono font-bold text-[#16CFFF] shadow-[0_0_10px_rgba(22,207,255,0.25)]">
-                  OS 2026
-                </span>
-              </div>
-              <p className="text-[11px] text-[#9CB4CC] font-medium tracking-wide">
-                Your Career. Our Mission.
-              </p>
-            </div>
+            <span className="text-xl font-black tracking-tight text-white group-hover:text-[#16CFFF] transition-colors whitespace-nowrap">
+              CAMPUSLINK
+            </span>
           </Link>
 
-          {/* Navigation Links */}
-          <nav className="hidden md:flex items-center gap-8 text-xs font-semibold text-[#9CB4CC]">
-            <a href="#platform" className="hover:text-[#16CFFF] transition-colors">
+          {/* Zone 2: 4-5 concise single-line nav links */}
+          <nav className="hidden md:flex items-center gap-7 text-xs font-semibold text-[#9CB4CC]">
+            <a href="#platform" className="hover:text-[#16CFFF] transition-colors whitespace-nowrap shrink-0">
               Platform
             </a>
-            <a href="#portals" className="hover:text-[#16CFFF] transition-colors">
-              Student
+            <a href="#portals" className="hover:text-[#16CFFF] transition-colors whitespace-nowrap shrink-0">
+              Workspaces
             </a>
-            <a href="#portals" className="hover:text-[#16CFFF] transition-colors">
-              Recruiter
+            <a href="#workflow" className="hover:text-[#16CFFF] transition-colors whitespace-nowrap shrink-0">
+              Workflow
             </a>
-            <a href="#portals" className="hover:text-[#16CFFF] transition-colors">
-              Placement Office
-            </a>
-            <a href="#features" className="hover:text-[#16CFFF] transition-colors">
-              About
+            <a href="#about" className="hover:text-[#16CFFF] transition-colors whitespace-nowrap shrink-0">
+              Governance
             </a>
           </nav>
 
-          {/* User Auth CTAs */}
-          <div className="flex items-center gap-3">
+          {/* Zone 3: 1 primary action / auth actions */}
+          <div className="flex items-center gap-3 shrink-0">
             {isAuthenticated && currentUser ? (
               <Link
                 href={ROLE_DASHBOARD_ROUTES[currentUser.role]}
-                className="gradient-btn-primary rounded-xl px-4 py-2.5 text-xs font-black transition-all flex items-center gap-2 cursor-pointer"
+                className="gradient-btn-primary rounded-xl px-4 py-2 text-xs font-black transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap"
               >
-                <span>Dashboard ({ROLE_LABELS[currentUser.role]})</span>
+                <span>Dashboard</span>
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             ) : (
               <>
                 <Link
                   href="/login"
-                  className="rounded-xl border border-[#152744] bg-[#06162D]/90 px-4 py-2.5 text-xs font-bold text-[#F4FAFF] hover:border-[#16CFFF]/60 hover:text-white transition-all shadow-xs cursor-pointer"
+                  className="rounded-xl border border-[#152744] bg-[#06162D]/90 px-3.5 py-2 text-xs font-bold text-[#F4FAFF] hover:border-[#16CFFF]/60 hover:text-white transition-all shadow-xs cursor-pointer whitespace-nowrap"
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/register"
-                  className="gradient-btn-primary rounded-xl px-5 py-2.5 text-xs font-black transition-all cursor-pointer shadow-[0_0_20px_rgba(22,207,255,0.3)] hover:shadow-[0_0_30px_rgba(0,229,212,0.5)]"
+                  className="gradient-btn-primary rounded-xl px-4 py-2 text-xs font-black transition-all cursor-pointer shadow-[0_0_20px_rgba(22,207,255,0.3)] hover:shadow-[0_0_30px_rgba(0,229,212,0.5)] whitespace-nowrap"
                 >
                   Get Started
                 </Link>
@@ -186,23 +175,23 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-16 pb-24 lg:pt-24 lg:pb-32 border-b border-[#152744]">
-        {/* Cinematic university campus background with dark navy gradient overlay */}
+      <section className="relative overflow-hidden pt-14 pb-20 lg:pt-20 lg:pb-28 border-b border-[#152744]">
+        {/* Cinematic university campus background with measured gradient scrim */}
         <div className="absolute inset-0 pointer-events-none -z-20 overflow-hidden">
           <Image
-            src="https://picsum.photos/seed/bput-campus-cinematic/1920/1080"
-            alt="University campus background"
+            src="/images/campuslink_hero_campus_1791562156457.jpg"
+            alt="Futuristic university campus architecture at dusk"
             fill
             priority
             referrerPolicy="no-referrer"
-            className="object-cover object-center opacity-10 filter contrast-125 brightness-75 scale-105"
+            className="object-cover object-center opacity-25 filter contrast-125 brightness-90 scale-105"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#020817]/95 via-[#020817]/85 to-[#020817]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#020817]/90 via-[#020817]/80 to-[#020817]" />
         </div>
 
         {/* Abstract 3D Geometric Light Mesh */}
         <div
-          className="absolute inset-0 opacity-20 pointer-events-none -z-10"
+          className="absolute inset-0 opacity-15 pointer-events-none -z-10"
           style={{
             backgroundImage: `radial-gradient(rgba(22, 207, 255, 0.25) 1px, transparent 1px)`,
             backgroundSize: '32px 32px',
@@ -211,14 +200,16 @@ export default function LandingPage() {
 
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-6 max-w-4xl mx-auto">
-            {/* Pill Tag */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#16CFFF]/40 bg-[#06162D]/90 px-4 py-1.5 text-xs font-bold text-[#16CFFF] shadow-[0_0_20px_rgba(22,207,255,0.2)] backdrop-blur-md">
-              <Sparkles className="h-4 w-4 text-[#00E5D4] animate-pulse" />
-              <span>AI-Powered University Placement Platform · BPUT 2026</span>
+            {/* Clean unboxed metadata kicker */}
+            <div className="flex items-center justify-center gap-2 text-xs font-semibold text-[#16CFFF]">
+              <Sparkles className="h-4 w-4 text-[#00E5D4]" />
+              <span>AI-Powered Placement Intelligence</span>
+              <span aria-hidden="true" className="text-slate-600">·</span>
+              <span className="text-slate-300">BPUT 2026 PS10 Framework</span>
             </div>
 
-            {/* Main Headline */}
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white leading-[1.08] drop-shadow-lg">
+            {/* Main Headline with balanced wrap */}
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white leading-[1.08] drop-shadow-lg [text-wrap:balance]">
               Your Future. Your Skills.{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#16CFFF] via-[#00E5D4] to-[#00BFA6] glow-text-cyan">
                 Your Career.
@@ -249,128 +240,110 @@ export default function LandingPage() {
           </div>
 
           {/* Sophisticated Floating 3D Dashboard Preview */}
-          <div className="mt-14 sm:mt-20 relative max-w-5xl mx-auto perspective-1000">
+          <div className="mt-14 sm:mt-18 relative max-w-5xl mx-auto perspective-1200">
             {/* Glowing Backdrop Rim */}
-            <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-[#16CFFF]/30 via-[#00E5D4]/20 to-[#00BFA6]/30 blur-2xl opacity-75" />
+            <div className="absolute -inset-2 rounded-3xl bg-gradient-to-r from-[#16CFFF]/30 via-[#00E5D4]/25 to-[#00BFA6]/30 blur-2xl opacity-75 animate-pulse-glow" />
 
-            <div className="relative rounded-3xl border border-[#16CFFF]/30 bg-[#06162D]/90 p-5 sm:p-7 shadow-[0_20px_60px_rgba(0,0,0,0.8)] backdrop-blur-2xl transition-all duration-500 hover:border-[#16CFFF]/60">
-              {/* Window Bar */}
-              <div className="flex items-center justify-between border-b border-[#152744] pb-4 mb-6">
-                <div className="flex items-center gap-2.5">
-                  <span className="h-3 w-3 rounded-full bg-rose-500/80" />
-                  <span className="h-3 w-3 rounded-full bg-amber-500/80" />
-                  <span className="h-3 w-3 rounded-full bg-emerald-500/80" />
-                  <span className="ml-2 text-xs font-mono text-[#9CB4CC] hidden sm:inline">
-                    campuslink.bput.ac.in/student/dashboard
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-[#00E5D4] animate-pulse" />
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-[#00E5D4]">
-                    LIVE TELEMETRY
-                  </span>
-                </div>
-              </div>
-
-              {/* Floating Dashboard Inner Shell */}
-              <div className="space-y-6">
-                {/* Hero Card inside preview */}
-                <div className="relative rounded-2xl border border-[#152744] bg-gradient-to-r from-[#020817] via-[#0A203B] to-[#06162D] p-5 sm:p-6 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-5 overflow-hidden">
-                  <div className="space-y-1.5 relative z-10">
-                    <div className="flex items-center gap-2 text-xs">
-                      <span className="rounded bg-[#16CFFF]/15 border border-[#16CFFF]/30 px-2 py-0.5 text-[10px] font-mono text-[#16CFFF]">
-                        STUDENT OS
-                      </span>
-                      <span className="text-[#9CB4CC]">·</span>
-                      <span className="text-slate-300 font-mono text-xs">Reg #2201106284</span>
-                    </div>
-                    <h3 className="text-xl sm:text-2xl font-black tracking-tight text-white">
-                      Welcome back, Priyanshu Mohanty
-                    </h3>
-                    <p className="text-xs text-[#9CB4CC]">
-                      Computer Science & Engineering · Silicon Institute of Technology · Batch 2026
-                    </p>
+            <Card3D maxTilt={3.5} glare={true} highlightBorder={true}>
+              <div className="relative rounded-3xl border border-[#16CFFF]/35 bg-[#06162D]/95 p-4 sm:p-6 shadow-[0_24px_70px_rgba(0,0,0,0.85)] backdrop-blur-2xl transition-all duration-500 hover:border-[#16CFFF]/70 preserve-3d overflow-hidden">
+                {/* Window Bar */}
+                <div className="flex items-center justify-between border-b border-[#152744] pb-3 mb-5 translate-z-10">
+                  <div className="flex items-center gap-2.5">
+                    <span className="h-2.5 w-2.5 rounded-full bg-rose-500/80" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-amber-500/80" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/80" />
+                    <span className="ml-2 text-xs font-mono text-[#9CB4CC] hidden sm:inline">
+                      campuslink.bput.ac.in/command-center
+                    </span>
                   </div>
-
-                  {/* Readiness Ring Widget */}
-                  <div className="flex items-center gap-4 bg-[#020817]/80 border border-[#16CFFF]/30 p-3.5 rounded-xl shrink-0 backdrop-blur-md">
-                    <div className="relative flex items-center justify-center h-14 w-14 rounded-full border-4 border-[#16CFFF] shadow-[0_0_15px_rgba(22,207,255,0.4)]">
-                      <span className="font-mono text-sm font-black text-white">92%</span>
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-white">Profile Complete</p>
-                      <p className="text-[11px] text-[#00E5D4] font-semibold">Tier-1 Qualified</p>
-                    </div>
+                  <div className="flex items-center gap-2 text-[10px] font-mono text-[#00E5D4]">
+                    <span className="text-slate-400">STATUS</span>
+                    <span aria-hidden="true">·</span>
+                    <span className="font-bold">ACTIVE CYCLE 2026</span>
                   </div>
                 </div>
 
-                {/* 4 Mini Stat Cards */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-left">
-                  <div className="rounded-xl border border-[#152744] bg-[#020817]/80 p-3.5 shadow-sm">
-                    <span className="text-[10px] font-extrabold uppercase text-[#9CB4CC] tracking-wider block">
-                      AI Readiness
-                    </span>
-                    <p className="text-xl font-black text-white font-mono mt-0.5">84 / 100</p>
-                    <span className="text-[10px] text-[#00E5D4] font-semibold">Top 5% Cohort</span>
-                  </div>
-
-                  <div className="rounded-xl border border-[#152744] bg-[#020817]/80 p-3.5 shadow-sm">
-                    <span className="text-[10px] font-extrabold uppercase text-[#9CB4CC] tracking-wider block">
-                      Active Matches
-                    </span>
-                    <p className="text-xl font-black text-[#16CFFF] font-mono mt-0.5">3 Matched</p>
-                    <span className="text-[10px] text-slate-400">90%+ Fit Ratio</span>
-                  </div>
-
-                  <div className="rounded-xl border border-[#152744] bg-[#020817]/80 p-3.5 shadow-sm">
-                    <span className="text-[10px] font-extrabold uppercase text-[#9CB4CC] tracking-wider block">
-                      Conflict Radar
-                    </span>
-                    <p className="text-xl font-black text-emerald-400 font-mono mt-0.5">0 Clashes</p>
-                    <span className="text-[10px] text-emerald-400 font-semibold">Exams Protected</span>
-                  </div>
-
-                  <div className="rounded-xl border border-[#152744] bg-[#020817]/80 p-3.5 shadow-sm">
-                    <span className="text-[10px] font-extrabold uppercase text-[#9CB4CC] tracking-wider block">
-                      Verified Offers
-                    </span>
-                    <p className="text-xl font-black text-white font-mono mt-0.5">1 Issued</p>
-                    <span className="text-[10px] text-[#00E5D4] font-semibold">₹8.5 LPA Package</span>
-                  </div>
-                </div>
-
-                {/* Live Recommended Job Preview Strip */}
-                <div className="rounded-xl border border-[#16CFFF]/25 bg-[#020817]/90 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-left">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0A203B] border border-[#16CFFF]/30 text-[#16CFFF] font-black text-xs shrink-0">
-                      TCS
+                {/* Split 3D Preview: Generated High-Fidelity UI Image + Interactive Hologram Layer */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+                  {/* Left: High-res dimensional render */}
+                  <div className="lg:col-span-7 relative rounded-2xl overflow-hidden border border-[#152744] shadow-inner bg-[#020817] group aspect-16/10">
+                    <Image
+                      src="/images/campuslink_dashboard_preview_1791562168781.jpg"
+                      alt="CAMPUSLINK 3D placement dashboard preview"
+                      fill
+                      priority
+                      referrerPolicy="no-referrer"
+                      className="object-cover object-center group-hover:scale-102 transition-transform duration-700"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#020817] via-transparent to-transparent opacity-60" />
+                    <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-xs text-white bg-[#06162D]/85 backdrop-blur-md p-2.5 rounded-xl border border-[#16CFFF]/30">
+                      <span className="font-bold">Interactive Telemetry Overlay</span>
+                      <span className="font-mono text-[#00E5D4] text-[11px] font-bold">1,420 Cohort Synchronized</span>
                     </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <strong className="text-xs sm:text-sm font-bold text-white">
-                          Software Development Engineer — Digital
-                        </strong>
-                        <span className="text-[9px] font-bold text-[#00E5D4] bg-[#00E5D4]/10 border border-[#00E5D4]/30 px-1.5 py-0.2 rounded">
-                          94% Match
-                        </span>
+                  </div>
+
+                  {/* Right: Live Interactive Card Matrix */}
+                  <div className="lg:col-span-5 flex flex-col justify-between gap-3 translate-z-20">
+                    {/* Hero Card inside preview */}
+                    <div className="rounded-xl border border-[#152744] bg-[#020817]/90 p-4 space-y-2">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-mono text-[#16CFFF] font-bold text-[11px]">STUDENT DOSSIER</span>
+                        <span className="text-slate-400 text-[10px] font-mono">Reg #2201106284</span>
                       </div>
+                      <h4 className="text-sm font-bold text-white">Priyanshu Mohanty</h4>
                       <p className="text-[11px] text-[#9CB4CC]">
-                        Tata Consultancy Services · Bhubaneswar / Remote · ₹7.5 - ₹9.0 LPA
+                        CSE · Silicon Institute of Technology · CGPA 8.45
                       </p>
                     </div>
-                  </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-[11px] font-mono text-emerald-400 font-semibold bg-emerald-950/60 border border-emerald-800/40 px-2.5 py-1 rounded-lg">
-                      ELIGIBLE ✓
-                    </span>
-                    <div className="gradient-btn-primary rounded-lg px-3 py-1 text-xs font-black">
-                      Apply Now
+                    {/* Readiness Gauge Widget */}
+                    <div className="flex items-center justify-between gap-3 p-3.5 rounded-xl bg-gradient-to-r from-[#06162D] to-[#0A203B] border border-[#16CFFF]/30">
+                      <div>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#9CB4CC] block">
+                          AI Readiness Score
+                        </span>
+                        <span className="text-2xl font-black font-mono text-[#00E5D4] tabular-nums">
+                          84 / 100
+                        </span>
+                        <span className="text-[10px] text-emerald-400 block font-semibold mt-0.5">
+                          Tier-1 Direct Shortlist Eligible
+                        </span>
+                      </div>
+                      <div className="relative flex items-center justify-center h-12 w-12 rounded-full border-3 border-[#16CFFF] shadow-[0_0_15px_rgba(22,207,255,0.4)]">
+                        <span className="font-mono text-xs font-black text-white">84%</span>
+                      </div>
                     </div>
+
+                    {/* Mini Stats 2-column */}
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div className="rounded-xl border border-[#152744] bg-[#020817]/80 p-3">
+                        <span className="text-[9px] font-extrabold uppercase text-[#9CB4CC] block">
+                          Conflict Radar
+                        </span>
+                        <p className="text-lg font-black text-emerald-400 font-mono mt-0.5">0 Clashes</p>
+                        <span className="text-[10px] text-slate-400">Timetable Protected</span>
+                      </div>
+                      <div className="rounded-xl border border-[#152744] bg-[#020817]/80 p-3">
+                        <span className="text-[9px] font-extrabold uppercase text-[#9CB4CC] block">
+                          Verified Offers
+                        </span>
+                        <p className="text-lg font-black text-[#16CFFF] font-mono mt-0.5">1 Issued</p>
+                        <span className="text-[10px] text-slate-400">₹8.5 LPA Package</span>
+                      </div>
+                    </div>
+
+                    {/* Action button inside preview */}
+                    <Link
+                      href="/student"
+                      className="gradient-btn-primary rounded-xl py-2.5 px-4 text-xs font-black text-center flex items-center justify-center gap-1.5 shadow-[0_0_15px_rgba(22,207,255,0.3)] cursor-pointer"
+                    >
+                      <span>Explore Live Portal Demo</span>
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </Link>
                   </div>
                 </div>
               </div>
-            </div>
+            </Card3D>
           </div>
         </div>
       </section>
@@ -418,64 +391,86 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Interactive Portal Display Card */}
-          <div className="rounded-3xl border border-[#16CFFF]/30 bg-[#06162D]/85 p-6 sm:p-10 shadow-[0_12px_40px_rgba(0,0,0,0.5)] backdrop-blur-xl max-w-5xl mx-auto space-y-8">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 border-b border-[#152744] pb-6">
-              <div className="flex items-center gap-4">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#0A203B] border border-[#16CFFF]/40 text-[#16CFFF] shadow-[0_0_20px_rgba(22,207,255,0.25)]">
-                  <ActiveIcon className="h-7 w-7" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-2xl font-black text-white">{activePortal.title}</h3>
-                    <span className={`text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-md border ${activePortal.badgeColor}`}>
-                      {activePortal.badge}
-                    </span>
+          {/* Interactive Portal Display Card with Isometric Visual Showcase */}
+          <Card3D maxTilt={2.5} glare={true} highlightBorder={true} className="max-w-5xl mx-auto">
+            <div className="rounded-3xl border border-[#16CFFF]/30 bg-[#06162D]/90 p-6 sm:p-8 shadow-[0_16px_50px_rgba(0,0,0,0.6)] backdrop-blur-xl space-y-6 preserve-3d">
+              {/* Header banner */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 border-b border-[#152744] pb-6 translate-z-10">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#0A203B] border border-[#16CFFF]/40 text-[#16CFFF] shadow-[0_0_20px_rgba(22,207,255,0.25)]">
+                    <ActiveIcon className="h-7 w-7" />
                   </div>
-                  <p className="text-xs text-[#9CB4CC] font-medium">{activePortal.tagline}</p>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-2xl font-black text-white">{activePortal.title}</h3>
+                      <span className={`text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-md border ${activePortal.badgeColor}`}>
+                        {activePortal.badge}
+                      </span>
+                    </div>
+                    <p className="text-xs text-[#9CB4CC] font-medium">{activePortal.tagline}</p>
+                  </div>
                 </div>
+
+                <Link
+                  href={activePortal.route}
+                  className="gradient-btn-primary rounded-xl px-5 py-2.5 text-xs font-black transition-all flex items-center gap-2 cursor-pointer self-start sm:self-auto"
+                >
+                  <span>Launch {activePortal.badge}</span>
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
               </div>
 
-              <Link
-                href={activePortal.route}
-                className="gradient-btn-primary rounded-xl px-5 py-2.5 text-xs font-black transition-all flex items-center gap-2 cursor-pointer self-start sm:self-auto"
-              >
-                <span>Launch {activePortal.badge}</span>
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-
-            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-3xl">
-              {activePortal.description}
-            </p>
-
-            {/* Live Metrics associated with portal */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {activePortal.demoMetrics.map((met, i) => (
-                <div key={i} className="p-4 rounded-xl bg-[#020817] border border-[#152744]">
-                  <span className="text-[10px] font-extrabold uppercase text-[#9CB4CC] tracking-wider block">
-                    {met.label}
-                  </span>
-                  <p className="text-2xl font-black text-[#16CFFF] font-mono mt-1 tabular-nums">
-                    {met.value}
-                  </p>
-                  <span className="text-[11px] text-slate-400 mt-0.5 block">{met.sub}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Key feature checklist */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
-              {activePortal.features.map((feat, idx) => (
-                <div key={idx} className="flex items-start gap-3 text-xs text-slate-200">
-                  <div className="rounded-lg bg-[#16CFFF]/15 border border-[#16CFFF]/40 p-1 text-[#16CFFF] shrink-0 mt-0.5">
-                    <Check className="h-3.5 w-3.5" />
+              {/* Portal Content Grid: Visual Asset + Real Metrics */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center translate-z-10">
+                <div className="lg:col-span-5 relative rounded-2xl overflow-hidden border border-[#152744] shadow-md bg-[#020817] aspect-16/10">
+                  <Image
+                    src="/images/campuslink_portal_showcase_1791562184038.jpg"
+                    alt="Three synchronized placement workspace portals"
+                    fill
+                    referrerPolicy="no-referrer"
+                    className="object-cover object-center"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#020817]/80 via-transparent to-transparent" />
+                  <div className="absolute bottom-2.5 left-2.5 right-2.5 text-[11px] font-mono font-semibold text-[#00E5D4] bg-[#06162D]/90 px-2.5 py-1.5 rounded-lg border border-[#16CFFF]/25">
+                    Isolated RBAC Architecture · 100% Data Protection
                   </div>
-                  <span className="leading-relaxed">{feat}</span>
                 </div>
-              ))}
+
+                <div className="lg:col-span-7 space-y-4">
+                  <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                    {activePortal.description}
+                  </p>
+
+                  {/* Live Metrics associated with portal */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {activePortal.demoMetrics.map((met, i) => (
+                      <div key={i} className="p-3.5 rounded-xl bg-[#020817] border border-[#152744] hover:border-[#16CFFF]/30 transition-colors">
+                        <span className="text-[10px] font-extrabold uppercase text-[#9CB4CC] tracking-wider block">
+                          {met.label}
+                        </span>
+                        <p className="text-xl font-black text-[#16CFFF] font-mono mt-1 tabular-nums">
+                          {met.value}
+                        </p>
+                        <span className="text-[10px] text-slate-400 mt-0.5 block">{met.sub}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Key feature checklist */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                    {activePortal.features.map((feat, idx) => (
+                      <div key={idx} className="flex items-start gap-2.5 text-xs text-slate-200">
+                        <div className="rounded-lg bg-[#16CFFF]/15 border border-[#16CFFF]/40 p-1 text-[#16CFFF] shrink-0 mt-0.5">
+                          <Check className="h-3 w-3" />
+                        </div>
+                        <span className="leading-snug text-[11px]">{feat}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
+          </Card3D>
         </div>
       </section>
 
@@ -495,65 +490,77 @@ export default function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="rounded-2xl border border-[#152744] bg-[#06162D]/80 p-6 space-y-3.5 hover:border-[#16CFFF]/50 hover:shadow-[0_0_25px_rgba(22,207,255,0.15)] transition-all">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#0A203B] border border-[#16CFFF]/40 text-[#16CFFF]">
-                <ShieldCheck className="h-6 w-6" />
+            <Card3D maxTilt={4} glare={true} className="h-full">
+              <div className="h-full rounded-2xl border border-[#152744] bg-[#06162D]/85 p-6 space-y-3.5 hover:border-[#16CFFF]/50 hover:shadow-[0_0_25px_rgba(22,207,255,0.18)] transition-all preserve-3d">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#0A203B] border border-[#16CFFF]/40 text-[#16CFFF] translate-z-10">
+                  <ShieldCheck className="h-6 w-6" />
+                </div>
+                <h3 className="text-base font-bold text-white translate-z-10">Deterministic Eligibility Gate</h3>
+                <p className="text-xs text-[#9CB4CC] leading-relaxed translate-z-10">
+                  Evaluates candidate CGPA cutoffs, allowed engineering disciplines, active backlog tolerances, and graduation batches strictly on server-side rules. No hallucinated passes.
+                </p>
               </div>
-              <h3 className="text-base font-bold text-white">Deterministic Eligibility Gate</h3>
-              <p className="text-xs text-[#9CB4CC] leading-relaxed">
-                Evaluates candidate CGPA cutoffs, allowed engineering disciplines, active backlog tolerances, and graduation batches strictly on server-side rules. No hallucinated passes.
-              </p>
-            </div>
+            </Card3D>
 
-            <div className="rounded-2xl border border-[#152744] bg-[#06162D]/80 p-6 space-y-3.5 hover:border-[#00E5D4]/50 hover:shadow-[0_0_25px_rgba(0,229,212,0.15)] transition-all">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#0A203B] border border-[#00E5D4]/40 text-[#00E5D4]">
-                <Scale className="h-6 w-6" />
+            <Card3D maxTilt={4} glare={true} className="h-full">
+              <div className="h-full rounded-2xl border border-[#152744] bg-[#06162D]/85 p-6 space-y-3.5 hover:border-[#00E5D4]/50 hover:shadow-[0_0_25px_rgba(0,229,212,0.18)] transition-all preserve-3d">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#0A203B] border border-[#00E5D4]/40 text-[#00E5D4] translate-z-10">
+                  <Scale className="h-6 w-6" />
+                </div>
+                <h3 className="text-base font-bold text-white translate-z-10">Explainable Candidate Matching</h3>
+                <p className="text-xs text-[#9CB4CC] leading-relaxed translate-z-10">
+                  Multi-dimensional rubric scoring across required technical skills, academic performance, project experience, and soft skills with clear justification breakdowns.
+                </p>
               </div>
-              <h3 className="text-base font-bold text-white">Explainable Candidate Matching</h3>
-              <p className="text-xs text-[#9CB4CC] leading-relaxed">
-                Multi-dimensional rubric scoring across required technical skills, academic performance, project experience, and soft skills with clear justification breakdowns.
-              </p>
-            </div>
+            </Card3D>
 
-            <div className="rounded-2xl border border-[#152744] bg-[#06162D]/80 p-6 space-y-3.5 hover:border-[#00BFA6]/50 hover:shadow-[0_0_25px_rgba(0,191,166,0.15)] transition-all">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#0A203B] border border-[#00BFA6]/40 text-[#00BFA6]">
-                <CalendarDays className="h-6 w-6" />
+            <Card3D maxTilt={4} glare={true} className="h-full">
+              <div className="h-full rounded-2xl border border-[#152744] bg-[#06162D]/85 p-6 space-y-3.5 hover:border-[#00BFA6]/50 hover:shadow-[0_0_25px_rgba(0,191,166,0.18)] transition-all preserve-3d">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#0A203B] border border-[#00BFA6]/40 text-[#00BFA6] translate-z-10">
+                  <CalendarDays className="h-6 w-6" />
+                </div>
+                <h3 className="text-base font-bold text-white translate-z-10">Conflict-Free Timetable Scheduler</h3>
+                <p className="text-xs text-[#9CB4CC] leading-relaxed translate-z-10">
+                  Interval tree clash detection prevents interview panel schedules from overlapping with university semester exams, laboratory sessions, or competing job drives.
+                </p>
               </div>
-              <h3 className="text-base font-bold text-white">Conflict-Free Timetable Scheduler</h3>
-              <p className="text-xs text-[#9CB4CC] leading-relaxed">
-                Interval tree clash detection prevents interview panel schedules from overlapping with university semester exams, laboratory sessions, or competing job drives.
-              </p>
-            </div>
+            </Card3D>
 
-            <div className="rounded-2xl border border-[#152744] bg-[#06162D]/80 p-6 space-y-3.5 hover:border-[#16CFFF]/50 hover:shadow-[0_0_25px_rgba(22,207,255,0.15)] transition-all">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#0A203B] border border-[#16CFFF]/40 text-[#16CFFF]">
-                <Sparkles className="h-6 w-6" />
+            <Card3D maxTilt={4} glare={true} className="h-full">
+              <div className="h-full rounded-2xl border border-[#152744] bg-[#06162D]/85 p-6 space-y-3.5 hover:border-[#16CFFF]/50 hover:shadow-[0_0_25px_rgba(22,207,255,0.18)] transition-all preserve-3d">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#0A203B] border border-[#16CFFF]/40 text-[#16CFFF] translate-z-10">
+                  <Sparkles className="h-6 w-6" />
+                </div>
+                <h3 className="text-base font-bold text-white translate-z-10">AI Career Readiness Diagnostic</h3>
+                <p className="text-xs text-[#9CB4CC] leading-relaxed translate-z-10">
+                  Scores student resumes, portfolio projects, and technical competency against industry job descriptions using Gemini 3.8 Flash with structured schema extraction.
+                </p>
               </div>
-              <h3 className="text-base font-bold text-white">AI Career Readiness Diagnostic</h3>
-              <p className="text-xs text-[#9CB4CC] leading-relaxed">
-                Scores student resumes, portfolio projects, and technical competency against industry job descriptions using Gemini 3.8 Flash with structured schema extraction.
-              </p>
-            </div>
+            </Card3D>
 
-            <div className="rounded-2xl border border-[#152744] bg-[#06162D]/80 p-6 space-y-3.5 hover:border-[#00E5D4]/50 hover:shadow-[0_0_25px_rgba(0,229,212,0.15)] transition-all">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#0A203B] border border-[#00E5D4]/40 text-[#00E5D4]">
-                <Target className="h-6 w-6" />
+            <Card3D maxTilt={4} glare={true} className="h-full">
+              <div className="h-full rounded-2xl border border-[#152744] bg-[#06162D]/85 p-6 space-y-3.5 hover:border-[#00E5D4]/50 hover:shadow-[0_0_25px_rgba(0,229,212,0.18)] transition-all preserve-3d">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#0A203B] border border-[#00E5D4]/40 text-[#00E5D4] translate-z-10">
+                  <Target className="h-6 w-6" />
+                </div>
+                <h3 className="text-base font-bold text-white translate-z-10">Target Skill-Gap Radar</h3>
+                <p className="text-xs text-[#9CB4CC] leading-relaxed translate-z-10">
+                  Identifies missing technical proficiencies for desired corporate roles and maps out actionable learning roadmaps before campus hiring drives begin.
+                </p>
               </div>
-              <h3 className="text-base font-bold text-white">Target Skill-Gap Radar</h3>
-              <p className="text-xs text-[#9CB4CC] leading-relaxed">
-                Identifies missing technical proficiencies for desired corporate roles and maps out actionable learning roadmaps before campus hiring drives begin.
-              </p>
-            </div>
+            </Card3D>
 
-            <div className="rounded-2xl border border-[#152744] bg-[#06162D]/80 p-6 space-y-3.5 hover:border-[#00BFA6]/50 hover:shadow-[0_0_25px_rgba(0,191,166,0.15)] transition-all">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#0A203B] border border-[#00BFA6]/40 text-[#00BFA6]">
-                <BarChart3 className="h-6 w-6" />
+            <Card3D maxTilt={4} glare={true} className="h-full">
+              <div className="h-full rounded-2xl border border-[#152744] bg-[#06162D]/85 p-6 space-y-3.5 hover:border-[#00BFA6]/50 hover:shadow-[0_0_25px_rgba(0,191,166,0.18)] transition-all preserve-3d">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#0A203B] border border-[#00BFA6]/40 text-[#00BFA6] translate-z-10">
+                  <BarChart3 className="h-6 w-6" />
+                </div>
+                <h3 className="text-base font-bold text-white translate-z-10">Central Placement Governance</h3>
+                <p className="text-xs text-[#9CB4CC] leading-relaxed translate-z-10">
+                  Institutional oversight with branch-wise placement rates, salary distribution telemetry, verified offer letters, and BPUT PS10 regulatory audit logging.
+                </p>
               </div>
-              <h3 className="text-base font-bold text-white">Central Placement Governance</h3>
-              <p className="text-xs text-[#9CB4CC] leading-relaxed">
-                Institutional oversight with branch-wise placement rates, salary distribution telemetry, verified offer letters, and BPUT PS10 regulatory audit logging.
-              </p>
-            </div>
+            </Card3D>
           </div>
         </div>
       </section>

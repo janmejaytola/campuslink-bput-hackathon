@@ -95,6 +95,36 @@
   transform: translateY(-1px);
 }
 
+.gradient-btn-primary:active {
+  transform: translateY(0.5px);
+  box-shadow: 0 2px 14px rgba(0, 229, 212, 0.4);
+}
+
+.gradient-btn-primary:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #020817, 0 0 0 4px #16CFFF, 0 6px 30px rgba(0, 229, 212, 0.6);
+}
+
+.btn-cyber-outline {
+  background: rgba(8, 27, 52, 0.8);
+  border: 1px solid rgba(0, 201, 192, 0.4);
+  color: #00F5D4;
+  font-weight: 700;
+  transition: all 0.25s ease;
+}
+
+.btn-cyber-outline:hover {
+  background: rgba(0, 201, 192, 0.15);
+  border-color: #00F5D4;
+  box-shadow: 0 0 16px rgba(0, 201, 192, 0.25);
+  color: #FFFFFF;
+}
+
+.btn-cyber-outline:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #020817, 0 0 0 4px #00F5D4;
+}
+
 /* Subtle dot mesh background for dark hero sections */
 .bg-mesh-dark {
   background-color: #020817;
@@ -129,7 +159,218 @@
   animation: lightSweep 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
-/* Accessible reduced-motion discipline */
+/* ======================================================== */
+/* LIGHT MODE STYLING ARCHITECTURE                          */
+/* ======================================================== */
+html.light,
+html[data-theme="light"] {
+  --brand-bg: #F8FAFC;
+  --brand-surface-1: #FFFFFF;
+  --brand-surface-2: #F1F5F9;
+  --brand-neon-cyan: #0284C7;
+  --brand-turquoise: #0D9488;
+  --brand-teal: #0F766E;
+  --text-primary: #0F172A;
+  --text-muted: #475569;
+  --border-subtle: #E2E8F0;
+  color-scheme: light;
+}
+
+html.light body,
+html[data-theme="light"] body {
+  background-color: #F8FAFC !important;
+  color: #0F172A !important;
+}
+
+/* Canvas background overrides in Light Mode */
+html.light .bg-\[\#020817\],
+html.light .bg-\[\#040D1A\],
+html.light .bg-\[\#030B17\] {
+  background-color: #F8FAFC !important;
+}
+
+/* Surface backgrounds in Light Mode */
+html.light .bg-\[\#06162D\],
+html.light .bg-\[\#06172B\],
+html.light .bg-\[\#06172B\]\/90,
+html.light .bg-\[\#06172B\]\/80 {
+  background-color: #FFFFFF !important;
+}
+
+html.light .bg-\[\#081B34\],
+html.light .bg-\[\#081B34\]\/90,
+html.light .bg-\[\#081B34\]\/85,
+html.light .bg-\[\#081B34\]\/80,
+html.light .bg-\[\#091D38\],
+html.light .bg-\[\#0A203B\],
+html.light .bg-\[\#0B2242\],
+html.light .bg-\[\#102442\] {
+  background-color: #FFFFFF !important;
+}
+
+html.light .bg-\[\#08223E\]\/90,
+html.light .bg-\[\#08233C\]\/90,
+html.light .bg-\[\#0A1F3D\]\/90 {
+  background-color: #F8FAFC !important;
+}
+
+/* Glass panels in Light Mode */
+html.light .glass-panel {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(2, 132, 199, 0.25) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06), 0 0 12px rgba(2, 132, 199, 0.05) !important;
+}
+
+/* Borders in Light Mode */
+html.light .border-\[\#152744\],
+html.light .border-\[\#172D4D\],
+html.light .border-\[\#1E375C\] {
+  border-color: #E2E8F0 !important;
+}
+
+/* Typography contrast in Light Mode */
+html.light .text-white {
+  color: #0F172A !important;
+}
+
+html.light .text-slate-100,
+html.light .text-slate-200,
+html.light .text-slate-300 {
+  color: #1E293B !important;
+}
+
+html.light .text-slate-400 {
+  color: #475569 !important;
+}
+
+html.light .text-slate-500 {
+  color: #64748B !important;
+}
+
+/* Neon accents adjusted for vibrant contrast in Light Mode */
+html.light .text-\[\#00F5D4\],
+html.light .text-\[\#00C9C0\],
+html.light .text-\[\#16CFFF\] {
+  color: #0284C7 !important;
+}
+
+html.light .bg-\[\#00C9C0\]\/15,
+html.light .bg-\[\#00C9C0\]\/10 {
+  background-color: rgba(2, 132, 199, 0.12) !important;
+  color: #0369A1 !important;
+}
+
+html.light .border-\[\#00C9C0\]\/40,
+html.light .border-\[\#00C9C0\]\/30 {
+  border-color: rgba(2, 132, 199, 0.35) !important;
+}
+
+/* Primary buttons in Light Mode */
+html.light .gradient-btn-primary {
+  background: linear-gradient(135deg, #0284C7 0%, #0D9488 100%) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 18px rgba(2, 132, 199, 0.28) !important;
+}
+
+html.light .gradient-btn-primary:hover {
+  box-shadow: 0 6px 24px rgba(13, 148, 136, 0.4) !important;
+}
+
+html.light .btn-cyber-outline {
+  background: #FFFFFF !important;
+  border-color: #0284C7 !important;
+  color: #0284C7 !important;
+}
+
+html.light .btn-cyber-outline:hover {
+  background: rgba(2, 132, 199, 0.08) !important;
+  color: #0369A1 !important;
+}
+
+/* Inputs in Light Mode */
+html.light input,
+html.light textarea,
+html.light select {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+  border-color: #CBD5E1 !important;
+}
+
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: #94A3B8 !important;
+}
+
+/* Scrollbars in Light Mode */
+html.light ::-webkit-scrollbar-track {
+  background: #F1F5F9 !important;
+}
+
+html.light ::-webkit-scrollbar-thumb {
+  background: #CBD5E1 !important;
+}
+
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: #0284C7 !important;
+}
+
+/* Sidebar and Header in Light Mode */
+html.light aside {
+  background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%) !important;
+  border-color: #E2E8F0 !important;
+  color: #1E293B !important;
+}
+
+html.light header {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: #E2E8F0 !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* ======================================================== */
+/* ACCESSIBILITY & DENSITY CONTROL MODES                    */
+/* ======================================================== */
+/* Reduced motion class */
+html.reduced-motion *,
+html.reduced-motion *::before,
+html.reduced-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Compact layout density */
+html.density-compact .py-4 {
+  padding-top: 0.65rem !important;
+  padding-bottom: 0.65rem !important;
+}
+html.density-compact .py-5 {
+  padding-top: 0.8rem !important;
+  padding-bottom: 0.8rem !important;
+}
+html.density-compact .p-5 {
+  padding: 0.9rem !important;
+}
+html.density-compact .p-6 {
+  padding: 1rem !important;
+}
+
+/* High contrast mode */
+html.high-contrast {
+  --border-subtle: #000000;
+}
+html.dark.high-contrast {
+  --border-subtle: #00F5D4;
+}
+html.high-contrast button:focus-visible,
+html.high-contrast a:focus-visible,
+html.high-contrast input:focus-visible {
+  outline: 3px solid #00F5D4 !important;
+  outline-offset: 2px !important;
+}
+
+/* Accessible system reduced-motion discipline */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
     animation-duration: 0.01ms !important;
