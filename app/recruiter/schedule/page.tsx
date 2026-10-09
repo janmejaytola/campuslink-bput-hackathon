@@ -339,11 +339,11 @@ export default function RecruiterSchedulePage() {
                         <div className="flex flex-wrap items-center gap-4 text-[11px] text-slate-500 pt-1">
                           <span className="flex items-center gap-1">
                             <Clock className="h-3.5 w-3.5 text-slate-400" />
-                            {iv.scheduledDate} at {iv.scheduledTime}
+                            {iv.scheduledDate || iv.date} at {iv.scheduledTime || iv.startTime}
                           </span>
                           <span className="flex items-center gap-1">
                             <MapPin className="h-3.5 w-3.5 text-slate-400" />
-                            {iv.venue}
+                            {iv.venue || iv.locationOrLink}
                           </span>
                           {iv.meetingLink && (
                             <a

@@ -330,7 +330,7 @@ export default function RecruiterOffersPage() {
                                 ? 'success'
                                 : o.status === 'Pending Review'
                                 ? 'warning'
-                                : 'error'
+                                : 'danger'
                             }
                           />
                         </td>

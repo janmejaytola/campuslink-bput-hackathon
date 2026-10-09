@@ -2,6 +2,8 @@ export type InterviewStatus = 'SCHEDULED' | 'RESCHEDULED' | 'CANCELLED' | 'COMPL
 
 export type InterviewMode = 'IN_PERSON' | 'VIRTUAL' | 'HYBRID';
 
+export type InterviewRoundType = 'TECHNICAL' | 'CODING' | 'MANAGERIAL' | 'HR';
+
 export interface InterviewRecord {
   id: string;
   jobId: string;
@@ -23,9 +25,14 @@ export interface InterviewRecord {
   date: string;
   startTime: string;
   endTime: string;
+  scheduledDate?: string;
+  scheduledTime?: string;
+  venue?: string;
+  meetingLink?: string;
   mode: InterviewMode;
   locationOrLink: string;
   roundName: string;
+  roundType?: InterviewRoundType | string;
   notes?: string;
 
   // Status & Lifecycle

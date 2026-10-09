@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AppLayoutShell } from '@/components/navigation/AppLayoutShell';
+import { ProgressRing } from '@/components/common/ProgressRing';
 import { useAuth } from '@/context/AuthContext';
 import { ReadinessResult, ReadinessLevel, FACTOR_CONFIG, READINESS_WEIGHTS } from '@/types/readiness';
 import { readinessService } from '@/lib/services/readinessService';
@@ -256,9 +257,14 @@ export default function StudentReadinessPage() {
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                   {/* Left Score Display */}
                   <div className="flex items-center gap-6">
-                    <div className="flex h-24 w-24 shrink-0 flex-col items-center justify-center rounded-2xl bg-slate-900 text-white shadow-sm">
-                      <span className="text-3xl font-black tracking-tight">{readiness.score}</span>
-                      <span className="text-[11px] font-medium text-slate-400">out of 100</span>
+                    <div className="shrink-0">
+                      <ProgressRing
+                        value={readiness.score}
+                        size={88}
+                        strokeWidth={7}
+                        color="teal"
+                        sublabel="Index"
+                      />
                     </div>
 
                     <div>

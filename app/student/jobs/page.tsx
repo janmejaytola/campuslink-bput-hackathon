@@ -14,20 +14,60 @@ import {
   ArrowRight,
   ExternalLink,
 } from 'lucide-react';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AppLayoutShell } from '@/components/navigation/AppLayoutShell';
 import { PageHeader } from '@/components/common/PageHeader';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { PS10Notice } from '@/components/common/PS10Notice';
 import { DEMO_JOBS } from '@/lib/demoData';
 import { useAuth } from '@/context/AuthContext';
+import { jobService } from '@/lib/services/jobService';
 
 export default function StudentJobsPage() {
   const { currentUser } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [appliedJobs, setAppliedJobs] = useState<string[]>(['job_101', 'job_102', 'job_103']);
   const [modalJob, setModalJob] = useState<string | null>(null);
+  const [allJobs, setAllJobs] = useState(DEMO_JOBS);
 
-  const filteredJobs = DEMO_JOBS.filter(
+  React.useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const live = await jobService.getOpenJobs();
+        if (active && live.length > 0) {
+          const liveMapped = live.map((j) => ({
+            id: j.id,
+            title: j.title,
+            company: j.company,
+            location: j.location,
+            type: j.employmentType === 'INTERNSHIP' ? ('Internship' as const) : ('Full-time' as const),
+            packageCTC: j.salaryMin && j.salaryMax ? `₹${(j.salaryMin / 100000).toFixed(1)} - ${(j.salaryMax / 100000).toFixed(1)} LPA` : '₹7.0 - 10.0 LPA',
+            minCGPA: j.eligibility?.minCgpa || 7.0,
+            branches: j.eligibility?.branches?.length ? j.eligibility.branches : ['CSE', 'IT', 'ECE'],
+            batch: '2026 Graduating',
+            status: 'Active' as const,
+            deadline: j.applicationDeadline || '2026-11-30',
+            rolesDescription: j.description,
+            applicantsCount: 0,
+            shortlistedCount: 0,
+            offersCount: 0,
+            rounds: ['Online Assessment', 'Technical Round', 'HR'],
+          }));
+          const existingIds = new Set(liveMapped.map((l) => l.id));
+          const combined = [...liveMapped, ...DEMO_JOBS.filter((dj) => !existingIds.has(dj.id))];
+          setAllJobs(combined);
+        }
+      } catch (e) {
+        // Fallback to demo jobs
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const filteredJobs = allJobs.filter(
     (job) =>
       job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       job.company.toLowerCase().includes(searchTerm.toLowerCase())
@@ -41,7 +81,8 @@ export default function StudentJobsPage() {
   };
 
   return (
-    <AppLayoutShell role="student">
+    <ProtectedRoute allowedRole="STUDENT">
+      <AppLayoutShell role="student">
       <PageHeader
         title="Campus Placement Drives & Openings"
         description="Official recruitment drives approved by BPUT Central Placement Cell for Batch of 2026"
@@ -188,5 +229,6 @@ export default function StudentJobsPage() {
         </div>
       </div>
     </AppLayoutShell>
+    </ProtectedRoute>
   );
 }

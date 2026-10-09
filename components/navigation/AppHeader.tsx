@@ -22,6 +22,8 @@ import {
   Command,
   X,
   Building,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { RouteRole, StrictRole, ROLE_LABELS } from '@/types/auth';
@@ -29,9 +31,16 @@ import { RouteRole, StrictRole, ROLE_LABELS } from '@/types/auth';
 interface AppHeaderProps {
   onMenuClick: () => void;
   activeRole: RouteRole;
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
-export function AppHeader({ onMenuClick, activeRole }: AppHeaderProps) {
+export function AppHeader({
+  onMenuClick,
+  activeRole,
+  isCollapsed,
+  onToggleCollapse,
+}: AppHeaderProps) {
   const router = useRouter();
   const pathname = usePathname();
   const {
@@ -89,29 +98,29 @@ export function AppHeader({ onMenuClick, activeRole }: AppHeaderProps) {
         .split('-')
         .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
         .join(' ')
-    : 'Dashboard';
+    : 'Console Overview';
 
   const userStrictRole: StrictRole = currentUser?.role || 'STUDENT';
   const roleLabel = ROLE_LABELS[userStrictRole] || userStrictRole;
 
   const roleAccent = {
     student: {
-      avatarBg: 'bg-indigo-600',
-      sectionColor: 'text-indigo-700',
-      pingColor: 'bg-indigo-600',
-      borderTone: 'border-indigo-100',
+      avatarBg: 'bg-teal-700 text-white',
+      sectionColor: 'text-teal-800',
+      pingColor: 'bg-teal-600',
+      tagColor: 'text-teal-800 bg-teal-50 border-teal-200/80',
     },
     recruiter: {
-      avatarBg: 'bg-teal-600',
-      sectionColor: 'text-teal-700',
-      pingColor: 'bg-teal-600',
-      borderTone: 'border-slate-200',
+      avatarBg: 'bg-sky-700 text-white',
+      sectionColor: 'text-sky-800',
+      pingColor: 'bg-sky-600',
+      tagColor: 'text-sky-800 bg-sky-50 border-sky-200/80',
     },
     officer: {
-      avatarBg: 'bg-blue-600',
-      sectionColor: 'text-blue-700',
-      pingColor: 'bg-blue-600',
-      borderTone: 'border-blue-100',
+      avatarBg: 'bg-emerald-700 text-white',
+      sectionColor: 'text-emerald-800',
+      pingColor: 'bg-emerald-600',
+      tagColor: 'text-emerald-800 bg-emerald-50 border-emerald-200/80',
     },
   }[activeRole];
 
@@ -157,40 +166,58 @@ export function AppHeader({ onMenuClick, activeRole }: AppHeaderProps) {
   return (
     <>
       <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-slate-200/90 bg-white/95 backdrop-blur-md px-4 md:px-6 shadow-2xs">
-        {/* Left: Mobile Toggle & Page Context */}
-        <div className="flex items-center gap-3 md:gap-4">
+        {/* Left: Mobile Toggle / Desktop Collapse & Context */}
+        <div className="flex items-center gap-3">
+          {/* Mobile hamburger */}
           <button
             onClick={onMenuClick}
             className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900 lg:hidden cursor-pointer"
-            aria-label="Open sidebar"
+            aria-label="Open sidebar drawer"
           >
             <Menu className="h-5 w-5" />
           </button>
 
-          <div className="hidden sm:flex items-center gap-2 text-xs text-slate-500 font-medium">
-            <span className="font-bold text-slate-900">{roleLabel}</span>
-            <span aria-hidden="true" className="text-slate-300">/</span>
+          {/* Desktop collapse button */}
+          {onToggleCollapse && (
+            <button
+              onClick={onToggleCollapse}
+              className="hidden lg:flex rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer"
+              aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              {isCollapsed ? (
+                <PanelLeftOpen className="h-4 w-4" />
+              ) : (
+                <PanelLeftClose className="h-4 w-4" />
+              )}
+            </button>
+          )}
+
+          {/* Breadcrumbs */}
+          <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
+            <span className="font-bold text-slate-900 hidden sm:inline">{roleLabel}</span>
+            <span aria-hidden="true" className="text-slate-300 hidden sm:inline">/</span>
             <span className={`font-semibold ${roleAccent.sectionColor}`}>{currentSection}</span>
           </div>
         </div>
 
-        {/* Center: Command Palette Trigger */}
-        <div className="flex-1 max-w-md mx-4 hidden md:block">
+        {/* Center: Quick Command Palette Trigger */}
+        <div className="flex-1 max-w-sm mx-4 hidden md:block">
           <button
             onClick={() => setIsCommandOpen(true)}
-            className="w-full flex items-center justify-between rounded-xl border border-slate-200/90 bg-slate-50/70 px-3.5 py-1.5 text-xs text-slate-400 hover:border-slate-300 hover:bg-white transition-all shadow-2xs cursor-pointer"
+            className="w-full flex items-center justify-between rounded-xl border border-slate-200/90 bg-slate-50/80 px-3 py-1.5 text-xs text-slate-400 hover:border-slate-300 hover:bg-white transition-all shadow-2xs cursor-pointer"
           >
             <div className="flex items-center gap-2">
               <Search className="h-3.5 w-3.5 text-slate-400" />
-              <span>Quick navigation or search...</span>
+              <span>Search routes & features...</span>
             </div>
-            <kbd className="inline-flex items-center gap-0.5 rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-mono text-slate-400 shadow-2xs">
+            <kbd className="inline-flex items-center gap-0.5 rounded border border-slate-200 bg-white px-1.5 py-0.2 text-[10px] font-mono text-slate-400 shadow-2xs">
               ⌘K
             </kbd>
           </button>
         </div>
 
-        {/* Right: Notifications & User Profile */}
+        {/* Right: Actions, Notifications & Profile */}
         <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={() => setIsCommandOpen(true)}
@@ -218,12 +245,12 @@ export function AppHeader({ onMenuClick, activeRole }: AppHeaderProps) {
 
             {isNotifOpen && (
               <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl border border-slate-200 bg-white shadow-xl z-50 overflow-hidden">
-                <div className="flex items-center justify-between border-b border-slate-100 p-4">
+                <div className="flex items-center justify-between border-b border-slate-100 p-4 bg-slate-50/50">
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-xs text-slate-900">Notifications</span>
+                    <span className="font-bold text-xs text-slate-900">Notification Center</span>
                     {unreadCount > 0 && (
                       <span className="text-[10px] font-bold text-teal-800 tabular-nums">
-                        ({unreadCount} new)
+                        ({unreadCount} unread)
                       </span>
                     )}
                   </div>
@@ -248,7 +275,7 @@ export function AppHeader({ onMenuClick, activeRole }: AppHeaderProps) {
                         key={notif.id}
                         onClick={() => markNotificationRead(notif.id)}
                         className={`p-3.5 transition-colors cursor-pointer hover:bg-slate-50 ${
-                          !notif.read ? 'bg-slate-50/70' : ''
+                          !notif.read ? 'bg-slate-50/80 font-medium' : ''
                         }`}
                       >
                         <div className="flex items-start justify-between gap-2">
@@ -274,29 +301,32 @@ export function AppHeader({ onMenuClick, activeRole }: AppHeaderProps) {
           <div className="relative" ref={profileRef}>
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white py-1.5 px-2.5 hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer"
+              className="flex items-center gap-2 rounded-xl border border-slate-200/90 bg-white py-1.5 px-2 hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer"
             >
               <div
-                className={`flex h-7 w-7 items-center justify-center rounded-lg ${roleAccent.avatarBg} text-white font-black text-xs`}
+                className={`flex h-7 w-7 items-center justify-center rounded-lg ${roleAccent.avatarBg} font-extrabold text-xs shadow-xs`}
               >
                 {currentUser?.name?.slice(0, 2).toUpperCase() || 'CL'}
               </div>
-              <div className="text-left hidden md:block">
-                <p className="text-xs font-bold text-slate-900 leading-none truncate max-w-[120px]">
+              <div className="text-left hidden md:block max-w-[130px]">
+                <p className="text-xs font-bold text-slate-900 leading-none truncate">
                   {currentUser?.name || 'Workspace User'}
                 </p>
-                <p className="text-[10px] text-slate-500 font-medium leading-none mt-1">
+                <p className="text-[10px] text-slate-500 font-medium leading-none mt-1 truncate">
                   {roleLabel}
                 </p>
               </div>
-              <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+              <ChevronDown className="h-3 w-3 text-slate-400" />
             </button>
 
             {isProfileOpen && (
               <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl z-50 space-y-1">
                 <div className="px-3 py-2 border-b border-slate-100">
-                  <p className="text-xs font-bold text-slate-900">{currentUser?.name}</p>
+                  <p className="text-xs font-bold text-slate-900 truncate">{currentUser?.name}</p>
                   <p className="text-[11px] text-slate-500 truncate">{currentUser?.email}</p>
+                  <span className={`inline-block mt-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.2 rounded border ${roleAccent.tagColor}`}>
+                    {roleLabel}
+                  </span>
                 </div>
 
                 <Link
@@ -311,7 +341,7 @@ export function AppHeader({ onMenuClick, activeRole }: AppHeaderProps) {
                   className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
                 >
                   <User className="h-4 w-4 text-slate-400" />
-                  <span>Workspace Profile</span>
+                  <span>Profile Settings</span>
                 </Link>
 
                 <button
@@ -360,7 +390,7 @@ export function AppHeader({ onMenuClick, activeRole }: AppHeaderProps) {
                       setIsCommandOpen(false);
                       router.push(cmd.href);
                     }}
-                    className="w-full flex items-center justify-between rounded-lg px-3 py-2.5 text-left hover:bg-slate-50 cursor-pointer"
+                    className="w-full flex items-center justify-between rounded-lg px-3 py-2 text-left hover:bg-slate-50 cursor-pointer"
                   >
                     <span className="font-semibold text-slate-800">{cmd.title}</span>
                     <span className="text-[10px] font-mono text-slate-500">

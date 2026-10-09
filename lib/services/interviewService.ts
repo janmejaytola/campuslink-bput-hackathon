@@ -511,6 +511,99 @@ export const interviewService = {
     return this.getAllActiveInterviews();
   },
 
+  async createInterview(params: {
+    jobId: string;
+    jobTitle?: string;
+    company?: string;
+    candidateId: string;
+    candidateName: string;
+    candidateEmail?: string;
+    recruiterId: string;
+    roundType?: string;
+    scheduledDate?: string;
+    scheduledTime?: string;
+    venue?: string;
+    interviewerName?: string;
+    meetingLink?: string;
+    status?: InterviewStatus;
+  }): Promise<{ success: boolean; interview?: InterviewRecord; error?: string }> {
+    const date = params.scheduledDate || new Date().toISOString().split('T')[0];
+    const startTime = params.scheduledTime || '10:00';
+    const id = this.getInterviewId(params.jobId, params.candidateId, date, startTime);
+    const now = new Date().toISOString();
+
+    const record: InterviewRecord = {
+      id,
+      jobId: params.jobId,
+      candidateId: params.candidateId,
+      recruiterId: params.recruiterId,
+      interviewerId: `intv_${params.recruiterId}`,
+      interviewerName: params.interviewerName || 'Panel Evaluator',
+      candidateName: params.candidateName,
+      candidateBranch: 'Computer Science and Engineering',
+      candidateBatch: '2026',
+      candidateRegNo: '2201106284',
+      jobTitle: params.jobTitle || 'Placement Role',
+      company: params.company || 'Corporate Hiring Partner',
+      date,
+      startTime,
+      endTime: '11:00 AM',
+      scheduledDate: date,
+      scheduledTime: startTime,
+      venue: params.venue || 'Placement Block Room 302',
+      meetingLink: params.meetingLink,
+      mode: 'HYBRID',
+      locationOrLink: params.venue || params.meetingLink || 'Placement Cell / Google Meet',
+      roundName: params.roundType ? `${params.roundType} Round` : 'Technical Interview Round',
+      roundType: params.roundType || 'TECHNICAL',
+      notes: params.venue ? `Venue: ${params.venue}` : '',
+      status: params.status || 'SCHEDULED',
+      createdAt: now,
+      updatedAt: now,
+      scheduledBy: params.recruiterId,
+    };
+
+    localInterviews.set(id, record);
+
+    const colRef = getCollectionRef();
+    if (colRef && db) {
+      try {
+        const docRef = doc(db, 'interviews', id);
+        await setDoc(docRef, record);
+      } catch (err) {
+        console.warn('[interviewService.createInterview] Firestore fallback to memory:', err);
+      }
+    }
+
+    return {
+      success: true,
+      interview: record,
+    };
+  },
+
+  async updateInterviewStatus(interviewId: string, status: InterviewStatus): Promise<{ success: boolean; error?: string }> {
+    const existing = await this.getInterview(interviewId);
+    if (!existing) {
+      return { success: false, error: 'Interview not found.' };
+    }
+    const updated = {
+      ...existing,
+      status,
+      updatedAt: new Date().toISOString(),
+    };
+    localInterviews.set(interviewId, updated);
+    const colRef = getCollectionRef();
+    if (colRef && db) {
+      try {
+        const docRef = doc(db, 'interviews', interviewId);
+        await updateDoc(docRef, { status, updatedAt: updated.updatedAt });
+      } catch (err) {
+        console.warn('[interviewService.updateInterviewStatus] Firestore fallback:', err);
+      }
+    }
+    return { success: true };
+  },
+
   clearMemoryStore(): void {
     localInterviews.clear();
   },

@@ -11,6 +11,7 @@ import {
   AlertCircle,
   FileText,
 } from 'lucide-react';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AppLayoutShell } from '@/components/navigation/AppLayoutShell';
 import { PageHeader } from '@/components/common/PageHeader';
 import { PS10Notice } from '@/components/common/PS10Notice';
@@ -26,7 +27,8 @@ export default function StudentOffersPage() {
   };
 
   return (
-    <AppLayoutShell role="student">
+    <ProtectedRoute allowedRole="STUDENT">
+      <AppLayoutShell role="student">
       <PageHeader
         title="Placement Offers & Release Letters"
         description="Official employment offers, compensation breakdown, and digital acceptance records"
@@ -129,5 +131,6 @@ export default function StudentOffersPage() {
         </div>
       </div>
     </AppLayoutShell>
+    </ProtectedRoute>
   );
 }

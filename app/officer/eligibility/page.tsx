@@ -22,6 +22,7 @@ import {
   Building,
   Info,
 } from 'lucide-react';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AppLayoutShell } from '@/components/navigation/AppLayoutShell';
 import { useAuth } from '@/context/AuthContext';
 import { RecruiterJob } from '@/types/job';
@@ -272,7 +273,8 @@ export default function OfficerEligibilityPage() {
   }, []);
 
   return (
-    <AppLayoutShell role="officer">
+    <ProtectedRoute allowedRole="PLACEMENT_OFFICER">
+      <AppLayoutShell role="officer">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">
           {/* Header */}
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-slate-200 pb-6">
@@ -591,5 +593,6 @@ export default function OfficerEligibilityPage() {
           )}
         </div>
       </AppLayoutShell>
+    </ProtectedRoute>
   );
 }

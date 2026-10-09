@@ -10,6 +10,7 @@ import {
   Clock,
   ShieldCheck,
 } from 'lucide-react';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AppLayoutShell } from '@/components/navigation/AppLayoutShell';
 import { PageHeader } from '@/components/common/PageHeader';
 import { PS10Notice } from '@/components/common/PS10Notice';
@@ -54,7 +55,8 @@ const DOCUMENTS = [
 
 export default function StudentDocumentsPage() {
   return (
-    <AppLayoutShell role="student">
+    <ProtectedRoute allowedRole="STUDENT">
+      <AppLayoutShell role="student">
       <PageHeader
         title="Verified Academic Credentials & Document Vault"
         description="Institutional repository of certified transcripts, grade cards, and identity documents"
@@ -120,5 +122,6 @@ export default function StudentDocumentsPage() {
         </div>
       </div>
     </AppLayoutShell>
+    </ProtectedRoute>
   );
 }
