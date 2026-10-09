@@ -1,0 +1,184 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isPlacementOfficer() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'PLACEMENT_OFFICER';
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128;
+    }
+
+    function isValidRole(role) {
+      return role in ['STUDENT', 'PLACEMENT_OFFICER', 'RECRUITER'];
+    }
+
+    function isValidUser(data, userId) {
+      return data.keys().hasAll(['uid', 'name', 'email', 'role', 'createdAt', 'updatedAt'])
+        && data.uid == userId
+        && data.name is string && data.name.size() >= 2 && data.name.size() <= 100
+        && data.email is string && data.email.size() <= 120
+        && isValidRole(data.role);
+    }
+
+    // User authentication / role documents
+    match /users/{userId} {
+      allow get: if (isOwner(userId) || isPlacementOfficer()) && isValidId(userId);
+      allow list: if isPlacementOfficer();
+      allow create: if isOwner(userId) && isValidId(userId) && isValidUser(request.resource.data, userId);
+      allow update: if isOwner(userId) && isValidId(userId) && isValidUser(request.resource.data, userId)
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.role == resource.data.role;
+      allow delete: if false;
+    }
+
+    // Role requirements (read-only for authenticated users)
+    match /roleRequirements/{roleId} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    // Recruiter Jobs collection
+    match /jobs/{jobId} {
+      // Recruiter who created the job can get/list their own jobs; any signed-in user can view OPEN jobs
+      allow read: if isSignedIn() && (
+        resource.data.recruiterId == request.auth.uid
+        || resource.data.status == 'OPEN'
+        || isPlacementOfficer()
+      );
+      // Authenticated recruiters can create jobs where recruiterId matches their auth UID
+      allow create: if isSignedIn() && isValidId(jobId)
+        && request.resource.data.recruiterId == request.auth.uid;
+      // Only the owning recruiter can update or delete their jobs
+      allow update: if isSignedIn() && isValidId(jobId)
+        && resource.data.recruiterId == request.auth.uid
+        && request.resource.data.recruiterId == request.auth.uid;
+      allow delete: if isSignedIn() && isValidId(jobId)
+        && resource.data.recruiterId == request.auth.uid;
+    }
+
+    // Recruiter candidate shortlist collection
+    match /shortlists/{shortlistId} {
+      allow read: if isSignedIn() && (
+        resource.data.recruiterId == request.auth.uid
+        || resource.data.candidateId == request.auth.uid
+        || isPlacementOfficer()
+      );
+      allow create, update: if isSignedIn() && isValidId(shortlistId) && (
+        request.resource.data.recruiterId == request.auth.uid
+        || isPlacementOfficer()
+      );
+      allow delete: if isSignedIn() && (
+        resource.data.recruiterId == request.auth.uid
+        || isPlacementOfficer()
+      );
+    }
+
+    // Student profile documents
+    match /students/{userId} {
+      allow get: if (isOwner(userId) || isPlacementOfficer()) && isValidId(userId);
+      allow list: if isPlacementOfficer();
+      allow create: if isOwner(userId) && isValidId(userId)
+        && request.resource.data.uid == userId;
+      allow update: if isOwner(userId) && isValidId(userId)
+        && request.resource.data.uid == userId;
+      allow delete: if false;
+
+      // Student projects subcollection
+      match /projects/{projectId} {
+        allow read: if (isOwner(userId) || isPlacementOfficer()) && isValidId(projectId);
+        allow write: if isOwner(userId) && isValidId(projectId);
+      }
+
+      // Student certifications subcollection
+      match /certifications/{certificationId} {
+        allow read: if (isOwner(userId) || isPlacementOfficer()) && isValidId(certificationId);
+        allow write: if isOwner(userId) && isValidId(certificationId);
+      }
+
+      // Student internships subcollection
+      match /internships/{internshipId} {
+        allow read: if (isOwner(userId) || isPlacementOfficer()) && isValidId(internshipId);
+        allow write: if isOwner(userId) && isValidId(internshipId);
+      }
+
+      // Student readiness subcollection
+      match /readiness/{readinessId} {
+        allow read: if (isOwner(userId) || isPlacementOfficer()) && isValidId(readinessId);
+        allow write: if isOwner(userId) && isValidId(readinessId);
+      }
+
+      // Student skill gap subcollection
+      match /skillGap/{gapId} {
+        allow read: if (isOwner(userId) || isPlacementOfficer()) && isValidId(gapId);
+        allow write: if isOwner(userId) && isValidId(gapId);
+      }
+
+      // Student career goal history subcollection
+      match /careerGoalHistory/{goalId} {
+        allow read: if (isOwner(userId) || isPlacementOfficer()) && isValidId(goalId);
+        allow write: if isOwner(userId) && isValidId(goalId);
+      }
+
+      // Student deterministic eligibility evaluation records per job
+      match /eligibility/{jobId} {
+        allow read: if (isOwner(userId) || isPlacementOfficer()) && isValidId(jobId);
+        allow write: if (isOwner(userId) || isPlacementOfficer()) && isValidId(jobId);
+      }
+
+      // Student deterministic match calculation records per job
+      match /jobMatches/{jobId} {
+        allow read: if (isOwner(userId) || isPlacementOfficer()) && isValidId(jobId);
+        allow write: if (isOwner(userId) || isPlacementOfficer()) && isValidId(jobId);
+      }
+    }
+
+    // Resumes metadata and files subcollection
+    match /resumes/{userId} {
+      allow read: if (isOwner(userId) || isPlacementOfficer()) && isValidId(userId);
+      allow write: if isOwner(userId) && isValidId(userId);
+
+      match /files/{resumeId} {
+        allow read: if (isOwner(userId) || isPlacementOfficer()) && isValidId(resumeId);
+        allow write: if isOwner(userId) && isValidId(resumeId);
+      }
+    }
+
+    // Recruiter shortlists collection
+    match /shortlists/{shortlistId} {
+      // Placement officers can read all shortlists
+      // Recruiters can read their own job shortlists
+      // Students can read records where they are the candidate
+      allow read: if isSignedIn() && (
+        isPlacementOfficer()
+        || resource.data.recruiterId == request.auth.uid
+        || resource.data.candidateId == request.auth.uid
+      );
+
+      // Only recruiter (or officer) can create or update shortlist status
+      // Hard gate: Candidate must be eligible to have status == 'SHORTLISTED'
+      allow create, update: if isSignedIn() && (
+        isPlacementOfficer()
+        || (
+          request.resource.data.recruiterId == request.auth.uid
+          && (request.resource.data.status != 'SHORTLISTED' || request.resource.data.eligible == true)
+        )
+      );
+
+      allow delete: if isSignedIn() && (
+        isPlacementOfficer()
+        || resource.data.recruiterId == request.auth.uid
+      );
+    }
+  }
+}

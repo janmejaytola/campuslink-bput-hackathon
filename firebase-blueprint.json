@@ -1,0 +1,341 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "CAMPUSLINK User profile with Firebase Authentication UID and strict role",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "photoURL": { "type": "string" },
+        "provider": { "type": "string" },
+        "role": { "type": "string", "enum": ["STUDENT", "PLACEMENT_OFFICER", "RECRUITER"] },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["uid", "name", "email", "role", "createdAt", "updatedAt"]
+    },
+    "Student": {
+      "title": "Student",
+      "description": "Detailed academic, placement, and skills profile for a student",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "fullName": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "dateOfBirth": { "type": "string" },
+        "gender": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "bputRegistrationNumber": { "type": "string" },
+        "college": { "type": "string" },
+        "department": { "type": "string" },
+        "branch": { "type": "string" },
+        "semester": { "type": "string" },
+        "graduationYear": { "type": "string" },
+        "cgpa": { "type": "number", "minimum": 0, "maximum": 10 },
+        "backlogs": { "type": "integer", "minimum": 0 },
+        "skills": { "type": "array", "items": { "type": "string" } },
+        "careerGoal": {
+          "type": "object",
+          "properties": {
+            "targetRole": { "type": "string" },
+            "jobType": { "type": "string" },
+            "preferredLocation": { "type": "string" },
+            "workMode": { "type": "string" },
+            "expectedSalary": { "type": "string" }
+          }
+        },
+        "readinessInputs": {
+          "type": "object",
+          "properties": {
+            "aptitudeScore": { "type": "number", "minimum": 0, "maximum": 100 },
+            "technicalScore": { "type": "number", "minimum": 0, "maximum": 100 },
+            "communicationScore": { "type": "number", "minimum": 0, "maximum": 100 }
+          }
+        },
+        "profileCompletion": { "type": "number", "minimum": 0, "maximum": 100 },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["uid", "fullName", "email", "createdAt", "updatedAt"]
+    },
+    "Project": {
+      "title": "Project",
+      "description": "Student academic or personal project showcase",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "technologies": { "type": "array", "items": { "type": "string" } },
+        "projectUrl": { "type": "string" },
+        "githubUrl": { "type": "string" },
+        "role": { "type": "string" },
+        "duration": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["title", "createdAt", "updatedAt"]
+    },
+    "Certification": {
+      "title": "Certification",
+      "description": "Student industry or professional credential",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "issuingOrganization": { "type": "string" },
+        "issueDate": { "type": "string" },
+        "credentialId": { "type": "string" },
+        "credentialUrl": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["name", "issuingOrganization", "createdAt", "updatedAt"]
+    },
+    "Internship": {
+      "title": "Internship",
+      "description": "Student corporate internship or training experience",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "company": { "type": "string" },
+        "role": { "type": "string" },
+        "startDate": { "type": "string" },
+        "endDate": { "type": "string" },
+        "description": { "type": "string" },
+        "skillsUsed": { "type": "array", "items": { "type": "string" } },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["company", "role", "createdAt", "updatedAt"]
+    },
+    "Resume": {
+      "title": "Resume",
+      "description": "Student resume file metadata and AI extraction state",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "uid": { "type": "string" },
+        "fileName": { "type": "string" },
+        "fileType": { "type": "string" },
+        "fileSize": { "type": "integer" },
+        "storagePath": { "type": "string" },
+        "downloadURL": { "type": "string" },
+        "uploadedAt": { "type": "string" },
+        "updatedAt": { "type": "string" },
+        "extractionStatus": { "type": "string", "enum": ["pending", "processing", "completed", "failed"] }
+      },
+      "required": ["id", "uid", "fileName", "storagePath", "extractionStatus", "uploadedAt", "updatedAt"]
+    },
+    "ReadinessResult": {
+      "title": "ReadinessResult",
+      "description": "Deterministic placement readiness calculation and explainability breakdown",
+      "type": "object",
+      "properties": {
+        "score": { "type": "number", "minimum": 0, "maximum": 100 },
+        "level": { "type": "string", "enum": ["NOT READY", "DEVELOPING", "READY", "HIGHLY EMPLOYABLE"] },
+        "factorScores": {
+          "type": "object",
+          "properties": {
+            "academic": { "type": "number" },
+            "technical": { "type": "number" },
+            "projects": { "type": "number" },
+            "experience": { "type": "number" },
+            "certifications": { "type": "number" },
+            "assessments": { "type": "number" },
+            "communication": { "type": "number" }
+          }
+        },
+        "strengths": { "type": "array", "items": { "type": "string" } },
+        "improvementAreas": { "type": "array", "items": { "type": "string" } },
+        "recommendations": { "type": "array", "items": { "type": "string" } },
+        "targetRole": { "type": "string" },
+        "aiExplanation": { "type": "string" },
+        "calculatedAt": { "type": "string" }
+      },
+      "required": ["score", "level", "factorScores", "calculatedAt"]
+    },
+    "RoleRequirement": {
+      "title": "RoleRequirement",
+      "description": "Benchmark required and preferred skills for career roles",
+      "type": "object",
+      "properties": {
+        "roleId": { "type": "string" },
+        "title": { "type": "string" },
+        "requiredSkills": { "type": "object" },
+        "preferredSkills": { "type": "object" },
+        "isBenchmark": { "type": "boolean" }
+      },
+      "required": ["roleId", "title", "requiredSkills"]
+    },
+    "SkillGapAnalysis": {
+      "title": "SkillGapAnalysis",
+      "description": "Deterministic skill gap intelligence against target career role",
+      "type": "object",
+      "properties": {
+        "targetRole": { "type": "string" },
+        "targetRoleId": { "type": "string" },
+        "analyzedAt": { "type": "string" },
+        "coverage": { "type": "number" },
+        "gaps": { "type": "array" }
+      },
+      "required": ["targetRole", "targetRoleId", "analyzedAt", "coverage", "gaps"]
+    },
+    "Job": {
+      "title": "Job",
+      "description": "Recruiter placement job postings with structured requirements",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "recruiterId": { "type": "string" },
+        "title": { "type": "string" },
+        "company": { "type": "string" },
+        "description": { "type": "string" },
+        "location": { "type": "string" },
+        "workMode": { "type": "string", "enum": ["ON_SITE", "HYBRID", "REMOTE"] },
+        "employmentType": { "type": "string", "enum": ["FULL_TIME", "PART_TIME", "INTERNSHIP", "CONTRACT"] },
+        "status": { "type": "string", "enum": ["DRAFT", "OPEN", "CLOSED"] },
+        "salaryMin": { "type": "number" },
+        "salaryMax": { "type": "number" },
+        "openings": { "type": "integer" },
+        "applicationDeadline": { "type": "string" },
+        "driveDate": { "type": "string" },
+        "eligibility": { "type": "object" },
+        "requiredSkills": { "type": "array" },
+        "preferredSkills": { "type": "array" },
+        "jdSource": { "type": "string", "enum": ["MANUAL", "AI_PARSED"] },
+        "jdFileName": { "type": "string" },
+        "jdStoragePath": { "type": "string" },
+        "aiParsed": { "type": "boolean" },
+        "aiParsedAt": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "recruiterId", "title", "company", "description", "status", "createdAt", "updatedAt"]
+    },
+    "EligibilityEvaluation": {
+      "title": "EligibilityEvaluation",
+      "description": "Deterministic eligibility evaluation records per job",
+      "type": "object",
+      "properties": {
+        "jobId": { "type": "string" },
+        "studentId": { "type": "string" },
+        "jobTitle": { "type": "string" },
+        "company": { "type": "string" },
+        "eligible": { "type": "boolean" },
+        "status": { "type": "string", "enum": ["ELIGIBLE", "NOT_ELIGIBLE"] },
+        "evaluatedAt": { "type": "string" },
+        "rules": { "type": "array" },
+        "summary": { "type": "object" },
+        "evaluatedBy": { "type": "string" }
+      },
+      "required": ["jobId", "studentId", "eligible", "status", "evaluatedAt", "rules", "summary"]
+    },
+    "JobMatch": {
+      "title": "JobMatch",
+      "description": "Deterministic explainable candidate match evaluation per job opening",
+      "type": "object",
+      "properties": {
+        "studentId": { "type": "string" },
+        "jobId": { "type": "string" },
+        "jobTitle": { "type": "string" },
+        "company": { "type": "string" },
+        "eligible": { "type": "boolean" },
+        "rankingEligible": { "type": "boolean" },
+        "score": { "type": "number" },
+        "breakdown": { "type": "object" },
+        "strengths": { "type": "array" },
+        "gaps": { "type": "array" },
+        "explanation": { "type": "array" },
+        "evaluatedAt": { "type": "string" },
+        "requirementsVersion": { "type": "string" }
+      },
+      "required": ["studentId", "jobId", "eligible", "score", "breakdown", "evaluatedAt", "requirementsVersion"]
+    },
+    "ShortlistRecord": {
+      "title": "ShortlistRecord",
+      "description": "Candidate shortlist progression decisions recorded by recruiters",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "recruiterId": { "type": "string" },
+        "jobId": { "type": "string" },
+        "candidateId": { "type": "string" },
+        "candidateName": { "type": "string" },
+        "candidateBranch": { "type": "string" },
+        "candidateBatch": { "type": "string" },
+        "candidateRegNo": { "type": "string" },
+        "jobTitle": { "type": "string" },
+        "company": { "type": "string" },
+        "status": { "type": "string", "enum": ["NOT_REVIEWED", "SHORTLISTED", "REJECTED"] },
+        "matchScoreSnapshot": { "type": "number" },
+        "eligible": { "type": "boolean" },
+        "reason": { "type": "string" },
+        "strengthsSnapshot": { "type": "array" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" },
+        "reviewedBy": { "type": "string" }
+      },
+      "required": ["id", "recruiterId", "jobId", "candidateId", "status", "matchScoreSnapshot", "eligible", "createdAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User profile documents stored by UID"
+    },
+    "/jobs/{jobId}": {
+      "schema": { "$ref": "#/entities/Job" },
+      "description": "Job opportunities created by recruiters"
+    },
+    "/roleRequirements/{roleId}": {
+      "schema": { "$ref": "#/entities/RoleRequirement" },
+      "description": "Benchmark skill requirements by role"
+    },
+    "/students/{userId}": {
+      "schema": { "$ref": "#/entities/Student" },
+      "description": "Student profile documents stored by UID"
+    },
+    "/students/{userId}/projects/{projectId}": {
+      "schema": { "$ref": "#/entities/Project" },
+      "description": "Projects belonging to a student"
+    },
+    "/students/{userId}/certifications/{certificationId}": {
+      "schema": { "$ref": "#/entities/Certification" },
+      "description": "Certifications belonging to a student"
+    },
+    "/students/{userId}/internships/{internshipId}": {
+      "schema": { "$ref": "#/entities/Internship" },
+      "description": "Internships belonging to a student"
+    },
+    "/students/{userId}/readiness/{readinessId}": {
+      "schema": { "$ref": "#/entities/ReadinessResult" },
+      "description": "Readiness calculation records for student"
+    },
+    "/students/{userId}/skillGap/{gapId}": {
+      "schema": { "$ref": "#/entities/SkillGapAnalysis" },
+      "description": "Skill gap calculation records for student"
+    },
+    "/students/{userId}/eligibility/{jobId}": {
+      "schema": { "$ref": "#/entities/EligibilityEvaluation" },
+      "description": "Deterministic eligibility evaluation records per job"
+    },
+    "/students/{userId}/jobMatches/{jobId}": {
+      "schema": { "$ref": "#/entities/JobMatch" },
+      "description": "Deterministic explainable candidate match calculation records per job"
+    },
+    "/shortlists/{shortlistId}": {
+      "schema": { "$ref": "#/entities/ShortlistRecord" },
+      "description": "Candidate shortlist progression decisions recorded by recruiters"
+    },
+    "/resumes/{userId}/files/{resumeId}": {
+      "schema": { "$ref": "#/entities/Resume" },
+      "description": "Resume metadata and extraction records for student"
+    }
+  }
+}

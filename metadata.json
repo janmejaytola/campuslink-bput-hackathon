@@ -1,0 +1,6 @@
+{
+  "name": "CAMPUSLINK",
+  "description": "AI-powered campus placement intelligence and coordination platform for students, placement officers, and recruiters. BPUT Hackathon 2026 (PS10).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
