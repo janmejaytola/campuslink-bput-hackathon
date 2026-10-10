@@ -72,52 +72,52 @@ export function ProgressRing({
 
   const colorStyles = {
     turquoise: {
-      stroke: 'stroke-[#00E5D4]',
-      text: 'text-[#00E5D4]',
-      track: 'stroke-[#10243E]',
-      glow: 'drop-shadow-[0_0_10px_rgba(0,229,212,0.5)]',
+      stroke: 'stroke-teal-600 dark:stroke-[#00E5D4]',
+      text: 'text-teal-700 dark:text-[#00E5D4]',
+      track: 'stroke-slate-200 dark:stroke-[#10243E]',
+      glow: 'dark:drop-shadow-[0_0_10px_rgba(0,229,212,0.5)]',
     },
     white: {
-      stroke: 'stroke-[#16CFFF]',
-      text: 'text-white',
-      track: 'stroke-white/15',
-      glow: 'drop-shadow-[0_0_10px_rgba(22,207,255,0.5)]',
+      stroke: 'stroke-teal-600 dark:stroke-[#16CFFF]',
+      text: 'text-slate-900 dark:text-white',
+      track: 'stroke-slate-200 dark:stroke-white/15',
+      glow: 'dark:drop-shadow-[0_0_10px_rgba(22,207,255,0.5)]',
     },
     teal: {
-      stroke: 'stroke-[#00BFA6]',
-      text: 'text-[#00E5D4]',
-      track: 'stroke-[#0D243B]',
-      glow: 'drop-shadow-[0_0_8px_rgba(0,191,166,0.45)]',
+      stroke: 'stroke-teal-600 dark:stroke-[#00BFA6]',
+      text: 'text-teal-700 dark:text-[#00E5D4]',
+      track: 'stroke-slate-200 dark:stroke-[#0D243B]',
+      glow: 'dark:drop-shadow-[0_0_8px_rgba(0,191,166,0.45)]',
     },
     emerald: {
-      stroke: 'stroke-emerald-400',
-      text: 'text-emerald-300',
-      track: 'stroke-emerald-950/60',
-      glow: 'drop-shadow-[0_0_8px_rgba(16,185,129,0.45)]',
+      stroke: 'stroke-emerald-600 dark:stroke-emerald-400',
+      text: 'text-emerald-700 dark:text-emerald-300',
+      track: 'stroke-emerald-100 dark:stroke-emerald-950/60',
+      glow: 'dark:drop-shadow-[0_0_8px_rgba(16,185,129,0.45)]',
     },
     indigo: {
-      stroke: 'stroke-indigo-400',
-      text: 'text-indigo-300',
-      track: 'stroke-indigo-950/60',
-      glow: 'drop-shadow-[0_0_8px_rgba(99,102,241,0.45)]',
+      stroke: 'stroke-indigo-600 dark:stroke-indigo-400',
+      text: 'text-indigo-700 dark:text-indigo-300',
+      track: 'stroke-indigo-100 dark:stroke-indigo-950/60',
+      glow: 'dark:drop-shadow-[0_0_8px_rgba(99,102,241,0.45)]',
     },
     sky: {
-      stroke: 'stroke-sky-400',
-      text: 'text-sky-300',
-      track: 'stroke-sky-950/60',
-      glow: 'drop-shadow-[0_0_8px_rgba(56,189,248,0.45)]',
+      stroke: 'stroke-sky-600 dark:stroke-sky-400',
+      text: 'text-sky-700 dark:text-sky-300',
+      track: 'stroke-sky-100 dark:stroke-sky-950/60',
+      glow: 'dark:drop-shadow-[0_0_8px_rgba(56,189,248,0.45)]',
     },
     amber: {
-      stroke: 'stroke-amber-400',
-      text: 'text-amber-300',
-      track: 'stroke-amber-950/60',
-      glow: 'drop-shadow-[0_0_8px_rgba(245,158,11,0.45)]',
+      stroke: 'stroke-amber-600 dark:stroke-amber-400',
+      text: 'text-amber-700 dark:text-amber-300',
+      track: 'stroke-amber-100 dark:stroke-amber-950/60',
+      glow: 'dark:drop-shadow-[0_0_8px_rgba(245,158,11,0.45)]',
     },
     rose: {
-      stroke: 'stroke-rose-400',
-      text: 'text-rose-300',
-      track: 'stroke-rose-950/60',
-      glow: 'drop-shadow-[0_0_8px_rgba(244,63,94,0.45)]',
+      stroke: 'stroke-rose-600 dark:stroke-rose-400',
+      text: 'text-rose-700 dark:text-rose-300',
+      track: 'stroke-rose-100 dark:stroke-rose-950/60',
+      glow: 'dark:drop-shadow-[0_0_8px_rgba(244,63,94,0.45)]',
     },
   }[color];
 
@@ -126,7 +126,7 @@ export function ProgressRing({
       <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
         {/* Subtle radial ambient backglow */}
         <div
-          className="absolute inset-2 rounded-full opacity-30 blur-md pointer-events-none"
+          className="absolute inset-2 rounded-full opacity-15 dark:opacity-30 blur-md pointer-events-none"
           style={{ background: 'radial-gradient(circle, rgba(0, 229, 212, 0.4) 0%, transparent 70%)' }}
           aria-hidden="true"
         />
@@ -161,7 +161,7 @@ export function ProgressRing({
             {currentDisplay}%
           </span>
           {sublabel && (
-            <span className="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-wider leading-none">
+            <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-wider leading-none">
               {sublabel}
             </span>
           )}
@@ -169,7 +169,7 @@ export function ProgressRing({
       </div>
 
       {label && (
-        <span className="mt-2 text-xs font-bold text-slate-300 text-center tracking-wide">
+        <span className="mt-2 text-xs font-bold text-slate-700 dark:text-slate-300 text-center tracking-wide">
           {label}
         </span>
       )}

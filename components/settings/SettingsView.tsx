@@ -427,13 +427,21 @@ export function SettingsView({ role }: SettingsViewProps) {
                     </span>
                   </div>
                   <div className="grid grid-cols-2 gap-3 text-xs">
-                    <div className="rounded-lg border border-[#172D4D] bg-[#020817] p-3 text-white space-y-1">
+                    <div
+                      data-keep-dark="true"
+                      data-keep-white="true"
+                      className="rounded-lg border border-[#172D4D] bg-[#020817] p-3 text-white space-y-1"
+                    >
                       <span className="text-[10px] font-mono text-[#00F5D4] block">Midnight Navy (#020817)</span>
                       <p className="text-[11px] font-medium text-slate-300">Cyber dark canvas with neon cyan glows</p>
                     </div>
-                    <div className="rounded-lg border border-[#00C9C0]/30 bg-gradient-to-r from-[#007F83]/30 to-[#00C9C0]/20 p-3 space-y-1">
-                      <span className="text-[10px] font-mono text-[#00F5D4] block">Cyan Highlight (#00C9C0)</span>
-                      <p className="text-[11px] font-bold text-white">Vibrant accents remain high-contrast</p>
+                    <div className="rounded-lg border border-teal-300 dark:border-[#00C9C0]/30 bg-teal-50/70 dark:bg-gradient-to-r dark:from-[#007F83]/30 dark:to-[#00C9C0]/20 p-3 space-y-1">
+                      <span className="text-[10px] font-mono text-teal-700 dark:text-[#00F5D4] block">
+                        {resolvedTheme === 'light' ? 'Crisp Light (#F8FAFC)' : 'Cyan Highlight (#00C9C0)'}
+                      </span>
+                      <p className="text-[11px] font-bold text-slate-900 dark:text-white">
+                        Vibrant accents remain high-contrast
+                      </p>
                     </div>
                   </div>
                 </div>

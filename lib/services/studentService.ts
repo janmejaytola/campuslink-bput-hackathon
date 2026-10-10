@@ -14,6 +14,7 @@ import {
   InternshipItem,
   DEFAULT_STUDENT_PROFILE,
 } from '@/types/student';
+import { formatFirestoreError, FirestoreOperationType } from './resumeService';
 
 export interface CompletionAudit {
   percentage: number;
@@ -201,9 +202,16 @@ export const studentService = {
       createdAt: profile.createdAt || now,
     };
 
-    if (typeof window !== 'undefined' && db) {
+    if (typeof window === 'undefined' || !db || !('type' in db || 'app' in db)) {
+      throw new Error('Firestore database connection is not available.');
+    }
+
+    const path = `students/${profile.uid}`;
+    try {
       const studentRef = doc(db, 'students', profile.uid);
       await setDoc(studentRef, payload, { merge: true });
+    } catch (error) {
+      throw formatFirestoreError(error, FirestoreOperationType.WRITE, path);
     }
   },
 
@@ -294,8 +302,13 @@ export const studentService = {
     if (!uid) throw new Error('Student UID is required.');
     if (!item.title.trim()) throw new Error('Project title is required.');
 
+    if (typeof window === 'undefined' || !db || !('type' in db || 'app' in db)) {
+      throw new Error('Firestore database connection is not available.');
+    }
+
     const now = new Date().toISOString();
     const id = projectId || `proj_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const path = `students/${uid}/projects/${id}`;
     const docRef = doc(db, 'students', uid, 'projects', id);
 
     const payload: ProjectItem = {
@@ -305,8 +318,12 @@ export const studentService = {
       updatedAt: now,
     };
 
-    await setDoc(docRef, payload, { merge: true });
-    return id;
+    try {
+      await setDoc(docRef, payload, { merge: true });
+      return id;
+    } catch (error) {
+      throw formatFirestoreError(error, FirestoreOperationType.WRITE, path);
+    }
   },
 
   async deleteProject(uid: string, projectId: string): Promise<void> {
@@ -365,8 +382,13 @@ export const studentService = {
     if (!item.name.trim()) throw new Error('Certification name is required.');
     if (!item.issuingOrganization.trim()) throw new Error('Issuing organization is required.');
 
+    if (typeof window === 'undefined' || !db || !('type' in db || 'app' in db)) {
+      throw new Error('Firestore database connection is not available.');
+    }
+
     const now = new Date().toISOString();
     const id = certId || `cert_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const path = `students/${uid}/certifications/${id}`;
     const docRef = doc(db, 'students', uid, 'certifications', id);
 
     const payload: CertificationItem = {
@@ -376,8 +398,12 @@ export const studentService = {
       updatedAt: now,
     };
 
-    await setDoc(docRef, payload, { merge: true });
-    return id;
+    try {
+      await setDoc(docRef, payload, { merge: true });
+      return id;
+    } catch (error) {
+      throw formatFirestoreError(error, FirestoreOperationType.WRITE, path);
+    }
   },
 
   async deleteCertification(uid: string, certId: string): Promise<void> {
@@ -438,8 +464,13 @@ export const studentService = {
     if (!item.company.trim()) throw new Error('Company name is required.');
     if (!item.role.trim()) throw new Error('Role is required.');
 
+    if (typeof window === 'undefined' || !db || !('type' in db || 'app' in db)) {
+      throw new Error('Firestore database connection is not available.');
+    }
+
     const now = new Date().toISOString();
     const id = internshipId || `intern_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const path = `students/${uid}/internships/${id}`;
     const docRef = doc(db, 'students', uid, 'internships', id);
 
     const payload: InternshipItem = {
@@ -449,8 +480,12 @@ export const studentService = {
       updatedAt: now,
     };
 
-    await setDoc(docRef, payload, { merge: true });
-    return id;
+    try {
+      await setDoc(docRef, payload, { merge: true });
+      return id;
+    } catch (error) {
+      throw formatFirestoreError(error, FirestoreOperationType.WRITE, path);
+    }
   },
 
   async deleteInternship(uid: string, internshipId: string): Promise<void> {

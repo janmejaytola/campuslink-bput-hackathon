@@ -7,25 +7,20 @@ import {
   UploadCloud,
   CheckCircle2,
   AlertCircle,
-  Clock,
   Sparkles,
   Trash2,
   RefreshCw,
   ExternalLink,
   ChevronRight,
-  ShieldCheck,
-  Edit2,
   Plus,
   X,
   FileCheck2,
-  ArrowRight,
   Loader2,
   Briefcase,
   GraduationCap,
   Award,
   Code2,
   User,
-  Info,
 } from 'lucide-react';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AppLayoutShell } from '@/components/navigation/AppLayoutShell';
@@ -33,21 +28,39 @@ import { useAuth } from '@/context/AuthContext';
 import {
   ResumeRecord,
   ExtractedResumeData,
-  ExtractedProject,
-  ExtractedCertification,
-  ExtractedInternship,
-  ExtractedEducation,
 } from '@/types/resume';
 import { resumeService } from '@/lib/services/resumeService';
 import { studentService } from '@/lib/services/studentService';
-import { StudentProfile } from '@/types/student';
+import {
+  MAX_RESUME_SIZE_BYTES,
+  validateResumeFileMeta,
+  mapExtractedResumeToProfileUpdates,
+} from '@/lib/services/resumeExtractionUtils';
 
-const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
 const ACCEPTED_EXTENSIONS = ['.pdf', '.docx'];
+
+function formatUserFacingError(err: unknown, fallbackMessage: string): string {
+  if (!(err instanceof Error)) return fallbackMessage;
+  const msg = err.message || fallbackMessage;
+  // Parse structured FirestoreErrorInfo JSON if thrown by formatFirestoreError
+  if (msg.startsWith('{') && msg.endsWith('}')) {
+    try {
+      const parsed = JSON.parse(msg);
+      if (parsed && typeof parsed.error === 'string') {
+        return `Database permission/write error (${parsed.operationType || 'write'} on ${parsed.path || 'Firestore'}): ${parsed.error}`;
+      }
+    } catch {
+      // fall through
+    }
+  }
+  return msg;
+}
 
 export default function ResumePage() {
   const { currentUser } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isSubmittingRef = useRef<boolean>(false);
+  const isSavingRef = useRef<boolean>(false);
 
   // Resume state
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -75,7 +88,7 @@ export default function ResumePage() {
       if (records.length > 0) {
         const latest = records[0];
         setActiveResumeRecord((prev) => prev || latest);
-        if (latest.extractedData) {
+        if (latest.extractedData && latest.extractionStatus === 'completed') {
           setExtractedData((prev) => prev || latest.extractedData || null);
         }
       }
@@ -95,7 +108,7 @@ export default function ResumePage() {
         if (records.length > 0) {
           const latest = records[0];
           setActiveResumeRecord((prev) => prev || latest);
-          if (latest.extractedData) {
+          if (latest.extractedData && latest.extractionStatus === 'completed') {
             setExtractedData((prev) => prev || latest.extractedData || null);
           }
         }
@@ -111,25 +124,18 @@ export default function ResumePage() {
 
   // Validation function
   const validateFile = (file: File): string | null => {
-    if (file.size === 0) {
-      return 'The selected file is empty. Please upload a valid resume document.';
+    const check = validateResumeFileMeta(file.name, file.type, file.size);
+    if (!check.valid) {
+      return check.error || 'Please upload a valid PDF or DOCX file under 5 MB.';
     }
-
-    if (file.size > MAX_FILE_SIZE_BYTES) {
-      return `Resume must be smaller than 5 MB. Selected file is ${(file.size / (1024 * 1024)).toFixed(2)} MB.`;
-    }
-
     const lowerName = file.name.toLowerCase();
     const hasValidExt = ACCEPTED_EXTENSIONS.some((ext) => lowerName.endsWith(ext));
-    const hasValidMime =
-      file.type === 'application/pdf' ||
-      file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-      file.type === 'application/msword';
-
-    if (!hasValidExt && !hasValidMime) {
-      return 'Please upload a PDF or DOCX file.';
+    if (!hasValidExt && !check.isPdf && !check.isDocx) {
+      return 'Please upload a PDF (.pdf) or Word (.docx) file.';
     }
-
+    if (file.size > MAX_RESUME_SIZE_BYTES) {
+      return `Resume must be smaller than 5 MB. Selected file is ${(file.size / (1024 * 1024)).toFixed(2)} MB.`;
+    }
     return null;
   };
 
@@ -151,6 +157,7 @@ export default function ResumePage() {
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
+    if (isProcessing) return;
     setErrorMessage(null);
     setSuccessMessage(null);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
@@ -175,7 +182,6 @@ export default function ResumePage() {
       const reader = new FileReader();
       reader.onload = () => {
         const result = reader.result as string;
-        // strip data url prefix
         const base64 = result.split(',')[1] || result;
         resolve(base64);
       };
@@ -184,8 +190,12 @@ export default function ResumePage() {
     });
   };
 
-  // Upload and Extract Handler
+  // Upload and Extract Handler (with duplicate submission guard)
   const handleUploadAndExtract = async () => {
+    if (isSubmittingRef.current || isProcessing) {
+      return;
+    }
+
     if (!selectedFile) {
       setErrorMessage('Please select a PDF or DOCX resume to upload.');
       return;
@@ -195,12 +205,20 @@ export default function ResumePage() {
       return;
     }
 
+    const validationError = validateFile(selectedFile);
+    if (validationError) {
+      setErrorMessage(validationError);
+      return;
+    }
+
+    isSubmittingRef.current = true;
     setIsProcessing(true);
     setErrorMessage(null);
     setSuccessMessage(null);
     setUploadProgress(0);
 
     const resumeId = `res_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+    const fileToProcess = selectedFile;
 
     try {
       // 1. Upload to Firebase Storage
@@ -211,14 +229,14 @@ export default function ResumePage() {
       try {
         const uploadRes = await resumeService.uploadFileToStorage(
           currentUser.uid,
-          selectedFile,
+          fileToProcess,
           (pct) => setUploadProgress(pct)
         );
         storagePath = uploadRes.storagePath;
         downloadURL = uploadRes.downloadURL;
       } catch (storageErr) {
         console.warn('[Storage upload warning - proceeding with text extraction]:', storageErr);
-        storagePath = `resumes/${currentUser.uid}/${selectedFile.name}`;
+        storagePath = `resumes/${currentUser.uid}/${fileToProcess.name}`;
       }
 
       // 2. Save initial metadata in Firestore
@@ -226,9 +244,13 @@ export default function ResumePage() {
       const initialRecord: ResumeRecord = {
         id: resumeId,
         uid: currentUser.uid,
-        fileName: selectedFile.name,
-        fileType: selectedFile.type || 'application/pdf',
-        fileSize: selectedFile.size,
+        fileName: fileToProcess.name,
+        fileType:
+          fileToProcess.type ||
+          (fileToProcess.name.toLowerCase().endsWith('.pdf')
+            ? 'application/pdf'
+            : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'),
+        fileSize: fileToProcess.size,
         storagePath,
         downloadURL,
         uploadedAt: new Date().toISOString(),
@@ -239,35 +261,43 @@ export default function ResumePage() {
       await resumeService.saveResumeRecord(initialRecord);
 
       // 3. Prepare file for AI Extraction
-      setProcessingStep('Extracting document contents...');
-      const base64Data = await fileToBase64(selectedFile);
+      setProcessingStep('Extracting readable text from document...');
+      const base64Data = await fileToBase64(fileToProcess);
 
-      // 4. Send to server-side Gemini API route
-      setProcessingStep('AI Career Assistant is analyzing resume structure...');
+      // 4. Send to server-side Gemini 3.8 Flash API route
+      setProcessingStep('Gemini 3.8 Flash is extracting structured resume fields...');
       const res = await fetch('/api/resume/extract', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           fileBase64: base64Data,
-          fileType: selectedFile.type,
-          fileName: selectedFile.name,
+          fileType: fileToProcess.type,
+          fileName: fileToProcess.name,
         }),
       });
 
-      const responseJson = await res.json();
+      let responseJson: { success?: boolean; data?: ExtractedResumeData; error?: string };
+      try {
+        responseJson = await res.json();
+      } catch {
+        throw new Error(`Resume extraction API returned an invalid response (HTTP ${res.status}).`);
+      }
 
-      if (!res.ok || !responseJson.success) {
-        throw new Error(responseJson.error || 'Failed to extract structured information from resume.');
+      if (!res.ok || !responseJson.success || !responseJson.data) {
+        throw new Error(
+          responseJson.error || 'Failed to extract structured information from resume.'
+        );
       }
 
       const extracted: ExtractedResumeData = responseJson.data;
 
       // 5. Update Firestore with extraction results
-      setProcessingStep('Persisting extraction results in Firestore...');
+      setProcessingStep('Persisting verified extraction results in Firestore...');
       const completedRecord: ResumeRecord = {
         ...initialRecord,
         extractionStatus: 'completed',
         extractedData: extracted,
+        errorMessage: null,
         updatedAt: new Date().toISOString(),
       };
       await resumeService.saveResumeRecord(completedRecord);
@@ -277,22 +307,27 @@ export default function ResumePage() {
       setSelectedFile(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
 
-      setSuccessMessage('AI Extraction Complete! Review extracted details below before syncing to your profile.');
+      setSuccessMessage(
+        'AI Extraction Complete! Review the extracted details below before syncing to your profile.'
+      );
       await loadHistory();
     } catch (err: unknown) {
       console.error('[Resume Processing Error]:', err);
-      const msg = err instanceof Error ? err.message : 'Upload and extraction failed. Please try again.';
+      const msg = formatUserFacingError(
+        err,
+        'Upload and extraction failed. Please check the file and try again.'
+      );
       setErrorMessage(msg);
 
-      // Record failure in Firestore
+      // Record failure state in Firestore if possible
       try {
         await resumeService.saveResumeRecord({
           id: resumeId,
           uid: currentUser.uid,
-          fileName: selectedFile.name,
-          fileType: selectedFile.type || 'application/pdf',
-          fileSize: selectedFile.size,
-          storagePath: `resumes/${currentUser.uid}/${selectedFile.name}`,
+          fileName: fileToProcess.name,
+          fileType: fileToProcess.type || 'application/pdf',
+          fileSize: fileToProcess.size,
+          storagePath: `resumes/${currentUser.uid}/${fileToProcess.name}`,
           downloadURL: '',
           uploadedAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
@@ -304,6 +339,7 @@ export default function ResumePage() {
         console.error('[Error saving failure state]:', logErr);
       }
     } finally {
+      isSubmittingRef.current = false;
       setIsProcessing(false);
       setProcessingStep('');
     }
@@ -311,23 +347,30 @@ export default function ResumePage() {
 
   // Reprocess existing resume
   const handleReprocess = async (record: ResumeRecord) => {
-    if (!currentUser?.uid) return;
+    if (!currentUser?.uid || isSubmittingRef.current || isProcessing) return;
+
+    isSubmittingRef.current = true;
     setIsProcessing(true);
-    setProcessingStep('Re-running AI analysis on uploaded resume...');
+    setProcessingStep('Re-running Gemini 3.8 Flash extraction on uploaded resume...');
     setErrorMessage(null);
     setSuccessMessage(null);
 
     try {
-      // If we don't have the original local file, prompt user or use download URL
       if (!record.downloadURL) {
-        throw new Error('Original file binary not directly accessible. Please upload the file again to reprocess.');
+        throw new Error(
+          'Original file binary is not stored in cloud storage for this record. Please re-select the file above and click "Upload & Extract with AI".'
+        );
       }
 
       const fileRes = await fetch(record.downloadURL);
+      if (!fileRes.ok) {
+        throw new Error(`Could not download original resume file (HTTP ${fileRes.status}).`);
+      }
       const blob = await fileRes.blob();
-      const base64Data = await new Promise<string>((resolve) => {
+      const base64Data = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = () => resolve((reader.result as string).split(',')[1]);
+        reader.onload = () => resolve(((reader.result as string) || '').split(',')[1] || '');
+        reader.onerror = (err) => reject(err);
         reader.readAsDataURL(blob);
       });
 
@@ -342,7 +385,7 @@ export default function ResumePage() {
       });
 
       const responseJson = await res.json();
-      if (!res.ok || !responseJson.success) {
+      if (!res.ok || !responseJson.success || !responseJson.data) {
         throw new Error(responseJson.error || 'Failed to reprocess resume.');
       }
 
@@ -351,16 +394,23 @@ export default function ResumePage() {
       await resumeService.updateResumeRecord(currentUser.uid, record.id, {
         extractionStatus: 'completed',
         extractedData: extracted,
+        errorMessage: null,
       });
 
       setExtractedData(extracted);
-      setActiveResumeRecord({ ...record, extractedData: extracted, extractionStatus: 'completed' });
+      setActiveResumeRecord({
+        ...record,
+        extractedData: extracted,
+        extractionStatus: 'completed',
+        errorMessage: null,
+      });
       setSuccessMessage('Resume reprocessed successfully. Review the refreshed extraction below.');
       await loadHistory();
     } catch (err: unknown) {
       console.error('[Reprocess Error]:', err);
-      setErrorMessage(err instanceof Error ? err.message : 'Failed to reprocess resume.');
+      setErrorMessage(formatUserFacingError(err, 'Failed to reprocess resume.'));
     } finally {
+      isSubmittingRef.current = false;
       setIsProcessing(false);
       setProcessingStep('');
     }
@@ -368,10 +418,9 @@ export default function ResumePage() {
 
   // Delete resume
   const handleDeleteResume = async (record: ResumeRecord) => {
-    if (!confirm(`Are you sure you want to delete "${record.fileName}"? This will not delete information already saved in your Student Profile.`)) {
-      return;
-    }
     if (!currentUser?.uid) return;
+    setErrorMessage(null);
+    setSuccessMessage(null);
 
     try {
       await resumeService.deleteResume(currentUser.uid, record.id, record.storagePath);
@@ -380,121 +429,83 @@ export default function ResumePage() {
         setActiveResumeRecord(null);
         setExtractedData(null);
       }
-      setSuccessMessage(`Resume "${record.fileName}" deleted.`);
+      setSuccessMessage(`Resume "${record.fileName}" deleted from your vault.`);
     } catch (err) {
       console.error('[Delete Resume Error]:', err);
-      setErrorMessage('Failed to delete resume file.');
+      setErrorMessage(formatUserFacingError(err, 'Failed to delete resume file.'));
     }
   };
 
-  // Approve & Save to Student Profile
+  // Approve & Save to Student Profile (with duplicate submission & deduplication guard)
   const handleApproveAndSave = async () => {
-    if (!currentUser?.uid || !extractedData) return;
+    if (!currentUser?.uid || !extractedData || isSavingRef.current || isSavingToProfile) return;
 
+    isSavingRef.current = true;
     setIsSavingToProfile(true);
     setErrorMessage(null);
     setSuccessMessage(null);
 
     try {
-      // 1. Fetch current student profile
-      const currentProfile = await studentService.getStudentProfile(currentUser.uid);
+      // 1. Fetch current student profile and existing subcollections
+      const [currentProfile, existingProjects, existingCerts, existingInterns] =
+        await Promise.all([
+          studentService.getStudentProfile(currentUser.uid),
+          studentService.getProjects(currentUser.uid),
+          studentService.getCertifications(currentUser.uid),
+          studentService.getInternships(currentUser.uid),
+        ]);
 
-      // 2. Merge skills safely without duplicates
-      const existingSkills = currentProfile?.skills || [];
-      const newSkills = extractedData.skills || [];
-      const mergedSkills = Array.from(new Set([...existingSkills, ...newSkills]));
+      // 2. Deterministically map extracted fields onto profile & subcollections without inventing or duplicating
+      const {
+        updatedProfile,
+        projectsToSave,
+        certificationsToSave,
+        internshipsToSave,
+      } = mapExtractedResumeToProfileUpdates(
+        currentUser.uid,
+        extractedData,
+        currentProfile,
+        existingProjects,
+        existingCerts,
+        existingInterns,
+        {
+          name: currentUser.name || currentUser.displayName,
+          email: currentUser.email,
+          phone: currentUser.phone,
+          photoURL: currentUser.photoURL,
+          regNumber: currentUser.regNumber,
+          institution: currentUser.institution,
+          department: currentUser.department,
+        }
+      );
 
-      // 3. Prepare updated profile fields (fill in missing data without overwriting verified fields)
-      const updatedProfile: StudentProfile = {
-        uid: currentUser.uid,
-        fullName: currentProfile?.fullName || extractedData.fullName || currentUser.name || '',
-        email: currentUser.email || currentProfile?.email || extractedData.email || '',
-        phone: currentProfile?.phone || extractedData.phone || '',
-        dateOfBirth: currentProfile?.dateOfBirth || '',
-        gender: currentProfile?.gender || 'Male',
-        photoURL: currentProfile?.photoURL || currentUser.photoURL || '',
-        bputRegistrationNumber: currentProfile?.bputRegistrationNumber || currentUser.regNumber || '',
-        college: currentProfile?.college || currentUser.institution || 'BPUT Affiliated Institute',
-        department: currentProfile?.department || currentUser.department || 'Computer Science & Engineering',
-        branch: currentProfile?.branch || 'Computer Science & Engineering',
-        semester: currentProfile?.semester || '7th Semester',
-        graduationYear: currentProfile?.graduationYear || extractedData.education?.[0]?.graduationYear || '2026',
-        cgpa: currentProfile?.cgpa ?? (typeof extractedData.education?.[0]?.cgpa === 'number' ? extractedData.education[0].cgpa : 8.0),
-        backlogs: currentProfile?.backlogs ?? 0,
-        skills: mergedSkills,
-        careerGoal: currentProfile?.careerGoal || {
-          targetRole: extractedData.careerKeywords?.[0] || 'Software Engineer',
-          jobType: 'Full-time',
-          preferredLocation: 'Bhubaneswar, Bengaluru, Hyderabad',
-          workMode: 'Hybrid',
-          expectedSalary: '6-9 LPA',
-        },
-        readinessInputs: currentProfile?.readinessInputs || {
-          aptitudeScore: 75,
-          technicalScore: 80,
-          communicationScore: 78,
-        },
-        profileCompletion: currentProfile?.profileCompletion || 60,
-        createdAt: currentProfile?.createdAt || new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      // 4. Save main profile to Firestore students/{uid}
+      // 3. Save main profile to Firestore students/{uid}
       await studentService.saveStudentProfile(updatedProfile);
 
-      // 5. Save projects to subcollection students/{uid}/projects
-      if (extractedData.projects && extractedData.projects.length > 0) {
-        for (const proj of extractedData.projects) {
-          if (proj.title?.trim()) {
-            await studentService.saveProject(currentUser.uid, {
-              title: proj.title,
-              description: proj.description || '',
-              technologies: proj.technologies || [],
-              projectUrl: proj.projectUrl || '',
-              githubUrl: proj.githubUrl || '',
-              role: 'Developer',
-              duration: 'Project',
-            });
-          }
-        }
+      // 4. Save new non-duplicate projects to subcollection students/{uid}/projects
+      for (const proj of projectsToSave) {
+        await studentService.saveProject(currentUser.uid, proj);
       }
 
-      // 6. Save certifications to subcollection students/{uid}/certifications
-      if (extractedData.certifications && extractedData.certifications.length > 0) {
-        for (const cert of extractedData.certifications) {
-          if (cert.name?.trim()) {
-            await studentService.saveCertification(currentUser.uid, {
-              name: cert.name,
-              issuingOrganization: cert.issuingOrganization || 'Professional Authority',
-              issueDate: cert.issueDate || '2025',
-              credentialId: cert.credentialId || '',
-              credentialUrl: cert.credentialUrl || '',
-            });
-          }
-        }
+      // 5. Save new non-duplicate certifications to subcollection students/{uid}/certifications
+      for (const cert of certificationsToSave) {
+        await studentService.saveCertification(currentUser.uid, cert);
       }
 
-      // 7. Save internships to subcollection students/{uid}/internships
-      if (extractedData.internships && extractedData.internships.length > 0) {
-        for (const intern of extractedData.internships) {
-          if (intern.company?.trim()) {
-            await studentService.saveInternship(currentUser.uid, {
-              company: intern.company,
-              role: intern.role || 'Intern',
-              startDate: intern.startDate || '2025',
-              endDate: intern.endDate || '2025',
-              description: intern.description || '',
-              skillsUsed: intern.skills || [],
-            });
-          }
-        }
+      // 6. Save new non-duplicate internships/experience to subcollection students/{uid}/internships
+      for (const intern of internshipsToSave) {
+        await studentService.saveInternship(currentUser.uid, intern);
       }
 
-      // 8. Mark resume as synced
+      // 7. Mark resume as synced in Firestore
       if (activeResumeRecord) {
         await resumeService.updateResumeRecord(currentUser.uid, activeResumeRecord.id, {
           syncStatus: 'synced',
+          extractedData,
         });
+        setActiveResumeRecord((prev) =>
+          prev ? { ...prev, syncStatus: 'synced', extractedData } : prev
+        );
       }
 
       setSuccessMessage(
@@ -503,8 +514,14 @@ export default function ResumePage() {
       await loadHistory();
     } catch (err) {
       console.error('[Error saving to profile]:', err);
-      setErrorMessage('Failed to sync extracted data into Student Profile. Please try again.');
+      setErrorMessage(
+        formatUserFacingError(
+          err,
+          'Failed to sync extracted data into Student Profile. Please try again.'
+        )
+      );
     } finally {
+      isSavingRef.current = false;
       setIsSavingToProfile(false);
     }
   };
@@ -557,6 +574,15 @@ export default function ResumePage() {
     });
   };
 
+  // Experience removal
+  const handleRemoveExperience = (index: number) => {
+    if (!extractedData) return;
+    setExtractedData({
+      ...extractedData,
+      experience: extractedData.experience.filter((_, i) => i !== index),
+    });
+  };
+
   return (
     <ProtectedRoute allowedRole="STUDENT">
       <AppLayoutShell role="student">
@@ -575,7 +601,7 @@ export default function ResumePage() {
                 Resume & AI Extraction
               </h1>
               <p className="mt-1 text-xs text-slate-500">
-                Upload your resume and let CAMPUSLINK extract structured career information automatically.
+                Upload your resume (PDF or DOCX) and let CAMPUSLINK extract structured career information automatically.
               </p>
             </div>
 
@@ -592,16 +618,42 @@ export default function ResumePage() {
 
           {/* Feedback alerts */}
           {errorMessage && (
-            <div className="rounded-xl border border-rose-200 bg-rose-50/90 p-4 text-xs font-medium text-rose-800 flex items-start gap-2.5">
-              <AlertCircle className="h-4 w-4 text-rose-600 shrink-0 mt-0.5" />
-              <div className="flex-1 leading-relaxed">{errorMessage}</div>
+            <div
+              role="alert"
+              className="rounded-xl border border-rose-200 bg-rose-50/90 p-4 text-xs font-medium text-rose-800 flex items-start justify-between gap-2.5"
+            >
+              <div className="flex items-start gap-2.5">
+                <AlertCircle className="h-4 w-4 text-rose-600 shrink-0 mt-0.5" />
+                <div className="flex-1 leading-relaxed">{errorMessage}</div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setErrorMessage(null)}
+                className="text-rose-500 hover:text-rose-700 p-0.5 cursor-pointer"
+                aria-label="Dismiss error"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
             </div>
           )}
 
           {successMessage && (
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-xs font-medium text-emerald-800 flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-              <span className="flex-1">{successMessage}</span>
+            <div
+              role="status"
+              className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-xs font-medium text-emerald-800 flex items-center justify-between gap-2"
+            >
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                <span className="flex-1">{successMessage}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSuccessMessage(null)}
+                className="text-emerald-600 hover:text-emerald-800 p-0.5 cursor-pointer"
+                aria-label="Dismiss message"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
             </div>
           )}
 
@@ -614,7 +666,7 @@ export default function ResumePage() {
               </div>
               <span className="text-slate-300">→</span>
 
-              <div className={`flex items-center gap-1.5 ${isProcessing ? 'text-teal-700 font-bold animate-pulse' : activeResumeRecord ? 'text-teal-700' : 'text-slate-400'}`}>
+              <div className={`flex items-center gap-1.5 ${isProcessing ? 'text-teal-700 font-bold animate-pulse' : activeResumeRecord?.extractionStatus === 'completed' ? 'text-teal-700' : 'text-slate-400'}`}>
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold">2</span>
                 <span>AI Extraction</span>
               </div>
@@ -669,19 +721,22 @@ export default function ResumePage() {
                   type="file"
                   accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                   onChange={handleFileChange}
+                  disabled={isProcessing}
                   className="hidden"
                   id="resume-file-input"
                 />
 
                 <label
                   htmlFor="resume-file-input"
-                  className="cursor-pointer inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-xs hover:bg-slate-50 transition-colors"
+                  className={`cursor-pointer inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-xs hover:bg-slate-50 transition-colors ${
+                    isProcessing ? 'opacity-50 pointer-events-none' : ''
+                  }`}
                 >
                   <UploadCloud className="h-3.5 w-3.5" />
                   <span>Browse Files</span>
                 </label>
 
-                {selectedFile && (
+                {selectedFile && !isProcessing && (
                   <button
                     type="button"
                     onClick={() => {
@@ -702,7 +757,7 @@ export default function ResumePage() {
               <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 rounded-xl bg-teal-50/60 border border-teal-200/80">
                 <div className="flex items-center gap-2.5">
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-600 text-white font-bold text-xs">
-                    {selectedFile.name.endsWith('.pdf') ? 'PDF' : 'DOC'}
+                    {selectedFile.name.toLowerCase().endsWith('.pdf') ? 'PDF' : 'DOC'}
                   </div>
                   <div>
                     <p className="text-xs font-bold text-slate-900 truncate max-w-xs">{selectedFile.name}</p>
@@ -734,16 +789,18 @@ export default function ResumePage() {
             )}
 
             {/* Upload progress indicator */}
-            {isProcessing && uploadProgress > 0 && uploadProgress < 100 && (
+            {isProcessing && (
               <div className="mt-3">
                 <div className="flex justify-between text-[11px] text-slate-600 mb-1">
-                  <span>Uploading to Firebase Storage...</span>
-                  <span className="font-bold">{uploadProgress}%</span>
+                  <span>{processingStep || 'Processing resume...'}</span>
+                  {uploadProgress > 0 && uploadProgress < 100 && (
+                    <span className="font-bold">{uploadProgress}%</span>
+                  )}
                 </div>
                 <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
                   <div
                     className="h-full bg-teal-600 rounded-full transition-all duration-300"
-                    style={{ width: `${uploadProgress}%` }}
+                    style={{ width: `${uploadProgress > 0 ? uploadProgress : 45}%` }}
                   />
                 </div>
               </div>
@@ -760,11 +817,11 @@ export default function ResumePage() {
                     <CheckCircle2 className="h-5 w-5 text-teal-600" />
                     <h3 className="text-sm font-bold text-slate-900">AI Extraction Complete</h3>
                     <span className="rounded-md bg-teal-100 px-2 py-0.5 text-[10px] font-bold text-teal-800">
-                      Extracted from resume
+                      Extracted via Gemini 3.8 Flash
                     </span>
                   </div>
                   <p className="mt-1 text-xs text-slate-600">
-                    AI-generated extraction — please review, edit, or delete items below before saving to your profile.
+                    Review, edit, or remove extracted items below before saving them to your Student Profile.
                   </p>
                 </div>
 
@@ -772,7 +829,7 @@ export default function ResumePage() {
                   <button
                     type="button"
                     onClick={handleApproveAndSave}
-                    disabled={isSavingToProfile}
+                    disabled={isSavingToProfile || isProcessing}
                     className="inline-flex items-center gap-2 rounded-xl bg-teal-600 px-5 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-teal-500 transition-colors disabled:opacity-50 cursor-pointer"
                   >
                     {isSavingToProfile ? (
@@ -834,7 +891,7 @@ export default function ResumePage() {
                             </p>
                             <div className="mt-1 flex items-center gap-3 text-[11px] text-slate-500">
                               {edu.graduationYear && <span>Year: {edu.graduationYear}</span>}
-                              {edu.cgpa !== null && (
+                              {edu.cgpa !== null && edu.cgpa !== undefined && (
                                 <span className="font-semibold text-teal-700">CGPA: {edu.cgpa}</span>
                               )}
                             </div>
@@ -966,7 +1023,7 @@ export default function ResumePage() {
                 </div>
               )}
 
-              {/* Certifications & Internships */}
+              {/* Certifications & Internships / Experience */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Certifications */}
                 <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
@@ -986,7 +1043,7 @@ export default function ResumePage() {
                           <div>
                             <p className="text-xs font-bold text-slate-900">{cert.name}</p>
                             <p className="text-[11px] text-slate-500">
-                              {cert.issuingOrganization || 'Verified Issuer'} {cert.issueDate ? `• ${cert.issueDate}` : ''}
+                              {cert.issuingOrganization || 'Issuing Organization'} {cert.issueDate ? `• ${cert.issueDate}` : ''}
                             </p>
                           </div>
                           <button
@@ -1002,21 +1059,25 @@ export default function ResumePage() {
                   )}
                 </div>
 
-                {/* Internships */}
+                {/* Internships & Experience */}
                 <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
                   <div className="flex items-center justify-between border-b border-slate-100 pb-2.5 mb-3">
                     <h4 className="text-xs font-bold text-slate-900 flex items-center gap-2">
                       <Briefcase className="h-4 w-4 text-teal-600" />
-                      Extracted Internships & Training ({extractedData.internships.length})
+                      Extracted Internships & Experience (
+                      {(extractedData.internships?.length || 0) + (extractedData.experience?.length || 0)})
                     </h4>
                   </div>
 
-                  {extractedData.internships.length === 0 ? (
-                    <p className="text-xs text-slate-400 italic">No internship experience explicitly detected.</p>
+                  {(extractedData.internships?.length || 0) === 0 &&
+                  (extractedData.experience?.length || 0) === 0 ? (
+                    <p className="text-xs text-slate-400 italic">
+                      No internship or work experience explicitly detected.
+                    </p>
                   ) : (
                     <div className="space-y-2.5">
                       {extractedData.internships.map((intern, idx) => (
-                        <div key={idx} className="rounded-xl border border-slate-200 p-3 bg-slate-50/40 flex items-start justify-between gap-2">
+                        <div key={`intern-${idx}`} className="rounded-xl border border-slate-200 p-3 bg-slate-50/40 flex items-start justify-between gap-2">
                           <div>
                             <p className="text-xs font-bold text-slate-900">{intern.role}</p>
                             <p className="text-[11px] font-semibold text-teal-800">
@@ -1037,6 +1098,29 @@ export default function ResumePage() {
                           </button>
                         </div>
                       ))}
+
+                      {(extractedData.experience || []).map((exp, idx) => (
+                        <div key={`exp-${idx}`} className="rounded-xl border border-slate-200 p-3 bg-slate-50/40 flex items-start justify-between gap-2">
+                          <div>
+                            <p className="text-xs font-bold text-slate-900">{exp.role}</p>
+                            <p className="text-[11px] font-semibold text-teal-800">
+                              {exp.company} {exp.startDate ? `(${exp.startDate} - ${exp.endDate || 'Present'})` : ''}
+                            </p>
+                            {exp.description && (
+                              <p className="mt-1 text-[11px] text-slate-600 line-clamp-2">
+                                {exp.description}
+                              </p>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveExperience(idx)}
+                            className="text-slate-400 hover:text-rose-600 cursor-pointer p-1"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -1045,13 +1129,13 @@ export default function ResumePage() {
               {/* Bottom Sync Action Bar */}
               <div className="rounded-2xl bg-white border border-slate-200 p-5 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="text-xs text-slate-500">
-                  Clicking <strong>Review & Save to Profile</strong> merges non-duplicate skills, projects, and certifications into your permanent Firestore profile dossier.
+                  Clicking <strong>Review & Save to Profile</strong> merges non-duplicate skills, projects, certifications, and internships into your permanent Firestore profile dossier.
                 </div>
 
                 <button
                   type="button"
                   onClick={handleApproveAndSave}
-                  disabled={isSavingToProfile}
+                  disabled={isSavingToProfile || isProcessing}
                   className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-teal-600 px-6 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-teal-500 transition-colors disabled:opacity-50 cursor-pointer"
                 >
                   {isSavingToProfile ? (
@@ -1095,14 +1179,14 @@ export default function ResumePage() {
                   >
                     <div className="flex items-center gap-3">
                       <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-50 text-teal-700 border border-teal-200 font-bold text-xs">
-                        {item.fileName.endsWith('.pdf') ? 'PDF' : 'DOC'}
+                        {item.fileName.toLowerCase().endsWith('.pdf') ? 'PDF' : 'DOC'}
                       </div>
                       <div>
                         <h4 className="text-xs font-bold text-slate-900">{item.fileName}</h4>
-                        <div className="flex items-center gap-2.5 text-[11px] text-slate-500 mt-0.5">
+                        <div className="flex flex-wrap items-center gap-2.5 text-[11px] text-slate-500 mt-0.5">
                           <span>{(item.fileSize / 1024).toFixed(1)} KB</span>
                           <span>•</span>
-                          <span>Uploaded {new Date(item.uploadedAt).toLocaleDateString()}</span>
+                          <span>Uploaded {item.uploadedAt ? item.uploadedAt.split('T')[0] : 'Recently'}</span>
                           <span>•</span>
                           <span
                             className={`font-semibold ${
@@ -1121,10 +1205,28 @@ export default function ResumePage() {
                             </span>
                           )}
                         </div>
+                        {item.extractionStatus === 'failed' && item.errorMessage && (
+                          <p className="mt-1 text-[11px] text-rose-600">
+                            Reason: {item.errorMessage}
+                          </p>
+                        )}
                       </div>
                     </div>
 
                     <div className="flex items-center gap-2">
+                      {item.extractedData && item.extractionStatus === 'completed' && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setActiveResumeRecord(item);
+                            setExtractedData(item.extractedData || null);
+                          }}
+                          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
+                        >
+                          <span>Load Review</span>
+                        </button>
+                      )}
+
                       {item.downloadURL && (
                         <a
                           href={item.downloadURL}
@@ -1141,7 +1243,7 @@ export default function ResumePage() {
                         type="button"
                         onClick={() => handleReprocess(item)}
                         disabled={isProcessing}
-                        className="inline-flex items-center gap-1 rounded-lg border border-teal-200 bg-teal-50 px-2.5 py-1.5 text-xs font-semibold text-teal-800 hover:bg-teal-100 transition-colors cursor-pointer"
+                        className="inline-flex items-center gap-1 rounded-lg border border-teal-200 bg-teal-50 px-2.5 py-1.5 text-xs font-semibold text-teal-800 hover:bg-teal-100 transition-colors cursor-pointer disabled:opacity-50"
                         title="Re-run AI extraction on this resume"
                       >
                         <RefreshCw className="h-3 w-3" />
@@ -1151,7 +1253,8 @@ export default function ResumePage() {
                       <button
                         type="button"
                         onClick={() => handleDeleteResume(item)}
-                        className="p-1.5 text-slate-400 hover:text-rose-600 cursor-pointer"
+                        disabled={isProcessing}
+                        className="p-1.5 text-slate-400 hover:text-rose-600 cursor-pointer disabled:opacity-50"
                         title="Delete resume from vault"
                       >
                         <Trash2 className="h-4 w-4" />

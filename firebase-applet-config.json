@@ -1,12 +1,12 @@
 {
-  "projectId": "campuslink-4e78d",
-  "appId": "1:945471533782:web:cda27bc78998a28c91cf77",
-  "apiKey": "AIzaSyC7euZT1zQ6GKhwXL0ycoe4vwP-YrGHcuU",
-  "authDomain": "campuslink-4e78d.firebaseapp.com",
-  "firestoreDatabaseId": "(default)",
-  "storageBucket": "campuslink-4e78d.firebasestorage.app",
-  "messagingSenderId": "945471533782",
-  "measurementId": "G-0YSVBSQRX5",
-  "oAuthClientId": "",
+  "projectId": "peppy-dimension-161jg",
+  "appId": "1:462099274320:web:72dd325143889294680f55",
+  "apiKey": "AIzaSyCvOJbPkYPzPefrOg0jE8l2_PGTSIX7F_E",
+  "authDomain": "peppy-dimension-161jg.firebaseapp.com",
+  "firestoreDatabaseId": "ai-studio-campuslinkbputha-b854873b-9033-4000-b71f-2bcf43c6fb5e",
+  "storageBucket": "peppy-dimension-161jg.firebasestorage.app",
+  "messagingSenderId": "462099274320",
+  "measurementId": "",
+  "oAuthClientId": "462099274320-l8lfsd3coh6nrvodni0k86vbh1csquee.apps.googleusercontent.com",
   "recaptchaSiteKey": ""
 }

@@ -6,12 +6,14 @@ import rawConfig from '../firebase-applet-config.json';
 
 const config = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || rawConfig.apiKey,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || rawConfig.authDomain || 'campuslink-4e78d.firebaseapp.com',
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || rawConfig.projectId || 'campuslink-4e78d',
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || rawConfig.storageBucket || 'campuslink-4e78d.firebasestorage.app',
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || rawConfig.authDomain || 'peppy-dimension-161jg.firebaseapp.com',
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || rawConfig.projectId || 'peppy-dimension-161jg',
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || rawConfig.storageBucket || 'peppy-dimension-161jg.firebasestorage.app',
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || rawConfig.messagingSenderId,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || rawConfig.appId,
 };
+
+const databaseId = process.env.NEXT_PUBLIC_FIRESTORE_DATABASE_ID || rawConfig.firestoreDatabaseId || '(default)';
 
 let app: FirebaseApp;
 let auth: Auth;
@@ -21,9 +23,7 @@ let storage: FirebaseStorage;
 if (typeof window !== 'undefined') {
   app = getApps().length > 0 ? getApp() : initializeApp(config);
   auth = getAuth(app);
-  // Standard Firebase Web SDK initialization connects to the default Cloud Firestore database "(default)"
-  db = getFirestore(app);
-  // Standard Firebase Storage initialization
+  db = getFirestore(app, databaseId);
   storage = getStorage(app);
 } else {
   // SSR placeholder

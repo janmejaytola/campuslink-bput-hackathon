@@ -1,27 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useSyncExternalStore } from 'react';
-
-function subscribe(callback: () => void) {
-  if (typeof window === 'undefined') return () => {};
-  const m1 = window.matchMedia('(hover: none)');
-  const m2 = window.matchMedia('(prefers-reduced-motion: reduce)');
-  m1.addEventListener('change', callback);
-  m2.addEventListener('change', callback);
-  return () => {
-    m1.removeEventListener('change', callback);
-    m2.removeEventListener('change', callback);
-  };
-}
-
-function getSnapshot() {
-  if (typeof window === 'undefined') return false;
-  return window.matchMedia('(hover: none)').matches || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-}
-
-function getServerSnapshot() {
-  return false;
-}
+import React, { useState, useRef, useEffect } from 'react';
 
 interface Card3DProps {
   children: React.ReactNode;
@@ -52,7 +31,22 @@ export function Card3D({
     opacity: 0,
   });
   const [isHovered, setIsHovered] = useState<boolean>(false);
-  const isTouchOrReducedMotion = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const [isTouchOrReducedMotion, setIsTouchOrReducedMotion] = useState<boolean>(false);
+
+  useEffect(() => {
+    const m1 = window.matchMedia('(hover: none)');
+    const m2 = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => {
+      setIsTouchOrReducedMotion(m1.matches || m2.matches);
+    };
+    update();
+    m1.addEventListener('change', update);
+    m2.addEventListener('change', update);
+    return () => {
+      m1.removeEventListener('change', update);
+      m2.removeEventListener('change', update);
+    };
+  }, []);
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (isTouchOrReducedMotion || !cardRef.current) return;
@@ -112,7 +106,7 @@ export function Card3D({
       onPointerMove={handlePointerMove}
       onPointerEnter={handlePointerEnter}
       onPointerLeave={handlePointerLeave}
-      className={`relative preserve-3d transition-transform duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#16CFFF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#020817] ${
+      className={`relative preserve-3d transition-transform duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:focus-visible:ring-[#16CFFF] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#020817] ${
         isHovered ? 'z-10' : 'z-0'
       } ${onClick ? 'cursor-pointer' : ''} ${className}`}
       style={{

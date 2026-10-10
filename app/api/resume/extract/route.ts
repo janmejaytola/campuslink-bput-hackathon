@@ -1,251 +1,309 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenAI } from '@google/genai';
-import mammoth from 'mammoth';
-import { ExtractedResumeData } from '@/types/resume';
-
-// Initialize Gemini SDK with server-side API Key
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+import { GoogleGenAI, Type } from '@google/genai';
+import {
+  validateResumeFileMeta,
+  extractReadableTextFromBuffer,
+  parseAndValidateGeminiResumeResponse,
+} from '@/lib/services/resumeExtractionUtils';
 
 const EXTRACTION_SYSTEM_INSTRUCTION = `You are the official CAMPUSLINK Resume Extraction Engine for Biju Patnaik University of Technology (BPUT) placement coordination.
-Extract only information explicitly present in the supplied resume.
+Extract ONLY information explicitly present in the supplied resume text.
 Return valid JSON matching the required schema.
-Do not invent or infer missing information.
-Normalize obvious formatting differences but preserve the original meaning.
-If a field is not present, return null or an empty array.
-Never invent a CGPA, company, certification, skill, date, or qualification that is not supported by the resume.
+Do NOT invent, guess, or infer missing information.
+Normalize obvious formatting differences (such as trimming whitespace) while preserving the original meaning.
+If a field is not present in the resume, return null for scalar fields or an empty array [] for list fields.
+Never invent a CGPA, university, company, certification, skill, date, project, or qualification that is not supported by the resume.`;
 
-Required JSON Structure:
-{
-  "fullName": string or null,
-  "email": string or null,
-  "phone": string or null,
-  "education": [
-    {
-      "institution": string or null,
-      "degree": string or null,
-      "branch": string or null,
-      "graduationYear": string or null,
-      "cgpa": number or string or null
-    }
+const RESUME_RESPONSE_SCHEMA = {
+  type: Type.OBJECT,
+  properties: {
+    fullName: {
+      type: Type.STRING,
+      nullable: true,
+      description: 'Candidate full name if explicitly stated in the resume, otherwise null.',
+    },
+    email: {
+      type: Type.STRING,
+      nullable: true,
+      description: 'Candidate email address if explicitly present, otherwise null.',
+    },
+    phone: {
+      type: Type.STRING,
+      nullable: true,
+      description: 'Candidate phone number if explicitly present, otherwise null.',
+    },
+    education: {
+      type: Type.ARRAY,
+      description: 'Educational qualifications listed in the resume.',
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          institution: { type: Type.STRING, nullable: true },
+          degree: { type: Type.STRING, nullable: true },
+          branch: { type: Type.STRING, nullable: true },
+          graduationYear: { type: Type.STRING, nullable: true },
+          cgpa: { type: Type.NUMBER, nullable: true },
+        },
+      },
+    },
+    skills: {
+      type: Type.ARRAY,
+      items: { type: Type.STRING },
+      description: 'Technical and professional skills explicitly listed in the resume.',
+    },
+    projects: {
+      type: Type.ARRAY,
+      description: 'Academic or personal projects explicitly described in the resume.',
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          title: { type: Type.STRING },
+          description: { type: Type.STRING, nullable: true },
+          technologies: { type: Type.ARRAY, items: { type: Type.STRING } },
+          projectUrl: { type: Type.STRING, nullable: true },
+          githubUrl: { type: Type.STRING, nullable: true },
+        },
+        required: ['title'],
+      },
+    },
+    certifications: {
+      type: Type.ARRAY,
+      description: 'Certifications and credentials explicitly listed in the resume.',
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          name: { type: Type.STRING },
+          issuingOrganization: { type: Type.STRING, nullable: true },
+          issueDate: { type: Type.STRING, nullable: true },
+          credentialId: { type: Type.STRING, nullable: true },
+          credentialUrl: { type: Type.STRING, nullable: true },
+        },
+        required: ['name'],
+      },
+    },
+    internships: {
+      type: Type.ARRAY,
+      description: 'Internships and industrial training explicitly listed in the resume.',
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          company: { type: Type.STRING },
+          role: { type: Type.STRING },
+          startDate: { type: Type.STRING, nullable: true },
+          endDate: { type: Type.STRING, nullable: true },
+          description: { type: Type.STRING, nullable: true },
+          skills: { type: Type.ARRAY, items: { type: Type.STRING } },
+        },
+        required: ['company', 'role'],
+      },
+    },
+    experience: {
+      type: Type.ARRAY,
+      description: 'Full-time or part-time work experience explicitly listed in the resume.',
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          company: { type: Type.STRING },
+          role: { type: Type.STRING },
+          startDate: { type: Type.STRING, nullable: true },
+          endDate: { type: Type.STRING, nullable: true },
+          description: { type: Type.STRING, nullable: true },
+        },
+        required: ['company', 'role'],
+      },
+    },
+    achievements: {
+      type: Type.ARRAY,
+      items: { type: Type.STRING },
+      description: 'Awards, honors, or competitive achievements explicitly mentioned.',
+    },
+    careerKeywords: {
+      type: Type.ARRAY,
+      items: { type: Type.STRING },
+      description: 'Role titles or domain keywords explicitly supported by the resume.',
+    },
+  },
+  required: [
+    'education',
+    'skills',
+    'projects',
+    'certifications',
+    'internships',
+    'experience',
+    'achievements',
+    'careerKeywords',
   ],
-  "skills": string[],
-  "projects": [
-    {
-      "title": string,
-      "description": string or null,
-      "technologies": string[],
-      "projectUrl": string or null,
-      "githubUrl": string or null
-    }
-  ],
-  "certifications": [
-    {
-      "name": string,
-      "issuingOrganization": string or null,
-      "issueDate": string or null,
-      "credentialId": string or null,
-      "credentialUrl": string or null
-    }
-  ],
-  "internships": [
-    {
-      "company": string,
-      "role": string,
-      "startDate": string or null,
-      "endDate": string or null,
-      "description": string or null,
-      "skills": string[]
-    }
-  ],
-  "experience": [
-    {
-      "company": string,
-      "role": string,
-      "startDate": string or null,
-      "endDate": string or null,
-      "description": string or null
-    }
-  ],
-  "achievements": string[],
-  "careerKeywords": string[]
-}`;
+};
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { fileBase64, fileType, fileName } = body;
+    let buffer: Buffer | null = null;
+    let fileName = '';
+    let fileType = '';
+    let fileSizeBytes = 0;
 
-    if (!fileBase64) {
+    const contentType = req.headers.get('content-type') || '';
+
+    if (contentType.includes('multipart/form-data')) {
+      const formData = await req.formData();
+      const file = formData.get('file') as File | null;
+      if (!file) {
+        return NextResponse.json(
+          { success: false, error: 'No resume file was provided in the multipart upload.' },
+          { status: 400 }
+        );
+      }
+      fileName = file.name;
+      fileType = file.type;
+      fileSizeBytes = file.size;
+      const arrayBuf = await file.arrayBuffer();
+      buffer = Buffer.from(arrayBuf);
+    } else {
+      let body: Record<string, unknown>;
+      try {
+        body = (await req.json()) as Record<string, unknown>;
+      } catch {
+        return NextResponse.json(
+          { success: false, error: 'Invalid JSON request payload.' },
+          { status: 400 }
+        );
+      }
+
+      const fileBase64 = typeof body.fileBase64 === 'string' ? body.fileBase64.trim() : '';
+      fileName = typeof body.fileName === 'string' ? body.fileName.trim() : '';
+      fileType = typeof body.fileType === 'string' ? body.fileType.trim() : '';
+
+      if (!fileBase64) {
+        return NextResponse.json(
+          { success: false, error: 'No resume document binary was provided for extraction.' },
+          { status: 400 }
+        );
+      }
+
+      // Strip optional data URI prefix if present
+      const cleanBase64 = fileBase64.includes(',')
+        ? fileBase64.split(',')[1] || ''
+        : fileBase64;
+
+      try {
+        buffer = Buffer.from(cleanBase64, 'base64');
+      } catch {
+        return NextResponse.json(
+          { success: false, error: 'Invalid base64 encoding for the uploaded resume.' },
+          { status: 400 }
+        );
+      }
+      fileSizeBytes = buffer.length;
+    }
+
+    // 1. Validate file type and size (PDF or DOCX, <= 5 MB)
+    const validation = validateResumeFileMeta(fileName, fileType, fileSizeBytes);
+    if (!validation.valid) {
       return NextResponse.json(
-        { error: 'No resume document binary provided.' },
+        { success: false, error: validation.error || 'Invalid resume file.' },
         { status: 400 }
       );
     }
 
-    const isDocx =
-      fileType?.includes('wordprocessingml') ||
-      fileType?.includes('docx') ||
-      fileName?.toLowerCase().endsWith('.docx');
+    // 2. Extract readable text reliably from PDF or DOCX before calling Gemini
+    let extractedDocumentText = '';
+    try {
+      extractedDocumentText = await extractReadableTextFromBuffer(buffer!, {
+        isPdf: validation.isPdf,
+        isDocx: validation.isDocx,
+        fileName,
+      });
+    } catch (docErr: unknown) {
+      const msg =
+        docErr instanceof Error
+          ? docErr.message
+          : 'Unable to extract readable text from this resume document.';
+      return NextResponse.json({ success: false, error: msg }, { status: 422 });
+    }
 
-    let contentsPayload: Array<
-      | string
-      | {
-          inlineData: {
-            mimeType: string;
-            data: string;
-          };
-        }
-    > = [];
-
-    if (isDocx) {
-      // Extract readable text from DOCX using mammoth
-      const buffer = Buffer.from(fileBase64, 'base64');
-      const textResult = await mammoth.extractRawText({ buffer });
-      const rawText = textResult.value || '';
-
-      if (!rawText.trim()) {
-        return NextResponse.json(
-          { error: 'Unable to extract readable text from this DOCX file. Please upload a PDF or text-based document.' },
-          { status: 422 }
-        );
-      }
-
-      contentsPayload = [
-        `Here is the extracted text from the student resume (${fileName}):\n\n${rawText}\n\nPlease extract structured resume information strictly according to the schema instructions.`,
-      ];
-    } else {
-      // PDF document natively ingested by Gemini multimodal vision/document model
-      contentsPayload = [
+    // 3. Verify server-side Gemini API key configuration
+    const apiKey = process.env.GEMINI_API_KEY?.trim();
+    if (!apiKey) {
+      return NextResponse.json(
         {
-          inlineData: {
-            mimeType: 'application/pdf',
-            data: fileBase64,
-          },
+          success: false,
+          error:
+            'Server Gemini API configuration is missing (GEMINI_API_KEY is not set). Unable to run AI resume extraction.',
         },
-        `Extract structured career and placement information from this student resume (${fileName}) strictly according to the schema.`,
-      ];
-    }
-
-    // Call Gemini 3.8 Flash model
-    let parsedData: ExtractedResumeData | null = null;
-    let modelUsed = 'gemini-3.8-flash';
-
-    if (process.env.GEMINI_API_KEY) {
-      try {
-        const response = await ai.models.generateContent({
-          model: 'gemini-3.8-flash',
-          contents: contentsPayload,
-          config: {
-            systemInstruction: EXTRACTION_SYSTEM_INSTRUCTION,
-            responseMimeType: 'application/json',
-          },
-        });
-
-        const responseText = response.text || '';
-        if (responseText.trim()) {
-          try {
-            parsedData = JSON.parse(responseText) as ExtractedResumeData;
-          } catch (parseErr) {
-            console.error('[Resume Extraction JSON Parse Error]:', parseErr, responseText);
-            const cleanJson = responseText.replace(/```json\s*|```/g, '').trim();
-            parsedData = JSON.parse(cleanJson) as ExtractedResumeData;
-          }
-        }
-      } catch (geminiError) {
-        console.warn('[Gemini 3.8 Flash resume extraction note]:', geminiError);
-      }
-    }
-
-    // Deterministic extraction fallback if Gemini was unavailable or errored
-    if (!parsedData) {
-      modelUsed = 'deterministic-parser-fallback';
-      let extractedText = '';
-      if (isDocx) {
-        const buffer = Buffer.from(fileBase64, 'base64');
-        const textResult = await mammoth.extractRawText({ buffer });
-        extractedText = textResult.value || '';
-      } else {
-        // Attempt ASCII extraction from PDF base64 stream
-        try {
-          const rawBuf = Buffer.from(fileBase64, 'base64').toString('latin1');
-          extractedText = rawBuf.replace(/[^\x20-\x7E\n]/g, ' ');
-        } catch {
-          extractedText = '';
-        }
-      }
-
-      const emailMatch = extractedText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
-      const phoneMatch = extractedText.match(/(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/);
-      const cgpaMatch = extractedText.match(/CGPA[:\s]*([0-9]\.[0-9]{1,2})/i);
-
-      const KNOWN_SKILLS = [
-        'Python', 'Java', 'C++', 'C', 'JavaScript', 'TypeScript', 'React', 'Next.js', 'Node.js',
-        'SQL', 'PostgreSQL', 'MySQL', 'MongoDB', 'Git', 'Docker', 'Kubernetes', 'AWS', 'Linux',
-        'Data Structures', 'Algorithms', 'Machine Learning', 'Spring Boot', 'Django',
-      ];
-      const matchedSkills = KNOWN_SKILLS.filter((s) =>
-        new RegExp(`\\b${s.replace('+', '\\+')}\\b`, 'i').test(extractedText)
+        { status: 503 }
       );
-
-      parsedData = {
-        fullName: fileName ? fileName.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ') : null,
-        email: emailMatch ? emailMatch[0] : null,
-        phone: phoneMatch ? phoneMatch[0] : null,
-        education: [
-          {
-            institution: 'Biju Patnaik University of Technology (BPUT)',
-            degree: 'Bachelor of Technology (B.Tech)',
-            branch: 'Computer Science & Engineering',
-            graduationYear: '2026',
-            cgpa: cgpaMatch ? parseFloat(cgpaMatch[1]) : 8.45,
-          },
-        ],
-        skills: matchedSkills.length > 0 ? matchedSkills : ['Python', 'SQL', 'Data Structures', 'Git'],
-        projects: [
-          {
-            title: 'Engineering Placement Portal & Telemetry System',
-            description: 'Full stack placement diagnostics and verified candidate tracking system.',
-            technologies: ['TypeScript', 'Next.js', 'SQL'],
-            projectUrl: '',
-            githubUrl: '',
-          },
-        ],
-        certifications: [],
-        internships: [],
-        experience: [],
-        achievements: [],
-        careerKeywords: matchedSkills.length > 0 ? matchedSkills : ['Python', 'Software Engineering'],
-      };
     }
 
-    // Ensure all arrays exist
-    const sanitizedData: ExtractedResumeData = {
-      fullName: parsedData.fullName || null,
-      email: parsedData.email || null,
-      phone: parsedData.phone || null,
-      education: Array.isArray(parsedData.education) ? parsedData.education : [],
-      skills: Array.isArray(parsedData.skills) ? parsedData.skills : [],
-      projects: Array.isArray(parsedData.projects) ? parsedData.projects : [],
-      certifications: Array.isArray(parsedData.certifications) ? parsedData.certifications : [],
-      internships: Array.isArray(parsedData.internships) ? parsedData.internships : [],
-      experience: Array.isArray(parsedData.experience) ? parsedData.experience : [],
-      achievements: Array.isArray(parsedData.achievements) ? parsedData.achievements : [],
-      careerKeywords: Array.isArray(parsedData.careerKeywords) ? parsedData.careerKeywords : [],
-    };
-
-    return NextResponse.json({
-      success: true,
-      data: sanitizedData,
-      modelUsed,
+    // 4. Call configured Gemini model (gemini-3.8-flash) from server-side code only
+    const ai = new GoogleGenAI({
+      apiKey,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        },
+      },
     });
+
+    const promptText = `Extract the structured resume fields from the following resume document (${fileName || 'resume'}).\nOnly include facts explicitly stated in the text below:\n\n--- BEGIN RESUME TEXT ---\n${extractedDocumentText}\n--- END RESUME TEXT ---`;
+
+    let rawModelOutput = '';
+    try {
+      const response = await ai.models.generateContent({
+        model: 'gemini-3.8-flash',
+        contents: promptText,
+        config: {
+          systemInstruction: EXTRACTION_SYSTEM_INSTRUCTION,
+          responseMimeType: 'application/json',
+          responseSchema: RESUME_RESPONSE_SCHEMA,
+          temperature: 0.1,
+        },
+      });
+      rawModelOutput = response.text || '';
+    } catch (geminiErr: unknown) {
+      console.error('[Gemini 3.8 Flash Resume Extraction API Error]:', geminiErr);
+      const rawMessage =
+        geminiErr instanceof Error ? geminiErr.message : String(geminiErr);
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Gemini AI extraction request failed: ${rawMessage}`,
+        },
+        { status: 502 }
+      );
+    }
+
+    // 5. Parse and validate the model response safely without inventing values
+    try {
+      const validatedData = parseAndValidateGeminiResumeResponse(rawModelOutput);
+      return NextResponse.json({
+        success: true,
+        data: validatedData,
+        modelUsed: 'gemini-3.8-flash',
+        extractedTextLength: extractedDocumentText.length,
+      });
+    } catch (validationErr: unknown) {
+      console.error('[Resume Extraction Validation Error]:', validationErr, rawModelOutput);
+      const validationMsg =
+        validationErr instanceof Error
+          ? validationErr.message
+          : 'The AI model returned an invalid or empty extraction result.';
+      return NextResponse.json(
+        {
+          success: false,
+          error: validationMsg,
+        },
+        { status: 422 }
+      );
+    }
   } catch (err: unknown) {
-    console.error('[AI Resume Extraction API Error]:', err);
+    console.error('[AI Resume Extraction Unhandled Error]:', err);
     return NextResponse.json(
       {
+        success: false,
         error:
           err instanceof Error
             ? err.message
-            : 'AI extraction failed. Please check your document and try again.',
+            : 'An unexpected server error occurred during resume extraction.',
       },
       { status: 500 }
     );

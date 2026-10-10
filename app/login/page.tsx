@@ -49,11 +49,15 @@ function LoginForm() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [transitioningUser, setTransitioningUser] = useState<UserRecord | null>(null);
+  const [currentDomain, setCurrentDomain] = useState<string>(
+    'ais-dev-dsoc65jc3o56vcetyot3bx-778812239942.asia-southeast1.run.app'
+  );
 
-  const currentDomain =
-    typeof window !== 'undefined'
-      ? window.location.hostname
-      : 'ais-dev-4b6twl2rvrk5j2qgdijxgx-521845764955.asia-southeast1.run.app';
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.hostname) {
+      setCurrentDomain(window.location.hostname);
+    }
+  }, []);
 
   useEffect(() => {
     if (isAuthenticated && currentUser) {

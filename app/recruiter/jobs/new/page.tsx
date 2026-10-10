@@ -58,12 +58,14 @@ function CreateJobContent() {
   const [salaryMin, setSalaryMin] = useState<string>('6');
   const [salaryMax, setSalaryMax] = useState<string>('10');
   const [openings, setOpenings] = useState<string>('5');
-  const [applicationDeadline, setApplicationDeadline] = useState<string>(() => {
+  const [applicationDeadline, setApplicationDeadline] = useState<string>('2026-11-15');
+  const [driveDate, setDriveDate] = useState<string>('');
+
+  useEffect(() => {
     const d = new Date();
     d.setDate(d.getDate() + 30);
-    return d.toISOString().split('T')[0];
-  });
-  const [driveDate, setDriveDate] = useState<string>('');
+    setApplicationDeadline(d.toISOString().split('T')[0]);
+  }, []);
 
   // Eligibility requirements
   const [minCgpa, setMinCgpa] = useState<string>('7.0');

@@ -67,23 +67,6 @@ service cloud.firestore {
         && resource.data.recruiterId == request.auth.uid;
     }
 
-    // Recruiter candidate shortlist collection
-    match /shortlists/{shortlistId} {
-      allow read: if isSignedIn() && (
-        resource.data.recruiterId == request.auth.uid
-        || resource.data.candidateId == request.auth.uid
-        || isPlacementOfficer()
-      );
-      allow create, update: if isSignedIn() && isValidId(shortlistId) && (
-        request.resource.data.recruiterId == request.auth.uid
-        || isPlacementOfficer()
-      );
-      allow delete: if isSignedIn() && (
-        resource.data.recruiterId == request.auth.uid
-        || isPlacementOfficer()
-      );
-    }
-
     // Student profile documents
     match /students/{userId} {
       allow get: if (isOwner(userId) || isPlacementOfficer()) && isValidId(userId);
